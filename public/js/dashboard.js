@@ -72,8 +72,19 @@ function connectToServer() {
         });
         
         socket.on('balanceUpdate', function(data) {
-            userBalance[accountType].balance = data.balance;
+            if (data.accountType) {
+                accountType = data.accountType;
+            }
+            if (userBalance[accountType]) {
+                userBalance[accountType].balance = data.balance;
+            } else {
+                userBalance[accountType] = { balance: data.balance };
+            }
             updateBalance();
+            
+            if (data.type === 'deposit') {
+                showNotification('💰 Deposit approved! Money added to account', 'success');
+            }
         });
         
         socket.on('userTrades', function(trades) {
@@ -83,11 +94,21 @@ function connectToServer() {
         
         socket.on('tradeResult', function(data) {
             if (data.success) {
-                userBalance[accountType].balance = data.balance;
+                if (userBalance[accountType]) {
+                    userBalance[accountType].balance = data.balance;
+                } else {
+                    userBalance[accountType] = { balance: data.balance };
+                }
                 updateBalance();
                 addTradeLineToChart(data.trade.direction, data.trade.duration);
                 showNotification(`Trade placed: ${data.trade.direction.toUpperCase()}`, 'success');
-                activeTrades.push(data.trade);
+                
+                const trade = {
+                    ...data.trade,
+                    startTime: new Date(data.trade.startTime),
+                    endTime: new Date(data.trade.endTime)
+                };
+                activeTrades.push(trade);
                 displayActiveTrades();
             } else {
                 showNotification(data.message, 'error');
@@ -266,6 +287,112 @@ function startPriceUpdates() {
             changeEl.style.color = change > 0 ? '#00ff88' : '#ff4444';
         }
     }, 1000);
+}
+
+// Add trade line to chart
+function addTradeLineToChart(direction, duration) {
+    const chartContainer = document.getElementById('tradingChart');
+    if (!chartContainer) return;
+    
+    // Create trade line overlay
+    const tradeLine = document.createElement('div');
+    tradeLine.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: ${direction === 'up' ? '#00ff88' : '#ff4444'};
+        z-index: 10;
+        box-shadow: 0 0 15px ${direction === 'up' ? '#00ff88' : '#ff4444'};
+        border-radius: 2px;
+    `;
+    
+    // Add direction arrow
+    const arrow = document.createElement('div');
+    arrow.textContent = direction === 'up' ? '↗️' : '↘️';
+    arrow.style.cssText = `
+        position: absolute;
+        left: 20px;
+        top: -20px;
+        color: ${direction === 'up' ? '#00ff88' : '#ff4444'};
+        font-size: 24px;
+        font-weight: bold;
+        text-shadow: 0 0 10px ${direction === 'up' ? '#00ff88' : '#ff4444'};
+    `;
+    tradeLine.appendChild(arrow);
+    
+    // Add countdown timer
+    const timer = document.createElement('div');
+    timer.style.cssText = `
+        position: absolute;
+        right: 20px;
+        top: -20px;
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        background: rgba(0,0,0,0.8);
+        padding: 4px 12px;
+        border-radius: 6px;
+        border: 1px solid ${direction === 'up' ? '#00ff88' : '#ff4444'};
+    `;
+    tradeLine.appendChild(timer);
+    
+    chartContainer.style.position = 'relative';
+    chartContainer.appendChild(tradeLine);
+    
+    // Countdown timer
+    let timeLeft = duration;
+    const countdown = setInterval(() => {
+        timeLeft--;
+        timer.textContent = `${timeLeft}s`;
+        
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+            // Fade out trade line
+            tradeLine.style.transition = 'opacity 1s';
+            tradeLine.style.opacity = '0';
+            setTimeout(() => {
+                if (chartContainer.contains(tradeLine)) {
+                    chartContainer.removeChild(tradeLine);
+                }
+            }, 1000);
+        }
+    }, 1000);
+    
+    timer.textContent = `${timeLeft}s`;
+}
+
+// Display active trades
+function displayActiveTrades() {
+    const container = document.getElementById('activeTradesList');
+    if (!container) return;
+    
+    if (activeTrades.length === 0) {
+        container.innerHTML = '<p style="color: #ccc; text-align: center; padding: 20px;">No active trades</p>';
+        return;
+    }
+    
+    container.innerHTML = activeTrades.map(trade => {
+        const timeLeft = Math.max(0, Math.floor((new Date(trade.endTime) - new Date()) / 1000));
+        
+        return `
+            <div class="active-trade" style="background: rgba(255,255,255,0.1); padding: 12px; margin: 8px 0; border-radius: 8px; border-left: 4px solid ${trade.direction === 'up' ? '#00ff88' : '#ff4444'};">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="color: white;">${trade.asset}</strong>
+                        <span style="color: ${trade.direction === 'up' ? '#00ff88' : '#ff4444'}; margin-left: 10px; font-weight: bold;">
+                            ${trade.direction === 'up' ? '↑' : '↓'} ${trade.direction.toUpperCase()}
+                        </span>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: white; font-weight: bold;">₹${trade.amount}</div>
+                        <div style="font-size: 12px; color: #00d4ff;">${timeLeft}s left</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 // Show notification
