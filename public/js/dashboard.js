@@ -1,7 +1,7 @@
 // Dashboard with server connection
 let currentAsset = 'EUR/USD';
 let accountType = 'demo';
-let userBalance = { demo: 50000, real: 0 };
+let userBalance = JSON.parse(localStorage.getItem('userBalance')) || { demo: 50000, real: 0 };
 let activeTrades = [];
 let socket;
 let isConnected = false;
@@ -80,6 +80,9 @@ function connectToServer() {
         } else {
             userBalance[accountType] = { balance: data.balance };
         }
+        
+        // Save to localStorage
+        localStorage.setItem('userBalance', JSON.stringify(userBalance));
         updateBalance();
         
         if (data.type === 'deposit') {
@@ -103,6 +106,9 @@ function connectToServer() {
             if (userBalance[accountType]) {
                 userBalance[accountType].balance = data.balance;
             }
+            
+            // Save to localStorage
+            localStorage.setItem('userBalance', JSON.stringify(userBalance));
             updateBalance();
             
             // Add trade line to chart
@@ -130,6 +136,9 @@ function connectToServer() {
         if (userBalance[accountType]) {
             userBalance[accountType].balance = data.balance;
         }
+        
+        // Save to localStorage
+        localStorage.setItem('userBalance', JSON.stringify(userBalance));
         updateBalance();
         
         // Remove from active trades
