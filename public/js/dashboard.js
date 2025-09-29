@@ -54,7 +54,6 @@ function connectToServer() {
         
     socket.on('connect', function() {
         isConnected = true;
-        showNotification('Connected to server', 'success');
         socket.emit('getUserData');
     });
     
