@@ -77,7 +77,11 @@ function switchAccount(type) {
 
 // Place trade function
 function placeTrade(direction) {
-    const amount = 100; // Fixed amount for simplicity
+    const amountInput = document.getElementById('tradeAmount');
+    const durationInput = document.getElementById('tradeDuration');
+    
+    const amount = amountInput ? parseInt(amountInput.value) || 100 : 100;
+    const duration = durationInput ? parseInt(durationInput.value) || 60 : 60;
     
     if (userBalance[accountType] < amount) {
         showNotification('Insufficient balance', 'error');
@@ -88,9 +92,12 @@ function placeTrade(direction) {
     userBalance[accountType] -= amount;
     updateBalance();
     
+    // Add trade line to chart
+    addTradeLineToChart(direction, duration);
+    
     showNotification(`${direction.toUpperCase()} trade placed for ₹${amount}`);
     
-    // Simulate trade result after 5 seconds
+    // Simulate trade result
     setTimeout(() => {
         const won = Math.random() > 0.5;
         if (won) {
@@ -101,7 +108,7 @@ function placeTrade(direction) {
             showNotification(`😔 Trade Lost! -₹${amount}`, 'error');
         }
         updateBalance();
-    }, 5000);
+    }, duration * 1000);
 }
 
 // Start price updates
@@ -149,6 +156,76 @@ function showNotification(message, type = 'info') {
     setTimeout(() => {
         document.body.removeChild(notification);
     }, 3000);
+}
+
+// Add trade line to chart
+function addTradeLineToChart(direction, duration) {
+    const chartContainer = document.getElementById('tradingChart');
+    
+    // Create trade line overlay
+    const tradeLine = document.createElement('div');
+    tradeLine.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: ${direction === 'up' ? '#00ff88' : '#ff4444'};
+        z-index: 10;
+        box-shadow: 0 0 10px ${direction === 'up' ? '#00ff88' : '#ff4444'};
+    `;
+    
+    // Add direction arrow
+    const arrow = document.createElement('div');
+    arrow.textContent = direction === 'up' ? '↗' : '↘';
+    arrow.style.cssText = `
+        position: absolute;
+        left: 20px;
+        top: -15px;
+        color: ${direction === 'up' ? '#00ff88' : '#ff4444'};
+        font-size: 20px;
+        font-weight: bold;
+    `;
+    tradeLine.appendChild(arrow);
+    
+    // Add countdown timer
+    const timer = document.createElement('div');
+    timer.style.cssText = `
+        position: absolute;
+        right: 20px;
+        top: -15px;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        background: rgba(0,0,0,0.7);
+        padding: 2px 8px;
+        border-radius: 4px;
+    `;
+    tradeLine.appendChild(timer);
+    
+    chartContainer.style.position = 'relative';
+    chartContainer.appendChild(tradeLine);
+    
+    // Countdown timer
+    let timeLeft = duration;
+    const countdown = setInterval(() => {
+        timeLeft--;
+        timer.textContent = `${timeLeft}s`;
+        
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+            // Fade out trade line
+            tradeLine.style.transition = 'opacity 1s';
+            tradeLine.style.opacity = '0';
+            setTimeout(() => {
+                if (chartContainer.contains(tradeLine)) {
+                    chartContainer.removeChild(tradeLine);
+                }
+            }, 1000);
+        }
+    }, 1000);
+    
+    timer.textContent = `${timeLeft}s`;
 }
 
 // Asset switching
