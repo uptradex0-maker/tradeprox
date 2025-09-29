@@ -95,22 +95,24 @@ const depositRequests = [];
 // Load saved QR code on server start
 function loadQRCode() {
   try {
-    if (fs.existsSync(qrDataFile)) {
+    if (fs.existsSync && fs.existsSync(qrDataFile)) {
       const qrData = JSON.parse(fs.readFileSync(qrDataFile, 'utf8'));
       currentQRCode = qrData.qrCode;
       console.log('✅ Loaded saved QR code from storage');
     }
   } catch (error) {
-    console.error('Error loading QR code:', error);
+    console.log('QR code loading skipped in serverless environment');
   }
 }
 
 // Save QR code to file
 function saveQRCode() {
   try {
-    fs.writeFileSync(qrDataFile, JSON.stringify({ qrCode: currentQRCode }, null, 2));
+    if (fs.writeFileSync) {
+      fs.writeFileSync(qrDataFile, JSON.stringify({ qrCode: currentQRCode }, null, 2));
+    }
   } catch (error) {
-    console.error('Error saving QR code:', error);
+    console.log('QR code saving skipped in serverless environment');
   }
 }
 
@@ -1035,9 +1037,13 @@ const ticketsDataFile = path.join(__dirname, 'data', 'tickets.json');
 const withdrawalsDataFile = path.join(__dirname, 'data', 'withdrawals.json');
 const transactionsDataFile = path.join(__dirname, 'data', 'transactions.json');
 
-// Ensure data directory exists
-if (!fs.existsSync(path.join(__dirname, 'data'))) {
-  fs.mkdirSync(path.join(__dirname, 'data'));
+// Data directory handling for Vercel
+try {
+  if (!fs.existsSync(path.join(__dirname, 'data'))) {
+    fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
+  }
+} catch (error) {
+  console.log('Data directory creation skipped in serverless environment');
 }
 
 // Load existing data on server start with backup recovery
@@ -1168,8 +1174,10 @@ function saveWithdrawals() {
   }
 }
 
-// Auto-save every 10 seconds for better data persistence
-setInterval(saveUserData, 10000);
+// Auto-save disabled for serverless environment
+if (process.env.NODE_ENV !== 'production') {
+  setInterval(saveUserData, 10000);
+}
 
 // Save data on every critical operation
 function saveDataImmediate() {
@@ -1219,43 +1227,32 @@ function initializeUser(userId) {
 
 // Initialize on server start
 initializeHistoricalData();
-// Only reset data in development
-if (process.env.NODE_ENV !== 'production') {
-  users.clear();
-  userTrades.clear();
-  allTickets.length = 0;
-  allWithdrawals.length = 0;
-  depositRequests.length = 0;
-  console.log('🔄 All user data and trades reset for development');
+
+// Load data safely
+try {
+  loadUserData();
+  loadQRCode();
+} catch (error) {
+  console.log('Data loading skipped in serverless environment');
 }
-loadUserData();
-loadQRCode();
 
-// Save data on server shutdown
-process.on('SIGINT', () => {
-  console.log('\nSaving user data before shutdown...');
-  saveUserData();
-  saveTickets();
-  saveWithdrawals();
-  process.exit(0);
-});
-
-process.on('SIGTERM', () => {
-  console.log('\nSaving user data before shutdown...');
-  saveUserData();
-  saveTickets();
-  saveWithdrawals();
-  process.exit(0);
-});
+// Process handlers disabled for serverless
+if (process.env.NODE_ENV !== 'production') {
+  process.on('SIGINT', () => {
+    console.log('\nSaving user data before shutdown...');
+    saveUserData();
+    saveTickets();
+    saveWithdrawals();
+    process.exit(0);
+  });
+}
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 TrustX Server running on port ${PORT}`);
-  console.log(`📊 Dashboard: /dashboard`);
-  console.log(`⚙️  Admin Panel: /admin`);
-  console.log(`📈 Multi-timeframe support: 5s, 10s, 30s, 1m, 5m, 10m`);
-  console.log(`🔄 Real-time sync active - 1s updates, 5s base candles`);
-  console.log(`🎛️  Admin controls: Trade mode = ${tradeMode}`);
-  console.log(`💾 User data persistence: ENABLED`);
-  console.log(`🎫 Support ticket system: ACTIVE`);
-});
+
+if (process.env.NODE_ENV !== 'production') {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 TrustX Server running on port ${PORT}`);
+  });
+}
+
+module.exports = app;

@@ -1,6 +1,1 @@
 node_modules
-*.log
-.env
-README.md
-PRODUCTION_READY.md
-reset-data.js
