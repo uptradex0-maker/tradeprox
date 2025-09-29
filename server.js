@@ -10,8 +10,13 @@ const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+  transports: ['websocket', 'polling'],
+  allowEIO3: true,
+  pingTimeout: 60000,
+  pingInterval: 25000
 });
 
 app.use(cors());
@@ -40,7 +45,22 @@ app.get('/admin-login', (req, res) => {
   res.render('admin-login');
 });
 
+app.post('/admin-auth', (req, res) => {
+  const { username, password } = req.body;
+  if (username === 'aryan' && password === 'aryan123') {
+    res.json({ success: true, redirect: '/admin' });
+  } else {
+    res.json({ success: false, message: 'Invalid credentials' });
+  }
+});
+
 app.get('/admin', (req, res) => {
+  // Simple admin authentication
+  const auth = req.headers.authorization;
+  if (!auth || !auth.includes('admin:aryan123')) {
+    res.setHeader('WWW-Authenticate', 'Basic realm="Admin Panel"');
+    return res.status(401).send('Authentication required');
+  }
   res.render('admin');
 });
 
@@ -1178,13 +1198,15 @@ function initializeUser(userId) {
 
 // Initialize on server start
 initializeHistoricalData();
-// Reset all user data for production
-users.clear();
-userTrades.clear();
-allTickets.length = 0;
-allWithdrawals.length = 0;
-depositRequests.length = 0;
-console.log('🔄 All user data and trades reset for production');
+// Only reset data in development
+if (process.env.NODE_ENV !== 'production') {
+  users.clear();
+  userTrades.clear();
+  allTickets.length = 0;
+  allWithdrawals.length = 0;
+  depositRequests.length = 0;
+  console.log('🔄 All user data and trades reset for development');
+}
 loadUserData();
 loadQRCode();
 
@@ -1206,10 +1228,10 @@ process.on('SIGTERM', () => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`🚀 TradePro Server running on port ${PORT}`);
-  console.log(`📊 Dashboard: http://localhost:${PORT}/dashboard`);
-  console.log(`⚙️  Admin Panel: http://localhost:${PORT}/admin`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 TrustX Server running on port ${PORT}`);
+  console.log(`📊 Dashboard: /dashboard`);
+  console.log(`⚙️  Admin Panel: /admin`);
   console.log(`📈 Multi-timeframe support: 5s, 10s, 30s, 1m, 5m, 10m`);
   console.log(`🔄 Real-time sync active - 1s updates, 5s base candles`);
   console.log(`🎛️  Admin controls: Trade mode = ${tradeMode}`);

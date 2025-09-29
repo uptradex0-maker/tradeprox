@@ -47,13 +47,17 @@ function initializeSocket() {
         localStorage.setItem('tradepro_user_id', userId);
     }
     
-    // Initialize with faster connection options
+    // Initialize with production-ready connection options
     socket = io({
         query: { userId: userId },
         transports: ['websocket', 'polling'],
         upgrade: true,
-        timeout: 5000,
-        forceNew: false
+        timeout: 10000,
+        forceNew: false,
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionAttempts: 5,
+        maxReconnectionAttempts: 5
     });
     
     socket.on('priceUpdate', function(assets) {
@@ -151,6 +155,19 @@ function initializeSocket() {
     socket.on('accountData', function(data) {
         userAccount = data.accounts;
         accountType = data.currentAccount;
+        
+        // Save account type to localStorage
+        localStorage.setItem('account_type', accountType);
+        
+        // Update UI buttons
+        document.querySelectorAll('.account-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        const activeBtn = document.querySelector(`[data-account="${accountType}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        }
+        
         updateUserBalance(userAccount[accountType].balance);
         
         // Store user ID if provided
@@ -175,11 +192,24 @@ function initializeSocket() {
     
     socket.on('connect', function() {
         console.log('Connected to server');
+        showTradeNotification('Connected to server', 'success');
         loadUserData();
     });
     
     socket.on('disconnect', function() {
         console.log('Disconnected from server');
+        showTradeNotification('Connection lost. Reconnecting...', 'error');
+    });
+    
+    socket.on('reconnect', function() {
+        console.log('Reconnected to server');
+        showTradeNotification('Reconnected to server', 'success');
+        loadUserData();
+    });
+    
+    socket.on('connect_error', function(error) {
+        console.error('Connection error:', error);
+        showTradeNotification('Connection error. Please refresh.', 'error');
     });
     
     socket.on('serverStatusChanged', function(data) {
@@ -1137,9 +1167,14 @@ function showChartLoading() {
     `;
 }
 
-// Initialize Quotex-Style Chart with faster loading
+// Initialize Quotex-Style Chart with production stability
 function initializeChart() {
     const chartContainer = document.getElementById('tradingChart');
+    
+    if (!chartContainer) {
+        console.error('Chart container not found');
+        return;
+    }
     
     // Ensure container has proper dimensions immediately
     chartContainer.style.width = '100%';
@@ -1149,30 +1184,48 @@ function initializeChart() {
     chartContainer.style.overflow = 'hidden';
     chartContainer.style.background = 'linear-gradient(135deg, #0a0e1a 0%, #1a1d29 100%)';
     
-    // Initialize chart immediately
-    try {
-        chart = new QuotexChart(chartContainer);
-        
-        // Hide loading indicator
-        setTimeout(() => {
-            const loading = chartContainer.querySelector('.chart-loading');
-            if (loading) loading.remove();
-        }, 500);
-        
-        // Immediate resize
-        if (chart && chart.resize) {
-            chart.resize();
+    // Initialize chart with retry mechanism
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    function tryInitChart() {
+        try {
+            chart = new QuotexChart(chartContainer);
+            
+            // Hide loading indicator
+            setTimeout(() => {
+                const loading = chartContainer.querySelector('.chart-loading');
+                if (loading) loading.remove();
+            }, 1000);
+            
+            // Delayed resize for stability
+            setTimeout(() => {
+                if (chart && chart.resize) {
+                    chart.resize();
+                }
+            }, 1500);
+            
+        } catch (error) {
+            console.error('Chart initialization error:', error);
+            retryCount++;
+            
+            if (retryCount < maxRetries) {
+                console.log(`Retrying chart initialization (${retryCount}/${maxRetries})`);
+                setTimeout(tryInitChart, 2000);
+            } else {
+                // Fallback: show simple chart placeholder
+                chartContainer.innerHTML = `
+                    <div class="chart-fallback" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #fff; background: linear-gradient(135deg, #0a0e1a 0%, #1a1d29 100%);">
+                        <div class="fallback-text" style="font-size: 18px; margin-bottom: 10px;">Chart Loading...</div>
+                        <div class="fallback-price" style="font-size: 24px; color: #00d4ff;">EUR/USD: 1.0850</div>
+                        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #00d4ff; color: #000; border: none; border-radius: 5px; cursor: pointer;">Reload</button>
+                    </div>
+                `;
+            }
         }
-    } catch (error) {
-        console.error('Chart initialization error:', error);
-        // Fallback: show simple chart placeholder
-        chartContainer.innerHTML = `
-            <div class="chart-fallback">
-                <div class="fallback-text">Chart Loading...</div>
-                <div class="fallback-price">EUR/USD: 1.0850</div>
-            </div>
-        `;
     }
+    
+    tryInitChart();
 }
 
 // Load historical candle data
