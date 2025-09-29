@@ -1,4 +1,4 @@
-// Dashboard with server connection
+// Simple Dashboard - No Messages
 let currentAsset = 'EUR/USD';
 let accountType = 'demo';
 let userBalance = JSON.parse(localStorage.getItem('userBalance')) || { demo: 50000, real: 0 };
@@ -6,7 +6,6 @@ let activeTrades = [];
 let socket;
 let isConnected = false;
 
-// Initialize immediately when page loads
 document.addEventListener('DOMContentLoaded', function() {
     initializeChart();
     initializeAccounts();
@@ -14,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
     startPriceUpdates();
 });
 
-// Simple chart that always works
 function initializeChart() {
     const container = document.getElementById('tradingChart');
     if (!container) return;
@@ -32,137 +30,100 @@ function initializeChart() {
     `;
 }
 
-// Connect to server
 function connectToServer() {
-    if (typeof io === 'undefined') {
-        isConnected = false;
-        return;
-    }
-    
-    let userId = localStorage.getItem('tradepro_user_id');
-    if (!userId) {
-        userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('tradepro_user_id', userId);
-    }
-    
-    socket = io({
-        query: { userId: userId },
-        transports: ['websocket', 'polling'],
-        timeout: 5000,
-        reconnection: true
-    });
-        
-    socket.on('connect', function() {
-        isConnected = true;
-        socket.emit('getUserData');
-    });
-    
-    socket.on('connect_error', function(error) {
-        isConnected = false;
-    });
-    
-    socket.on('accountData', function(data) {
-        userBalance = data.accounts;
-        accountType = data.currentAccount;
-        updateBalance();
-        updateAccountButtons();
-    });
-    
-    socket.on('balanceUpdate', function(data) {
-        console.log('Balance update received:', data);
-        
-        // Update balance immediately
-        if (userBalance[accountType]) {
-            userBalance[accountType].balance = data.balance;
-        } else {
-            userBalance[accountType] = { balance: data.balance };
+    try {
+        if (typeof io === 'undefined') {
+            isConnected = false;
+            return;
         }
         
-        // Save to localStorage
-        localStorage.setItem('userBalance', JSON.stringify(userBalance));
-        updateBalance();
-        
-        if (data.type === 'deposit') {
-            showNotification('💰 Deposit Approved! Money Added!', 'success');
+        let userId = localStorage.getItem('tradepro_user_id');
+        if (!userId) {
+            userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('tradepro_user_id', userId);
         }
-    });
-    
-    socket.on('userTrades', function(trades) {
-        activeTrades = trades.map(trade => ({
-            ...trade,
-            startTime: new Date(trade.startTime),
-            endTime: new Date(trade.endTime)
-        }));
-        displayActiveTrades();
-    });
-    
-    socket.on('tradeResult', function(data) {
-        console.log('Trade result:', data);
-        if (data.success) {
-            // Update balance
+        
+        socket = io({
+            query: { userId: userId },
+            transports: ['websocket', 'polling'],
+            timeout: 5000,
+            reconnection: false
+        });
+            
+        socket.on('connect', function() {
+            isConnected = true;
+            socket.emit('getUserData');
+        });
+        
+        socket.on('accountData', function(data) {
+            userBalance = data.accounts;
+            localStorage.setItem('userBalance', JSON.stringify(userBalance));
+            accountType = data.currentAccount;
+            updateBalance();
+            updateAccountButtons();
+        });
+        
+        socket.on('balanceUpdate', function(data) {
+            if (userBalance[accountType]) {
+                userBalance[accountType].balance = data.balance;
+            } else {
+                userBalance[accountType] = { balance: data.balance };
+            }
+            localStorage.setItem('userBalance', JSON.stringify(userBalance));
+            updateBalance();
+        });
+        
+        socket.on('userTrades', function(trades) {
+            activeTrades = trades.map(trade => ({
+                ...trade,
+                startTime: new Date(trade.startTime),
+                endTime: new Date(trade.endTime)
+            }));
+            displayActiveTrades();
+        });
+        
+        socket.on('tradeResult', function(data) {
+            if (data.success) {
+                if (userBalance[accountType]) {
+                    userBalance[accountType].balance = data.balance;
+                }
+                localStorage.setItem('userBalance', JSON.stringify(userBalance));
+                updateBalance();
+                
+                addTradeLineToChart(data.trade.direction, data.trade.duration);
+                
+                const trade = {
+                    ...data.trade,
+                    startTime: new Date(data.trade.startTime),
+                    endTime: new Date(data.trade.endTime)
+                };
+                activeTrades.push(trade);
+                displayActiveTrades();
+            }
+        });
+        
+        socket.on('tradeCompleted', function(data) {
             if (userBalance[accountType]) {
                 userBalance[accountType].balance = data.balance;
             }
-            
-            // Save to localStorage
             localStorage.setItem('userBalance', JSON.stringify(userBalance));
             updateBalance();
             
-            // Add trade line to chart
-            addTradeLineToChart(data.trade.direction, data.trade.duration);
-            
-            // Add to active trades
-            const trade = {
-                ...data.trade,
-                startTime: new Date(data.trade.startTime),
-                endTime: new Date(data.trade.endTime)
-            };
-            activeTrades.push(trade);
+            activeTrades = activeTrades.filter(t => t.id !== data.id);
             displayActiveTrades();
-            
-            showNotification(`✅ ${data.trade.direction.toUpperCase()} Trade Placed!`, 'success');
-        } else {
-            showNotification(data.message, 'error');
-        }
-    });
-    
-    socket.on('tradeCompleted', function(data) {
-        console.log('Trade completed:', data);
+        });
         
-        // Update balance
-        if (userBalance[accountType]) {
-            userBalance[accountType].balance = data.balance;
-        }
-        
-        // Save to localStorage
-        localStorage.setItem('userBalance', JSON.stringify(userBalance));
-        updateBalance();
-        
-        // Remove from active trades
-        activeTrades = activeTrades.filter(t => t.id !== data.id);
-        displayActiveTrades();
-        
-        // Show result
-        if (data.won) {
-            showNotification(`🎉 TRADE WON! +₹${data.payout}`, 'success');
-        } else {
-            showNotification(`😔 TRADE LOST! -₹${data.amount}`, 'error');
-        }
-    });
-    
-    socket.on('disconnect', function() {
+    } catch (error) {
         isConnected = false;
-    });
+    }
 }
 
-// Initialize accounts
 function initializeAccounts() {
     accountType = localStorage.getItem('account_type') || 'demo';
     updateBalance();
     updateAccountButtons();
 }
 
-// Update balance display
 function updateBalance() {
     const balanceEl = document.getElementById('userBalance');
     if (balanceEl) {
@@ -178,7 +139,6 @@ function updateBalance() {
     }
 }
 
-// Update account buttons
 function updateAccountButtons() {
     document.querySelectorAll('.account-btn').forEach(btn => {
         btn.classList.remove('active');
@@ -188,7 +148,6 @@ function updateAccountButtons() {
     });
 }
 
-// Switch account function
 function switchAccount(type) {
     accountType = type;
     localStorage.setItem('account_type', type);
@@ -200,11 +159,8 @@ function switchAccount(type) {
     updateBalance();
     updateAccountButtons();
     displayActiveTrades();
-    
-    showNotification(`Switched to ${type.toUpperCase()} account`);
 }
 
-// Place trade function
 function placeTrade(direction) {
     const amountInput = document.getElementById('tradeAmount');
     const durationInput = document.getElementById('tradeDuration');
@@ -216,14 +172,10 @@ function placeTrade(direction) {
         (userBalance[accountType].balance !== undefined ? userBalance[accountType].balance : userBalance[accountType]) : 0;
     
     if (currentBalance < amount) {
-        showNotification('Insufficient balance', 'error');
         return;
     }
     
-    console.log('Placing trade:', { direction, amount, duration, accountType });
-    
     if (isConnected && socket) {
-        // Send to server
         socket.emit('placeTrade', {
             asset: currentAsset,
             direction: direction,
@@ -234,14 +186,10 @@ function placeTrade(direction) {
     }
 }
 
-// Add trade line to chart
 function addTradeLineToChart(direction, duration) {
     const chartArea = document.getElementById('chartArea');
     if (!chartArea) return;
     
-    console.log('Adding trade line:', direction, duration);
-    
-    // Create trade line
     const tradeLine = document.createElement('div');
     tradeLine.style.cssText = `
         position: absolute;
@@ -256,7 +204,6 @@ function addTradeLineToChart(direction, duration) {
         animation: pulse 1s infinite;
     `;
     
-    // Add arrow
     const arrow = document.createElement('div');
     arrow.textContent = direction === 'up' ? '⬆️' : '⬇️';
     arrow.style.cssText = `
@@ -268,7 +215,6 @@ function addTradeLineToChart(direction, duration) {
     `;
     tradeLine.appendChild(arrow);
     
-    // Add timer
     const timer = document.createElement('div');
     timer.style.cssText = `
         position: absolute;
@@ -285,7 +231,6 @@ function addTradeLineToChart(direction, duration) {
     
     chartArea.appendChild(tradeLine);
     
-    // Countdown
     let timeLeft = duration;
     const countdown = setInterval(() => {
         timeLeft--;
@@ -306,7 +251,6 @@ function addTradeLineToChart(direction, duration) {
     timer.textContent = `${timeLeft}s`;
 }
 
-// Display active trades
 function displayActiveTrades() {
     const container = document.getElementById('activeTradesList');
     if (!container) return;
@@ -338,7 +282,6 @@ function displayActiveTrades() {
     }).join('');
 }
 
-// Start price updates
 function startPriceUpdates() {
     let price = 1.0850;
     
@@ -362,36 +305,10 @@ function startPriceUpdates() {
     }, 1000);
 }
 
-// Show notification
 function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 25px;
-        border-radius: 10px;
-        color: white;
-        font-weight: bold;
-        z-index: 1000;
-        font-size: 16px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        ${type === 'success' ? 'background: linear-gradient(135deg, #00ff88, #00cc6a);' : 
-          type === 'error' ? 'background: linear-gradient(135deg, #ff4444, #cc3333);' : 
-          'background: linear-gradient(135deg, #00d4ff, #0099cc);'}
-    `;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        if (document.body.contains(notification)) {
-            document.body.removeChild(notification);
-        }
-    }, 4000);
+    // Silent - no notifications
 }
 
-// Asset switching
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('asset-item')) {
         document.querySelector('.asset-item.active')?.classList.remove('active');
@@ -404,7 +321,6 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Add CSS animations
 const style = document.createElement('style');
 style.textContent = `
     @keyframes pulse {
