@@ -618,5 +618,45 @@
         "totalLosses": 0
       }
     }
+  },
+  "user_1759149492239_yiibwnp32": {
+    "id": "user_1759149492239_yiibwnp32",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50170,
+        "totalTrades": 2,
+        "totalWins": 2,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759149499739_bpg5zwink": {
+    "id": "user_1759149499739_bpg5zwink",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
   }
 }

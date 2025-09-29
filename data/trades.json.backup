@@ -199,5 +199,44 @@
   "user_1759142003885_u6c9juaha": {
     "demo": [],
     "real": []
+  },
+  "user_1759149492239_yiibwnp32": {
+    "demo": [
+      {
+        "id": 1759149497863,
+        "asset": "EUR/USD",
+        "direction": "up",
+        "amount": 100,
+        "duration": 5,
+        "startPrice": 1.0843528399762774,
+        "startTime": "2025-09-29T12:38:17.863Z",
+        "endTime": "2025-09-29T12:38:22.863Z",
+        "status": "completed",
+        "accountType": "demo",
+        "result": "won",
+        "endPrice": 1.0844981816309032,
+        "payout": 185
+      },
+      {
+        "id": 1759149498069,
+        "asset": "EUR/USD",
+        "direction": "up",
+        "amount": 100,
+        "duration": 5,
+        "startPrice": 1.084128002158738,
+        "startTime": "2025-09-29T12:38:18.069Z",
+        "endTime": "2025-09-29T12:38:23.069Z",
+        "status": "completed",
+        "accountType": "demo",
+        "result": "won",
+        "endPrice": 1.084293290455863,
+        "payout": 185
+      }
+    ],
+    "real": []
+  },
+  "user_1759149499739_bpg5zwink": {
+    "demo": [],
+    "real": []
   }
 }

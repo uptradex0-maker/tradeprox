@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  username    String   @unique
+  email       String?
+  demoBalance Float    @default(50000)
+  realBalance Float    @default(0)
+  totalDeposits Float  @default(0)
+  totalWithdrawals Float @default(0)
+  totalTrades Int      @default(0)
+  totalWins   Int      @default(0)
+  totalLosses Int      @default(0)
+  currentAccount String @default("demo")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  trades      Trade[]
+  deposits    Deposit[]
+  withdrawals Withdrawal[]
+  tickets     Ticket[]
+  
+  @@map("users")
+}
+
+model Trade {
+  id          String   @id @default(cuid())
+  userId      String
+  asset       String
+  direction   String
+  amount      Float
+  duration    Int
+  startPrice  Float
+  endPrice    Float?
+  startTime   DateTime @default(now())
+  endTime     DateTime
+  status      String   @default("active")
+  result      String?
+  payout      Float?
+  accountType String   @default("demo")
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("trades")
+}
+
+model Deposit {
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Float
+  utr         String?
+  status      String   @default("pending")
+  method      String   @default("upi")
+  createdAt   DateTime @default(now())
+  approvedAt  DateTime?
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("deposits")
+}
+
+model Withdrawal {
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Float
+  bankName    String
+  accountNumber String
+  ifscCode    String
+  accountHolder String
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  processedAt DateTime?
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("withdrawals")
+}
+
+model Ticket {
+  id          String   @id @default(cuid())
+  userId      String
+  category    String
+  subject     String
+  message     String
+  status      String   @default("open")
+  priority    String   @default("medium")
+  responses   Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("tickets")
+}
+
+model AdminSettings {
+  id              String   @id @default(cuid())
+  defaultPayout   Float    @default(85)
+  maxTradeAmount  Float    @default(10000)
+  minTradeAmount  Float    @default(10)
+  minDeposit      Float    @default(2720)
+  minWithdrawal   Float    @default(5700)
+  serverStatus    String   @default("online")
+  tradeMode       String   @default("normal")
+  qrCode          String?
+  updatedAt       DateTime @updatedAt
+  
+  @@map("admin_settings")
+}
