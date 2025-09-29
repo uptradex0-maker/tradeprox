@@ -20,7 +20,7 @@ function initializeChart() {
     if (!container) return;
     
     container.innerHTML = `
-        <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #0a0e1a 0%, #1a1d29 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; border-radius: 8px;">
+        <div id="chartArea" style="width: 100%; height: 100%; background: linear-gradient(135deg, #0a0e1a 0%, #1a1d29 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; border-radius: 8px; position: relative;">
             <div style="font-size: 48px; margin-bottom: 20px;">📈</div>
             <div style="font-size: 24px; margin-bottom: 10px;" id="chartPrice">EUR/USD: 1.0850</div>
             <div style="font-size: 16px; margin-bottom: 20px;" id="chartChange">+0.0012 (+0.11%)</div>
@@ -53,92 +53,101 @@ function connectToServer() {
         reconnection: true
     });
         
-        socket.on('connect', function() {
-            isConnected = true;
-            showNotification('Connected to server', 'success');
-            socket.emit('getUserData');
-        });
+    socket.on('connect', function() {
+        isConnected = true;
+        showNotification('Connected to server', 'success');
+        socket.emit('getUserData');
+    });
+    
+    socket.on('connect_error', function(error) {
+        console.log('Connection error:', error);
+        isConnected = false;
+    });
+    
+    socket.on('accountData', function(data) {
+        userBalance = data.accounts;
+        accountType = data.currentAccount;
+        updateBalance();
+        updateAccountButtons();
+    });
+    
+    socket.on('balanceUpdate', function(data) {
+        console.log('Balance update received:', data);
         
-        socket.on('connect_error', function(error) {
-            console.log('Connection error:', error);
-            isConnected = false;
-        });
+        // Update balance immediately
+        if (userBalance[accountType]) {
+            userBalance[accountType].balance = data.balance;
+        } else {
+            userBalance[accountType] = { balance: data.balance };
+        }
+        updateBalance();
         
-        socket.on('accountData', function(data) {
-            userBalance = data.accounts;
-            accountType = data.currentAccount;
-            updateBalance();
-            updateAccountButtons();
-        });
-        
-        socket.on('balanceUpdate', function(data) {
-            if (data.accountType) {
-                accountType = data.accountType;
-            }
+        if (data.type === 'deposit') {
+            showNotification('💰 Deposit Approved! Money Added!', 'success');
+        }
+    });
+    
+    socket.on('userTrades', function(trades) {
+        activeTrades = trades.map(trade => ({
+            ...trade,
+            startTime: new Date(trade.startTime),
+            endTime: new Date(trade.endTime)
+        }));
+        displayActiveTrades();
+    });
+    
+    socket.on('tradeResult', function(data) {
+        console.log('Trade result:', data);
+        if (data.success) {
+            // Update balance
             if (userBalance[accountType]) {
                 userBalance[accountType].balance = data.balance;
-            } else {
-                userBalance[accountType] = { balance: data.balance };
             }
             updateBalance();
             
-            if (data.type === 'deposit') {
-                showNotification('💰 Deposit approved! Money added to account', 'success');
-            }
-        });
-        
-        socket.on('userTrades', function(trades) {
-            activeTrades = trades;
-            displayActiveTrades();
-        });
-        
-        socket.on('tradeResult', function(data) {
-            if (data.success) {
-                if (userBalance[accountType]) {
-                    userBalance[accountType].balance = data.balance;
-                } else {
-                    userBalance[accountType] = { balance: data.balance };
-                }
-                updateBalance();
-                addTradeLineToChart(data.trade.direction, data.trade.duration);
-                showNotification(`Trade placed: ${data.trade.direction.toUpperCase()}`, 'success');
-                
-                const trade = {
-                    ...data.trade,
-                    startTime: new Date(data.trade.startTime),
-                    endTime: new Date(data.trade.endTime)
-                };
-                activeTrades.push(trade);
-                displayActiveTrades();
-            } else {
-                showNotification(data.message, 'error');
-            }
-        });
-        
-        socket.on('tradeCompleted', function(data) {
-            userBalance[accountType].balance = data.balance;
-            updateBalance();
-            activeTrades = activeTrades.filter(t => t.id !== data.id);
+            // Add trade line to chart
+            addTradeLineToChart(data.trade.direction, data.trade.duration);
+            
+            // Add to active trades
+            const trade = {
+                ...data.trade,
+                startTime: new Date(data.trade.startTime),
+                endTime: new Date(data.trade.endTime)
+            };
+            activeTrades.push(trade);
             displayActiveTrades();
             
-            if (data.won) {
-                showNotification(`🎉 Trade Won! +₹${data.payout}`, 'success');
-            } else {
-                showNotification(`😔 Trade Lost!`, 'error');
-            }
-        });
-        
-        socket.on('disconnect', function() {
-            isConnected = false;
-            showNotification('Connection lost', 'error');
-        });
-        
-    // Check connection after 3 seconds
-    setTimeout(() => {
-        if (!isConnected) {
-            console.log('Failed to connect to server');
+            showNotification(`✅ ${data.trade.direction.toUpperCase()} Trade Placed!`, 'success');
+        } else {
+            showNotification(data.message, 'error');
         }
-    }, 3000);
+    });
+    
+    socket.on('tradeCompleted', function(data) {
+        console.log('Trade completed:', data);
+        
+        // Update balance
+        if (userBalance[accountType]) {
+            userBalance[accountType].balance = data.balance;
+        }
+        updateBalance();
+        
+        // Remove from active trades
+        activeTrades = activeTrades.filter(t => t.id !== data.id);
+        displayActiveTrades();
+        
+        // Show result
+        if (data.won) {
+            showNotification(`🎉 TRADE WON! +₹${data.payout}`, 'success');
+        } else {
+            showNotification(`😔 TRADE LOST! -₹${data.amount}`, 'error');
+        }
+    });
+    
+    socket.on('disconnect', function() {
+        isConnected = false;
+        showNotification('Connection lost', 'error');
+    });
 }
 
 // Initialize accounts
@@ -152,7 +161,9 @@ function initializeAccounts() {
 function updateBalance() {
     const balanceEl = document.getElementById('userBalance');
     if (balanceEl) {
-        const balance = userBalance[accountType] ? userBalance[accountType].balance || userBalance[accountType] : (accountType === 'demo' ? 50000 : 0);
+        const balance = userBalance[accountType] ? 
+            (userBalance[accountType].balance !== undefined ? userBalance[accountType].balance : userBalance[accountType]) : 
+            (accountType === 'demo' ? 50000 : 0);
         balanceEl.textContent = balance.toLocaleString();
     }
     
@@ -179,11 +190,6 @@ function switchAccount(type) {
     
     if (isConnected && socket) {
         socket.emit('switchAccount', { accountType: type });
-    } else {
-        // Offline mode
-        if (!userBalance[type]) {
-            userBalance[type] = type === 'demo' ? 50000 : 0;
-        }
     }
     
     updateBalance();
@@ -201,12 +207,15 @@ function placeTrade(direction) {
     const amount = amountInput ? parseInt(amountInput.value) || 100 : 100;
     const duration = durationInput ? parseInt(durationInput.value) || 60 : 60;
     
-    const currentBalance = userBalance[accountType] ? (userBalance[accountType].balance || userBalance[accountType]) : 0;
+    const currentBalance = userBalance[accountType] ? 
+        (userBalance[accountType].balance !== undefined ? userBalance[accountType].balance : userBalance[accountType]) : 0;
     
     if (currentBalance < amount) {
         showNotification('Insufficient balance', 'error');
         return;
     }
+    
+    console.log('Placing trade:', { direction, amount, duration, accountType });
     
     if (isConnected && socket) {
         // Send to server
@@ -218,51 +227,113 @@ function placeTrade(direction) {
             accountType: accountType
         });
     } else {
-        // Offline mode
-        if (userBalance[accountType].balance) {
-            userBalance[accountType].balance -= amount;
-        } else {
-            userBalance[accountType] -= amount;
-        }
-        
-        updateBalance();
-        addTradeLineToChart(direction, duration);
-        
-        const trade = {
-            id: Date.now(),
-            asset: currentAsset,
-            direction: direction,
-            amount: amount,
-            duration: duration,
-            startTime: new Date(),
-            endTime: new Date(Date.now() + duration * 1000)
-        };
-        
-        activeTrades.push(trade);
-        displayActiveTrades();
-        
-        showNotification(`${direction.toUpperCase()} trade placed for ₹${amount}`);
-        
-        // Simulate result
-        setTimeout(() => {
-            const won = Math.random() > 0.5;
-            if (won) {
-                const payout = Math.floor(amount * 1.85);
-                if (userBalance[accountType].balance !== undefined) {
-                    userBalance[accountType].balance += payout;
-                } else {
-                    userBalance[accountType] += payout;
-                }
-                showNotification(`🎉 Trade Won! +₹${payout}`, 'success');
-            } else {
-                showNotification(`😔 Trade Lost! -₹${amount}`, 'error');
-            }
-            
-            activeTrades = activeTrades.filter(t => t.id !== trade.id);
-            displayActiveTrades();
-            updateBalance();
-        }, duration * 1000);
+        // Offline fallback
+        showNotification('Not connected to server', 'error');
     }
+}
+
+// Add trade line to chart
+function addTradeLineToChart(direction, duration) {
+    const chartArea = document.getElementById('chartArea');
+    if (!chartArea) return;
+    
+    console.log('Adding trade line:', direction, duration);
+    
+    // Create trade line
+    const tradeLine = document.createElement('div');
+    tradeLine.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        right: 10px;
+        height: 4px;
+        background: ${direction === 'up' ? '#00ff88' : '#ff4444'};
+        z-index: 100;
+        box-shadow: 0 0 20px ${direction === 'up' ? '#00ff88' : '#ff4444'};
+        border-radius: 2px;
+        animation: pulse 1s infinite;
+    `;
+    
+    // Add arrow
+    const arrow = document.createElement('div');
+    arrow.textContent = direction === 'up' ? '⬆️' : '⬇️';
+    arrow.style.cssText = `
+        position: absolute;
+        left: 20px;
+        top: -25px;
+        font-size: 20px;
+        animation: bounce 1s infinite;
+    `;
+    tradeLine.appendChild(arrow);
+    
+    // Add timer
+    const timer = document.createElement('div');
+    timer.style.cssText = `
+        position: absolute;
+        right: 20px;
+        top: -25px;
+        color: white;
+        font-weight: bold;
+        background: rgba(0,0,0,0.8);
+        padding: 5px 10px;
+        border-radius: 5px;
+        border: 2px solid ${direction === 'up' ? '#00ff88' : '#ff4444'};
+    `;
+    tradeLine.appendChild(timer);
+    
+    chartArea.appendChild(tradeLine);
+    
+    // Countdown
+    let timeLeft = duration;
+    const countdown = setInterval(() => {
+        timeLeft--;
+        timer.textContent = `${timeLeft}s`;
+        
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+            tradeLine.style.transition = 'opacity 1s';
+            tradeLine.style.opacity = '0';
+            setTimeout(() => {
+                if (chartArea.contains(tradeLine)) {
+                    chartArea.removeChild(tradeLine);
+                }
+            }, 1000);
+        }
+    }, 1000);
+    
+    timer.textContent = `${timeLeft}s`;
+}
+
+// Display active trades
+function displayActiveTrades() {
+    const container = document.getElementById('activeTradesList');
+    if (!container) return;
+    
+    if (activeTrades.length === 0) {
+        container.innerHTML = '<p style="color: #ccc; text-align: center; padding: 20px;">No active trades</p>';
+        return;
+    }
+    
+    container.innerHTML = activeTrades.map(trade => {
+        const timeLeft = Math.max(0, Math.floor((new Date(trade.endTime) - new Date()) / 1000));
+        
+        return `
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; margin: 10px 0; border-radius: 10px; border-left: 5px solid ${trade.direction === 'up' ? '#00ff88' : '#ff4444'};">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="color: white; font-size: 16px;">${trade.asset}</strong>
+                        <span style="color: ${trade.direction === 'up' ? '#00ff88' : '#ff4444'}; margin-left: 15px; font-weight: bold; font-size: 14px;">
+                            ${trade.direction === 'up' ? '⬆️' : '⬇️'} ${trade.direction.toUpperCase()}
+                        </span>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: white; font-weight: bold; font-size: 16px;">₹${trade.amount}</div>
+                        <div style="font-size: 14px; color: #00d4ff; font-weight: bold;">${timeLeft}s left</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 // Start price updates
@@ -289,112 +360,6 @@ function startPriceUpdates() {
     }, 1000);
 }
 
-// Add trade line to chart
-function addTradeLineToChart(direction, duration) {
-    const chartContainer = document.getElementById('tradingChart');
-    if (!chartContainer) return;
-    
-    // Create trade line overlay
-    const tradeLine = document.createElement('div');
-    tradeLine.style.cssText = `
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: ${direction === 'up' ? '#00ff88' : '#ff4444'};
-        z-index: 10;
-        box-shadow: 0 0 15px ${direction === 'up' ? '#00ff88' : '#ff4444'};
-        border-radius: 2px;
-    `;
-    
-    // Add direction arrow
-    const arrow = document.createElement('div');
-    arrow.textContent = direction === 'up' ? '↗️' : '↘️';
-    arrow.style.cssText = `
-        position: absolute;
-        left: 20px;
-        top: -20px;
-        color: ${direction === 'up' ? '#00ff88' : '#ff4444'};
-        font-size: 24px;
-        font-weight: bold;
-        text-shadow: 0 0 10px ${direction === 'up' ? '#00ff88' : '#ff4444'};
-    `;
-    tradeLine.appendChild(arrow);
-    
-    // Add countdown timer
-    const timer = document.createElement('div');
-    timer.style.cssText = `
-        position: absolute;
-        right: 20px;
-        top: -20px;
-        color: white;
-        font-size: 14px;
-        font-weight: bold;
-        background: rgba(0,0,0,0.8);
-        padding: 4px 12px;
-        border-radius: 6px;
-        border: 1px solid ${direction === 'up' ? '#00ff88' : '#ff4444'};
-    `;
-    tradeLine.appendChild(timer);
-    
-    chartContainer.style.position = 'relative';
-    chartContainer.appendChild(tradeLine);
-    
-    // Countdown timer
-    let timeLeft = duration;
-    const countdown = setInterval(() => {
-        timeLeft--;
-        timer.textContent = `${timeLeft}s`;
-        
-        if (timeLeft <= 0) {
-            clearInterval(countdown);
-            // Fade out trade line
-            tradeLine.style.transition = 'opacity 1s';
-            tradeLine.style.opacity = '0';
-            setTimeout(() => {
-                if (chartContainer.contains(tradeLine)) {
-                    chartContainer.removeChild(tradeLine);
-                }
-            }, 1000);
-        }
-    }, 1000);
-    
-    timer.textContent = `${timeLeft}s`;
-}
-
-// Display active trades
-function displayActiveTrades() {
-    const container = document.getElementById('activeTradesList');
-    if (!container) return;
-    
-    if (activeTrades.length === 0) {
-        container.innerHTML = '<p style="color: #ccc; text-align: center; padding: 20px;">No active trades</p>';
-        return;
-    }
-    
-    container.innerHTML = activeTrades.map(trade => {
-        const timeLeft = Math.max(0, Math.floor((new Date(trade.endTime) - new Date()) / 1000));
-        
-        return `
-            <div class="active-trade" style="background: rgba(255,255,255,0.1); padding: 12px; margin: 8px 0; border-radius: 8px; border-left: 4px solid ${trade.direction === 'up' ? '#00ff88' : '#ff4444'};">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong style="color: white;">${trade.asset}</strong>
-                        <span style="color: ${trade.direction === 'up' ? '#00ff88' : '#ff4444'}; margin-left: 10px; font-weight: bold;">
-                            ${trade.direction === 'up' ? '↑' : '↓'} ${trade.direction.toUpperCase()}
-                        </span>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="color: white; font-weight: bold;">₹${trade.amount}</div>
-                        <div style="font-size: 12px; color: #00d4ff;">${timeLeft}s left</div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
 // Show notification
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
@@ -403,121 +368,25 @@ function showNotification(message, type = 'info') {
         position: fixed;
         top: 20px;
         right: 20px;
-        padding: 15px 20px;
-        border-radius: 8px;
+        padding: 15px 25px;
+        border-radius: 10px;
         color: white;
         font-weight: bold;
         z-index: 1000;
-        ${type === 'success' ? 'background: #00ff88;' : type === 'error' ? 'background: #ff4444;' : 'background: #00d4ff;'}
+        font-size: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        ${type === 'success' ? 'background: linear-gradient(135deg, #00ff88, #00cc6a);' : 
+          type === 'error' ? 'background: linear-gradient(135deg, #ff4444, #cc3333);' : 
+          'background: linear-gradient(135deg, #00d4ff, #0099cc);'}
     `;
     
     document.body.appendChild(notification);
     
     setTimeout(() => {
-        document.body.removeChild(notification);
-    }, 3000);
-}
-
-// Add trade line to chart
-function addTradeLineToChart(direction, duration) {
-    const chartContainer = document.getElementById('tradingChart');
-    
-    // Create trade line overlay
-    const tradeLine = document.createElement('div');
-    tradeLine.style.cssText = `
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: ${direction === 'up' ? '#00ff88' : '#ff4444'};
-        z-index: 10;
-        box-shadow: 0 0 10px ${direction === 'up' ? '#00ff88' : '#ff4444'};
-    `;
-    
-    // Add direction arrow
-    const arrow = document.createElement('div');
-    arrow.textContent = direction === 'up' ? '↗' : '↘';
-    arrow.style.cssText = `
-        position: absolute;
-        left: 20px;
-        top: -15px;
-        color: ${direction === 'up' ? '#00ff88' : '#ff4444'};
-        font-size: 20px;
-        font-weight: bold;
-    `;
-    tradeLine.appendChild(arrow);
-    
-    // Add countdown timer
-    const timer = document.createElement('div');
-    timer.style.cssText = `
-        position: absolute;
-        right: 20px;
-        top: -15px;
-        color: white;
-        font-size: 12px;
-        font-weight: bold;
-        background: rgba(0,0,0,0.7);
-        padding: 2px 8px;
-        border-radius: 4px;
-    `;
-    tradeLine.appendChild(timer);
-    
-    chartContainer.style.position = 'relative';
-    chartContainer.appendChild(tradeLine);
-    
-    // Countdown timer
-    let timeLeft = duration;
-    const countdown = setInterval(() => {
-        timeLeft--;
-        timer.textContent = `${timeLeft}s`;
-        
-        if (timeLeft <= 0) {
-            clearInterval(countdown);
-            // Fade out trade line
-            tradeLine.style.transition = 'opacity 1s';
-            tradeLine.style.opacity = '0';
-            setTimeout(() => {
-                if (chartContainer.contains(tradeLine)) {
-                    chartContainer.removeChild(tradeLine);
-                }
-            }, 1000);
+        if (document.body.contains(notification)) {
+            document.body.removeChild(notification);
         }
-    }, 1000);
-    
-    timer.textContent = `${timeLeft}s`;
-}
-
-// Display active trades
-function displayActiveTrades() {
-    const container = document.getElementById('activeTradesList');
-    if (!container) return;
-    
-    if (activeTrades.length === 0) {
-        container.innerHTML = '<p style="color: #ccc; text-align: center; padding: 20px;">No active trades</p>';
-        return;
-    }
-    
-    container.innerHTML = activeTrades.map(trade => {
-        const timeLeft = Math.max(0, Math.floor((new Date(trade.endTime) - new Date()) / 1000));
-        
-        return `
-            <div class="active-trade" style="background: rgba(255,255,255,0.1); padding: 10px; margin: 5px 0; border-radius: 5px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong>${trade.asset}</strong>
-                        <span style="color: ${trade.direction === 'up' ? '#00ff88' : '#ff4444'}; margin-left: 10px;">
-                            ${trade.direction === 'up' ? '↑' : '↓'} ${trade.direction.toUpperCase()}
-                        </span>
-                    </div>
-                    <div style="text-align: right;">
-                        <div>₹${trade.amount}</div>
-                        <div style="font-size: 12px; color: #ccc;">${timeLeft}s left</div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
+    }, 4000);
 }
 
 // Asset switching
@@ -526,6 +395,23 @@ document.addEventListener('click', function(e) {
         document.querySelector('.asset-item.active')?.classList.remove('active');
         e.target.classList.add('active');
         currentAsset = e.target.dataset.asset;
-        document.getElementById('currentAsset').textContent = currentAsset;
+        const currentAssetEl = document.getElementById('currentAsset');
+        if (currentAssetEl) {
+            currentAssetEl.textContent = currentAsset;
+        }
     }
 });
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+`;
+document.head.appendChild(style);
