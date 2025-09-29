@@ -1,8 +1,6 @@
 node_modules
-.git
 *.log
 .env
 README.md
 PRODUCTION_READY.md
 reset-data.js
-package-lock.json
