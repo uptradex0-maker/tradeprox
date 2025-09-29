@@ -24,10 +24,10 @@
     "currentAccount": "demo",
     "accounts": {
       "demo": {
-        "balance": 49800,
-        "totalTrades": 2,
-        "totalWins": 0,
-        "totalLosses": 2
+        "balance": 49785,
+        "totalTrades": 4,
+        "totalWins": 1,
+        "totalLosses": 3
       },
       "real": {
         "balance": 0,

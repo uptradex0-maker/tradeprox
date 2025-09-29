@@ -34,6 +34,36 @@
         "result": "lost",
         "endPrice": 1.0849617897237642,
         "payout": 0
+      },
+      {
+        "id": 1759148716248,
+        "asset": "EUR/USD",
+        "direction": "up",
+        "amount": 100,
+        "duration": 5,
+        "startPrice": 1.08484631707383,
+        "startTime": "2025-09-29T12:25:16.248Z",
+        "endTime": "2025-09-29T12:25:21.248Z",
+        "status": "completed",
+        "accountType": "demo",
+        "result": "lost",
+        "endPrice": 1.0847160149357558,
+        "payout": 0
+      },
+      {
+        "id": 1759148737420,
+        "asset": "EUR/USD",
+        "direction": "down",
+        "amount": 100,
+        "duration": 5,
+        "startPrice": 1.085383040955905,
+        "startTime": "2025-09-29T12:25:37.420Z",
+        "endTime": "2025-09-29T12:25:42.420Z",
+        "status": "completed",
+        "accountType": "demo",
+        "result": "won",
+        "endPrice": 1.084641892470016,
+        "payout": 185
       }
     ],
     "real": []

@@ -1,10 +1,29 @@
 // Simple Dashboard - No Messages
 let currentAsset = 'EUR/USD';
 let accountType = 'demo';
-let userBalance = JSON.parse(localStorage.getItem('userBalance')) || { demo: 50000, real: 0 };
+let userBalance = { demo: 50000, real: 0 }; // Reset to default
 let activeTrades = [];
 let socket;
 let isConnected = false;
+
+// Reset all saved data
+function resetAllData() {
+    localStorage.removeItem('userBalance');
+    localStorage.removeItem('account_type');
+    localStorage.removeItem('tradepro_user_id');
+    localStorage.removeItem('trade_history');
+    localStorage.removeItem('user_transactions');
+    localStorage.removeItem('support_tickets');
+    userBalance = { demo: 50000, real: 0 };
+    activeTrades = [];
+    accountType = 'demo';
+    updateBalance();
+    updateAccountButtons();
+    displayActiveTrades();
+}
+
+// Auto-reset on page load
+resetAllData();
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeChart();
@@ -43,11 +62,13 @@ function connectToServer() {
             localStorage.setItem('tradepro_user_id', userId);
         }
         
-        socket = io({
+        socket = io(window.location.origin, {
             query: { userId: userId },
-            transports: ['websocket', 'polling'],
-            timeout: 5000,
-            reconnection: false
+            transports: ['polling', 'websocket'],
+            timeout: 10000,
+            reconnection: true,
+            reconnectionAttempts: 3,
+            reconnectionDelay: 1000
         });
             
         socket.on('connect', function() {
@@ -183,6 +204,9 @@ function placeTrade(direction) {
             duration: duration,
             accountType: accountType
         });
+    } else {
+        // Fallback for Vercel - simulate trade locally
+        simulateLocalTrade(direction, amount, duration);
     }
 }
 
@@ -303,6 +327,53 @@ function startPriceUpdates() {
             changeEl.style.color = change > 0 ? '#00ff88' : '#ff4444';
         }
     }, 1000);
+}
+
+function simulateLocalTrade(direction, amount, duration) {
+    // Deduct balance
+    if (userBalance[accountType].balance !== undefined) {
+        userBalance[accountType].balance -= amount;
+    } else {
+        userBalance[accountType] -= amount;
+    }
+    localStorage.setItem('userBalance', JSON.stringify(userBalance));
+    updateBalance();
+    
+    // Add trade line
+    addTradeLineToChart(direction, duration);
+    
+    // Create trade object
+    const trade = {
+        id: Date.now(),
+        asset: currentAsset,
+        direction: direction,
+        amount: amount,
+        duration: duration,
+        startTime: new Date(),
+        endTime: new Date(Date.now() + duration * 1000)
+    };
+    
+    activeTrades.push(trade);
+    displayActiveTrades();
+    
+    // Simulate completion
+    setTimeout(() => {
+        const won = Math.random() > 0.5;
+        if (won) {
+            const payout = Math.floor(amount * 1.85);
+            if (userBalance[accountType].balance !== undefined) {
+                userBalance[accountType].balance += payout;
+            } else {
+                userBalance[accountType] += payout;
+            }
+        }
+        
+        localStorage.setItem('userBalance', JSON.stringify(userBalance));
+        updateBalance();
+        
+        activeTrades = activeTrades.filter(t => t.id !== trade.id);
+        displayActiveTrades();
+    }, duration * 1000);
 }
 
 function showNotification(message, type = 'info') {
