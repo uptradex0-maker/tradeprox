@@ -1023,6 +1023,7 @@ function generateTimeframeData(asset, timeframeSeconds) {
 const users = new Map();
 const userTrades = new Map();
 const supportTickets = new Map();
+const userTransactions = new Map();
 const allTickets = [];
 const allWithdrawals = [];
 const fs = require('fs');
@@ -1032,6 +1033,7 @@ const usersDataFile = path.join(__dirname, 'data', 'users.json');
 const tradesDataFile = path.join(__dirname, 'data', 'trades.json');
 const ticketsDataFile = path.join(__dirname, 'data', 'tickets.json');
 const withdrawalsDataFile = path.join(__dirname, 'data', 'withdrawals.json');
+const transactionsDataFile = path.join(__dirname, 'data', 'transactions.json');
 
 // Ensure data directory exists
 if (!fs.existsSync(path.join(__dirname, 'data'))) {
