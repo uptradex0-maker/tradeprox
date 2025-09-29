@@ -1,13 +1,16 @@
-// Simple Dashboard that ALWAYS works
+// Dashboard with server connection
 let currentAsset = 'EUR/USD';
 let accountType = 'demo';
 let userBalance = { demo: 50000, real: 0 };
-let chart;
+let activeTrades = [];
+let socket;
+let isConnected = false;
 
 // Initialize immediately when page loads
 document.addEventListener('DOMContentLoaded', function() {
     initializeChart();
     initializeAccounts();
+    connectToServer();
     startPriceUpdates();
 });
 
@@ -29,15 +32,84 @@ function initializeChart() {
     `;
 }
 
+// Connect to server
+function connectToServer() {
+    try {
+        let userId = localStorage.getItem('tradepro_user_id');
+        if (!userId) {
+            userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('tradepro_user_id', userId);
+        }
+        
+        socket = io({
+            query: { userId: userId },
+            transports: ['websocket', 'polling']
+        });
+        
+        socket.on('connect', function() {
+            isConnected = true;
+            showNotification('Connected to server', 'success');
+            socket.emit('getUserData');
+        });
+        
+        socket.on('accountData', function(data) {
+            userBalance = data.accounts;
+            accountType = data.currentAccount;
+            updateBalance();
+            updateAccountButtons();
+        });
+        
+        socket.on('balanceUpdate', function(data) {
+            userBalance[accountType].balance = data.balance;
+            updateBalance();
+        });
+        
+        socket.on('userTrades', function(trades) {
+            activeTrades = trades;
+            displayActiveTrades();
+        });
+        
+        socket.on('tradeResult', function(data) {
+            if (data.success) {
+                userBalance[accountType].balance = data.balance;
+                updateBalance();
+                addTradeLineToChart(data.trade.direction, data.trade.duration);
+                showNotification(`Trade placed: ${data.trade.direction.toUpperCase()}`, 'success');
+                activeTrades.push(data.trade);
+                displayActiveTrades();
+            } else {
+                showNotification(data.message, 'error');
+            }
+        });
+        
+        socket.on('tradeCompleted', function(data) {
+            userBalance[accountType].balance = data.balance;
+            updateBalance();
+            activeTrades = activeTrades.filter(t => t.id !== data.id);
+            displayActiveTrades();
+            
+            if (data.won) {
+                showNotification(`🎉 Trade Won! +₹${data.payout}`, 'success');
+            } else {
+                showNotification(`😔 Trade Lost!`, 'error');
+            }
+        });
+        
+        socket.on('disconnect', function() {
+            isConnected = false;
+            showNotification('Disconnected from server', 'error');
+        });
+        
+    } catch (error) {
+        console.log('Socket connection failed, using offline mode');
+        isConnected = false;
+    }
+}
+
 // Initialize accounts
 function initializeAccounts() {
-    // Set demo as default
     accountType = localStorage.getItem('account_type') || 'demo';
-    
-    // Update balance display
     updateBalance();
-    
-    // Update account buttons
     updateAccountButtons();
 }
 
@@ -45,7 +117,8 @@ function initializeAccounts() {
 function updateBalance() {
     const balanceEl = document.getElementById('userBalance');
     if (balanceEl) {
-        balanceEl.textContent = userBalance[accountType].toLocaleString();
+        const balance = userBalance[accountType] ? userBalance[accountType].balance || userBalance[accountType] : (accountType === 'demo' ? 50000 : 0);
+        balanceEl.textContent = balance.toLocaleString();
     }
     
     const accountEl = document.getElementById('accountType');
@@ -69,8 +142,18 @@ function switchAccount(type) {
     accountType = type;
     localStorage.setItem('account_type', type);
     
+    if (isConnected && socket) {
+        socket.emit('switchAccount', { accountType: type });
+    } else {
+        // Offline mode
+        if (!userBalance[type]) {
+            userBalance[type] = type === 'demo' ? 50000 : 0;
+        }
+    }
+    
     updateBalance();
     updateAccountButtons();
+    displayActiveTrades();
     
     showNotification(`Switched to ${type.toUpperCase()} account`);
 }
@@ -83,32 +166,68 @@ function placeTrade(direction) {
     const amount = amountInput ? parseInt(amountInput.value) || 100 : 100;
     const duration = durationInput ? parseInt(durationInput.value) || 60 : 60;
     
-    if (userBalance[accountType] < amount) {
+    const currentBalance = userBalance[accountType] ? (userBalance[accountType].balance || userBalance[accountType]) : 0;
+    
+    if (currentBalance < amount) {
         showNotification('Insufficient balance', 'error');
         return;
     }
     
-    // Deduct amount
-    userBalance[accountType] -= amount;
-    updateBalance();
-    
-    // Add trade line to chart
-    addTradeLineToChart(direction, duration);
-    
-    showNotification(`${direction.toUpperCase()} trade placed for ₹${amount}`);
-    
-    // Simulate trade result
-    setTimeout(() => {
-        const won = Math.random() > 0.5;
-        if (won) {
-            const payout = Math.floor(amount * 1.85);
-            userBalance[accountType] += payout;
-            showNotification(`🎉 Trade Won! +₹${payout}`, 'success');
+    if (isConnected && socket) {
+        // Send to server
+        socket.emit('placeTrade', {
+            asset: currentAsset,
+            direction: direction,
+            amount: amount,
+            duration: duration,
+            accountType: accountType
+        });
+    } else {
+        // Offline mode
+        if (userBalance[accountType].balance) {
+            userBalance[accountType].balance -= amount;
         } else {
-            showNotification(`😔 Trade Lost! -₹${amount}`, 'error');
+            userBalance[accountType] -= amount;
         }
+        
         updateBalance();
-    }, duration * 1000);
+        addTradeLineToChart(direction, duration);
+        
+        const trade = {
+            id: Date.now(),
+            asset: currentAsset,
+            direction: direction,
+            amount: amount,
+            duration: duration,
+            startTime: new Date(),
+            endTime: new Date(Date.now() + duration * 1000)
+        };
+        
+        activeTrades.push(trade);
+        displayActiveTrades();
+        
+        showNotification(`${direction.toUpperCase()} trade placed for ₹${amount}`);
+        
+        // Simulate result
+        setTimeout(() => {
+            const won = Math.random() > 0.5;
+            if (won) {
+                const payout = Math.floor(amount * 1.85);
+                if (userBalance[accountType].balance !== undefined) {
+                    userBalance[accountType].balance += payout;
+                } else {
+                    userBalance[accountType] += payout;
+                }
+                showNotification(`🎉 Trade Won! +₹${payout}`, 'success');
+            } else {
+                showNotification(`😔 Trade Lost! -₹${amount}`, 'error');
+            }
+            
+            activeTrades = activeTrades.filter(t => t.id !== trade.id);
+            displayActiveTrades();
+            updateBalance();
+        }, duration * 1000);
+    }
 }
 
 // Start price updates
@@ -226,6 +345,38 @@ function addTradeLineToChart(direction, duration) {
     }, 1000);
     
     timer.textContent = `${timeLeft}s`;
+}
+
+// Display active trades
+function displayActiveTrades() {
+    const container = document.getElementById('activeTradesList');
+    if (!container) return;
+    
+    if (activeTrades.length === 0) {
+        container.innerHTML = '<p style="color: #ccc; text-align: center; padding: 20px;">No active trades</p>';
+        return;
+    }
+    
+    container.innerHTML = activeTrades.map(trade => {
+        const timeLeft = Math.max(0, Math.floor((new Date(trade.endTime) - new Date()) / 1000));
+        
+        return `
+            <div class="active-trade" style="background: rgba(255,255,255,0.1); padding: 10px; margin: 5px 0; border-radius: 5px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${trade.asset}</strong>
+                        <span style="color: ${trade.direction === 'up' ? '#00ff88' : '#ff4444'}; margin-left: 10px;">
+                            ${trade.direction === 'up' ? '↑' : '↓'} ${trade.direction.toUpperCase()}
+                        </span>
+                    </div>
+                    <div style="text-align: right;">
+                        <div>₹${trade.amount}</div>
+                        <div style="font-size: 12px; color: #ccc;">${timeLeft}s left</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
 }
 
 // Asset switching
