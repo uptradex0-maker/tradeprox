@@ -35,7 +35,6 @@ function initializeChart() {
 // Connect to server
 function connectToServer() {
     if (typeof io === 'undefined') {
-        console.log('Socket.io not available');
         isConnected = false;
         return;
     }
@@ -60,7 +59,6 @@ function connectToServer() {
     });
     
     socket.on('connect_error', function(error) {
-        console.log('Connection error:', error);
         isConnected = false;
     });
     
@@ -155,7 +153,6 @@ function connectToServer() {
     
     socket.on('disconnect', function() {
         isConnected = false;
-        showNotification('Connection lost', 'error');
     });
 }
 
@@ -235,9 +232,6 @@ function placeTrade(direction) {
             duration: duration,
             accountType: accountType
         });
-    } else {
-        // Offline fallback
-        showNotification('Not connected to server', 'error');
     }
 }
 
