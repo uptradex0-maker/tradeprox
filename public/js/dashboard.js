@@ -34,22 +34,34 @@ function initializeChart() {
 
 // Connect to server
 function connectToServer() {
-    try {
-        let userId = localStorage.getItem('tradepro_user_id');
-        if (!userId) {
-            userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('tradepro_user_id', userId);
-        }
-        
-        socket = io({
-            query: { userId: userId },
-            transports: ['websocket', 'polling']
-        });
+    if (typeof io === 'undefined') {
+        console.log('Socket.io not available');
+        isConnected = false;
+        return;
+    }
+    
+    let userId = localStorage.getItem('tradepro_user_id');
+    if (!userId) {
+        userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('tradepro_user_id', userId);
+    }
+    
+    socket = io({
+        query: { userId: userId },
+        transports: ['websocket', 'polling'],
+        timeout: 5000,
+        reconnection: true
+    });
         
         socket.on('connect', function() {
             isConnected = true;
             showNotification('Connected to server', 'success');
             socket.emit('getUserData');
+        });
+        
+        socket.on('connect_error', function(error) {
+            console.log('Connection error:', error);
+            isConnected = false;
         });
         
         socket.on('accountData', function(data) {
@@ -97,13 +109,15 @@ function connectToServer() {
         
         socket.on('disconnect', function() {
             isConnected = false;
-            showNotification('Disconnected from server', 'error');
+            showNotification('Connection lost', 'error');
         });
         
-    } catch (error) {
-        console.log('Socket connection failed, using offline mode');
-        isConnected = false;
-    }
+    // Check connection after 3 seconds
+    setTimeout(() => {
+        if (!isConnected) {
+            console.log('Failed to connect to server');
+        }
+    }, 3000);
 }
 
 // Initialize accounts
