@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradePro - Admin Panel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/admin-controls.css">
+    <link rel="stylesheet" href="/css/admin-deposit.css">
+</head>
+<body class="admin-body">
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>Admin Control Panel</h1>
+            <div class="admin-nav">
+                <button onclick="showTicketsModal()" class="tickets-btn">🎫 Support Tickets</button>
+                <button onclick="showWithdrawalsModal()" class="withdrawals-btn">💸 Withdrawals</button>
+                <button onclick="location.href='/dashboard'">Back to Trading</button>
+            </div>
+        </header>
+
+        <div class="admin-content">
+            <div class="admin-section">
+                <h2>Asset Management</h2>
+                <div class="asset-controls">
+                    <div class="asset-control-item">
+                        <h3>EUR/USD</h3>
+                        <div class="controls">
+                            <label>Base Price: <input type="number" id="base-EUR/USD" value="1.0850" step="0.0001"></label>
+                            <label>Volatility: <input type="range" id="vol-EUR/USD" min="0.1" max="2" value="1" step="0.1"></label>
+                            <label>Trend: 
+                                <select id="trend-EUR/USD">
+                                    <option value="neutral">Neutral</option>
+                                    <option value="bullish">Bullish</option>
+                                    <option value="bearish">Bearish</option>
+                                </select>
+                            </label>
+                            <button onclick="updateAsset('EUR/USD')">Update</button>
+                        </div>
+                    </div>
+
+                    <div class="asset-control-item">
+                        <h3>GBP/USD</h3>
+                        <div class="controls">
+                            <label>Base Price: <input type="number" id="base-GBP/USD" value="1.2650" step="0.0001"></label>
+                            <label>Volatility: <input type="range" id="vol-GBP/USD" min="0.1" max="2" value="1" step="0.1"></label>
+                            <label>Trend: 
+                                <select id="trend-GBP/USD">
+                                    <option value="neutral">Neutral</option>
+                                    <option value="bullish">Bullish</option>
+                                    <option value="bearish">Bearish</option>
+                                </select>
+                            </label>
+                            <button onclick="updateAsset('GBP/USD')">Update</button>
+                        </div>
+                    </div>
+
+                    <div class="asset-control-item">
+                        <h3>USD/JPY</h3>
+                        <div class="controls">
+                            <label>Base Price: <input type="number" id="base-USD/JPY" value="149.50" step="0.01"></label>
+                            <label>Volatility: <input type="range" id="vol-USD/JPY" min="0.1" max="2" value="1" step="0.1"></label>
+                            <label>Trend: 
+                                <select id="trend-USD/JPY">
+                                    <option value="neutral">Neutral</option>
+                                    <option value="bullish">Bullish</option>
+                                    <option value="bearish">Bearish</option>
+                                </select>
+                            </label>
+                            <button onclick="updateAsset('USD/JPY')">Update</button>
+                        </div>
+                    </div>
+
+                    <div class="asset-control-item">
+                        <h3>BTC/USD</h3>
+                        <div class="controls">
+                            <label>Base Price: <input type="number" id="base-BTC/USD" value="43250" step="1"></label>
+                            <label>Volatility: <input type="range" id="vol-BTC/USD" min="0.1" max="3" value="1.5" step="0.1"></label>
+                            <label>Trend: 
+                                <select id="trend-BTC/USD">
+                                    <option value="neutral">Neutral</option>
+                                    <option value="bullish">Bullish</option>
+                                    <option value="bearish">Bearish</option>
+                                </select>
+                            </label>
+                            <button onclick="updateAsset('BTC/USD')">Update</button>
+                        </div>
+                    </div>
+
+                    <div class="asset-control-item">
+                        <h3>ETH/USD</h3>
+                        <div class="controls">
+                            <label>Base Price: <input type="number" id="base-ETH/USD" value="2650" step="1"></label>
+                            <label>Volatility: <input type="range" id="vol-ETH/USD" min="0.1" max="3" value="1.3" step="0.1"></label>
+                            <label>Trend: 
+                                <select id="trend-ETH/USD">
+                                    <option value="neutral">Neutral</option>
+                                    <option value="bullish">Bullish</option>
+                                    <option value="bearish">Bearish</option>
+                                </select>
+                            </label>
+                            <button onclick="updateAsset('ETH/USD')">Update</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <h2>Trading Settings</h2>
+                <div class="trading-settings">
+                    <label>Default Payout (%): <input type="number" id="defaultPayout" value="85" min="70" max="95"></label>
+                    <label>Max Trade Amount (₹): <input type="number" id="maxTradeAmount" value="10000"></label>
+                    <label>Min Trade Amount (₹): <input type="number" id="minTradeAmount" value="10"></label>
+                    <button onclick="updateTradingSettings()">Update Settings</button>
+                </div>
+            </div>
+            
+            <div class="admin-section">
+                <h2>Trade Control</h2>
+                <div class="trade-control">
+                    <div class="control-buttons">
+                        <button class="control-btn loss-btn" onclick="setTradeMode('loss')" id="lossBtn">
+                            📉 Force All Losses
+                        </button>
+                        <button class="control-btn profit-btn" onclick="setTradeMode('profit')" id="profitBtn">
+                            📈 Force All Profits
+                        </button>
+                        <button class="control-btn neutral-btn active" onclick="setTradeMode('normal')" id="normalBtn">
+                            ⚖️ Normal Trading
+                        </button>
+                    </div>
+                    <div class="control-info">
+                        <p>Current Mode: <span id="currentMode">Normal</span></p>
+                        <p>Active Trades: <span id="activeTradesCount">0</span></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="admin-section">
+                <h2>Price Manipulation</h2>
+                <div class="price-control">
+                    <div class="price-item">
+                        <label>Asset: 
+                            <select id="manipulateAsset">
+                                <option value="EUR/USD">EUR/USD</option>
+                                <option value="GBP/USD">GBP/USD</option>
+                                <option value="USD/JPY">USD/JPY</option>
+                                <option value="BTC/USD">BTC/USD</option>
+                                <option value="ETH/USD">ETH/USD</option>
+                            </select>
+                        </label>
+                        <label>Target Price: <input type="number" id="targetPrice" step="0.0001"></label>
+                        <label>Duration (seconds): <input type="number" id="manipulateDuration" value="30" min="5" max="300"></label>
+                        <button onclick="manipulatePrice()">Manipulate Price</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="admin-section">
+                <h2>Deposit Management</h2>
+                <div class="deposit-management">
+                    <div class="qr-management">
+                        <h3>QR Code Management</h3>
+                        <div class="qr-upload">
+                            <input type="file" id="qrUpload" accept="image/*" onchange="uploadQR()">
+                            <button onclick="document.getElementById('qrUpload').click()" class="upload-btn">📁 Upload New QR Code</button>
+                            <div class="upload-status" id="uploadStatus"></div>
+                        </div>
+                        <div class="current-qr">
+                            <h4>Current QR Code:</h4>
+                            <img id="currentQRDisplay" src="" alt="Current QR" style="width: 150px; height: 150px; border: 1px solid #ccc;">
+                        </div>
+                    </div>
+                    <div class="deposit-requests">
+                        <h3>Deposit Requests</h3>
+                        <div class="requests-list" id="depositRequestsList">
+                            <!-- Deposit requests will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <h2>System Settings</h2>
+                <div class="system-settings">
+                    <div class="setting-item">
+                        <label>Server Status: 
+                            <select id="serverStatus">
+                                <option value="online">Online</option>
+                                <option value="maintenance">Maintenance</option>
+                                <option value="offline">Offline</option>
+                            </select>
+                        </label>
+                        <button onclick="updateServerStatus()">Update Status</button>
+                    </div>
+                    <div class="setting-item">
+                        <label>Max Concurrent Users: <input type="number" id="maxUsers" value="1000"></label>
+                        <button onclick="updateMaxUsers()">Update Limit</button>
+                    </div>
+                    <div class="setting-item">
+                        <label>Trading Hours: 
+                            <input type="time" id="tradingStart" value="00:00">
+                            to
+                            <input type="time" id="tradingEnd" value="23:59">
+                        </label>
+                        <button onclick="updateTradingHours()">Update Hours</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <h2>Live Statistics</h2>
+                <div class="user-stats">
+                    <div class="stat-card">
+                        <h3>Total Users</h3>
+                        <span class="stat-number" id="totalUsers">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Online Users</h3>
+                        <span class="stat-number" id="onlineUsers">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Trades</h3>
+                        <span class="stat-number" id="liveActiveTrades">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Volume (₹)</h3>
+                        <span class="stat-number" id="totalVolume">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Profit/Loss Ratio</h3>
+                        <span class="stat-number" id="profitLossRatio">50/50</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Server Revenue (₹)</h3>
+                        <span class="stat-number" id="serverRevenue">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="admin-section">
+                <h2>Recent Trades</h2>
+                <div class="recent-trades">
+                    <table id="tradesTable">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>User</th>
+                                <th>Asset</th>
+                                <th>Direction</th>
+                                <th>Amount</th>
+                                <th>Result</th>
+                                <th>Payout</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tradesTableBody">
+                            <!-- Trades will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Tickets Modal -->
+    <div id="ticketsModal" class="modal">
+        <div class="modal-content admin-modal">
+            <span class="close" onclick="closeModal('ticketsModal')">&times;</span>
+            <h2>🎫 Support Tickets</h2>
+            <div class="tickets-filter">
+                <select id="ticketFilter" onchange="filterTickets()">
+                    <option value="all">All Tickets</option>
+                    <option value="open">Open</option>
+                    <option value="pending">Pending</option>
+                    <option value="closed">Closed</option>
+                </select>
+            </div>
+            <div class="tickets-list" id="ticketsList">
+                <!-- Tickets will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Ticket Details Modal -->
+    <div id="ticketDetailsModal" class="modal">
+        <div class="modal-content admin-modal">
+            <span class="close" onclick="closeModal('ticketDetailsModal')">&times;</span>
+            <h2>Ticket Details</h2>
+            <div id="ticketDetails">
+                <!-- Ticket details will be populated here -->
+            </div>
+            <div class="ticket-response">
+                <textarea id="adminResponse" placeholder="Type your response..." rows="4"></textarea>
+                <div class="response-actions">
+                    <button onclick="respondToTicket()" class="respond-btn">Send Response</button>
+                    <button onclick="closeTicket()" class="close-ticket-btn">Close Ticket</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdrawals Modal -->
+    <div id="withdrawalsModal" class="modal">
+        <div class="modal-content admin-modal">
+            <span class="close" onclick="closeModal('withdrawalsModal')">&times;</span>
+            <h2>💸 Withdrawal Requests</h2>
+            <div class="withdrawals-filter">
+                <select id="withdrawalFilter" onchange="filterWithdrawals()">
+                    <option value="all">All Requests</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+            <div class="withdrawals-list" id="withdrawalsList">
+                <!-- Withdrawals will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Check admin authentication before loading
+        if (localStorage.getItem('admin_authenticated') !== 'true') {
+            window.location.href = '/admin-login';
+        }
+    </script>
+    <script src="/js/admin.js"></script>
+    <script>
+        // Load current QR code on page load
+        fetch('/get-qr-code')
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('currentQRDisplay').src = data.qrCode;
+            }
+        });
+        
+        // Load deposit requests
+        loadDepositRequests();
+        
+        function uploadQR() {
+            const file = document.getElementById('qrUpload').files[0];
+            if (!file) {
+                alert('Please select a file first!');
+                return;
+            }
+            
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file!');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const qrCode = e.target.result;
+                
+                // Update display immediately
+                document.getElementById('currentQRDisplay').src = qrCode;
+                
+                const statusDiv = document.getElementById('uploadStatus');
+                statusDiv.className = 'upload-status';
+                statusDiv.textContent = 'Uploading...';
+                statusDiv.style.display = 'block';
+                
+                fetch('/admin/update-qr', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ qrCode })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        statusDiv.className = 'upload-status success';
+                        statusDiv.textContent = '✓ QR Code updated successfully! All users notified.';
+                        setTimeout(() => {
+                            statusDiv.style.display = 'none';
+                        }, 3000);
+                    } else {
+                        statusDiv.className = 'upload-status error';
+                        statusDiv.textContent = '✗ Failed to update QR code';
+                        // Revert display on failure
+                        fetch('/get-qr-code')
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                document.getElementById('currentQRDisplay').src = data.qrCode;
+                            }
+                        });
+                    }
+                })
+                .catch(err => {
+                    statusDiv.className = 'upload-status error';
+                    statusDiv.textContent = '✗ Network error occurred';
+                    console.error(err);
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function loadDepositRequests() {
+            fetch('/admin/deposit-requests')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    displayDepositRequests(data.requests);
+                }
+            });
+        }
+        
+        function displayDepositRequests(requests) {
+            const container = document.getElementById('depositRequestsList');
+            
+            if (requests.length === 0) {
+                container.innerHTML = '<p>No deposit requests</p>';
+                return;
+            }
+            
+            container.innerHTML = requests.map(req => `
+                <div class="deposit-request ${req.status}">
+                    <div class="request-info">
+                        <strong>₹${req.amount}</strong>
+                        <span>UTR: ${req.utr}</span>
+                        <span>User: ${req.userId.substring(0, 10)}...</span>
+                        <span>${new Date(req.timestamp).toLocaleString()}</span>
+                    </div>
+                    <div class="request-actions">
+                        ${req.status === 'pending' ? `
+                            <button onclick="approveDeposit('${req.id}')" class="approve-btn">Approve</button>
+                            <button onclick="rejectDeposit('${req.id}')" class="reject-btn">Reject</button>
+                        ` : `<span class="status-badge ${req.status}">${req.status.toUpperCase()}</span>`}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function approveDeposit(requestId) {
+            fetch('/admin/approve-deposit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Deposit approved!');
+                    loadDepositRequests();
+                }
+            });
+        }
+        
+        function rejectDeposit(requestId) {
+            fetch('/admin/reject-deposit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Deposit rejected!');
+                    loadDepositRequests();
+                }
+            });
+        }
+        
+        // Listen for new deposit requests
+        if (typeof socket !== 'undefined') {
+            socket.on('newDepositRequest', function(request) {
+                loadDepositRequests();
+            });
+        }
+    </script>
+</body>
+</html>

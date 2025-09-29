@@ -1,0 +1,141 @@
+{
+  "user_1759123207775_ux8afb8at": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759037606365_v8sw2ab7q": {
+    "demo": [
+      {
+        "id": 1759127622651,
+        "asset": "EUR/USD",
+        "direction": "up",
+        "amount": 100,
+        "duration": 5,
+        "startPrice": 1.0854074083304954,
+        "startTime": "2025-09-29T06:33:42.651Z",
+        "endTime": "2025-09-29T06:33:47.651Z",
+        "status": "completed",
+        "accountType": "demo",
+        "result": "lost",
+        "endPrice": 1.0849617897237642,
+        "payout": 0
+      },
+      {
+        "id": 1759127623100,
+        "asset": "EUR/USD",
+        "direction": "up",
+        "amount": 100,
+        "duration": 5,
+        "startPrice": 1.0854074083304954,
+        "startTime": "2025-09-29T06:33:43.100Z",
+        "endTime": "2025-09-29T06:33:48.100Z",
+        "status": "completed",
+        "accountType": "demo",
+        "result": "lost",
+        "endPrice": 1.0849617897237642,
+        "payout": 0
+      }
+    ],
+    "real": []
+  },
+  "user_1759123214605_9awa6grn1": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759123223010_qng2oywf6": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759123242691_exlz0jl1u": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759123049476_re8y7xmv8": {
+    "demo": [
+      {
+        "id": 1759126882638,
+        "asset": "EUR/USD",
+        "direction": "up",
+        "amount": 100,
+        "duration": 5,
+        "startPrice": 1.0842408809511772,
+        "startTime": "2025-09-29T06:21:22.638Z",
+        "endTime": "2025-09-29T06:21:27.638Z",
+        "status": "completed",
+        "accountType": "demo",
+        "result": "lost",
+        "endPrice": 1.083719585353046,
+        "payout": 0
+      }
+    ],
+    "real": []
+  },
+  "user_1759123252400_o9vj7d9yb": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759125022185_9z924ef2p": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759125199774_wduae2h0y": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759125734649_uqe8igg7s": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759125891849_g1es0tr7k": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759126576455_sx4afyca5": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759126645914_7aczmx5mt": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759126837764_q9ssgtfaq": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759126899132_ggp02tq7c": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759127084769_cgqayf80a": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759127088093_usbgfnkph": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759127266125_dtoxdrab8": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759127612095_yiukgcfnw": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759127692970_b3sqig6md": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759127977114_cjawkhs5w": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759128039693_0rvvvfxwc": {
+    "demo": [],
+    "real": []
+  },
+  "user_1759128067523_b1af7hw11": {
+    "demo": [],
+    "real": []
+  }
+}

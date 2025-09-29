@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradePro - Login</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo">
+                <h1>TradePro</h1>
+                <p>Binary Options Trading</p>
+            </div>
+            
+            <form class="login-form" id="loginForm">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+            
+            <div class="register-link">
+                <p>Don't have an account? <a href="/register">Register here</a></p>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>Real-time Trading</h3>
+                <p>Trade with live market data</p>
+            </div>
+            <div class="feature">
+                <h3>Multiple Assets</h3>
+                <p>Forex, Crypto, Commodities</p>
+            </div>
+            <div class="feature">
+                <h3>Quick Trades</h3>
+                <p>5sec to 5min timeframes</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer with Legal Links -->
+    <footer class="login-footer">
+        <div class="footer-links">
+            <a href="#" onclick="showModal('termsModal')">Terms & Conditions</a>
+            <a href="#" onclick="showModal('privacyModal')">Privacy Policy</a>
+            <a href="#" onclick="showModal('shippingModal')">Shipping Policy</a>
+            <a href="#" onclick="showModal('contactModal')">Contact Us</a>
+            <a href="#" onclick="showModal('refundModal')">Cancellation & Refunds</a>
+        </div>
+        <p>&copy; 2024 TradePro. All rights reserved.</p>
+    </footer>
+    
+    <!-- Terms & Conditions Modal -->
+    <div id="termsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('termsModal')">&times;</span>
+            <h2>Terms & Conditions</h2>
+            <div class="modal-body">
+                <h3>1. Acceptance of Terms</h3>
+                <p>By accessing and using TradePro, you accept and agree to be bound by the terms and provision of this agreement.</p>
+                
+                <h3>2. Trading Risks</h3>
+                <p>Binary options trading involves substantial risk of loss. You should never invest money that you cannot afford to lose.</p>
+                
+                <h3>3. Account Responsibilities</h3>
+                <p>You are responsible for maintaining the confidentiality of your account and password and for restricting access to your account.</p>
+                
+                <h3>4. Prohibited Activities</h3>
+                <p>Users are prohibited from engaging in fraudulent activities, market manipulation, or any illegal activities on our platform.</p>
+                
+                <h3>5. Platform Availability</h3>
+                <p>We strive to maintain 99.9% uptime but cannot guarantee uninterrupted service due to maintenance or technical issues.</p>
+                
+                <h3>6. Modifications</h3>
+                <p>TradePro reserves the right to modify these terms at any time. Continued use constitutes acceptance of modified terms.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('privacyModal')">&times;</span>
+            <h2>Privacy Policy</h2>
+            <div class="modal-body">
+                <h3>Information We Collect</h3>
+                <p>We collect information you provide directly to us, such as when you create an account, make trades, or contact us for support.</p>
+                
+                <h3>How We Use Your Information</h3>
+                <p>We use your information to provide, maintain, and improve our services, process transactions, and communicate with you.</p>
+                
+                <h3>Information Sharing</h3>
+                <p>We do not sell, trade, or otherwise transfer your personal information to third parties without your consent, except as described in this policy.</p>
+                
+                <h3>Data Security</h3>
+                <p>We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>
+                
+                <h3>Cookies</h3>
+                <p>We use cookies to enhance your experience, analyze site usage, and assist in our marketing efforts.</p>
+                
+                <h3>Contact Information</h3>
+                <p>If you have questions about this Privacy Policy, please contact us at privacy@tradepro.com</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Shipping Policy Modal -->
+    <div id="shippingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('shippingModal')">&times;</span>
+            <h2>Shipping Policy</h2>
+            <div class="modal-body">
+                <h3>Digital Service</h3>
+                <p>TradePro is a digital trading platform. No physical products are shipped.</p>
+                
+                <h3>Account Access</h3>
+                <p>Upon successful registration and verification, you will receive immediate access to your trading account.</p>
+                
+                <h3>Verification Process</h3>
+                <p>Account verification may take 1-3 business days depending on the completeness of submitted documents.</p>
+                
+                <h3>Deposit Processing</h3>
+                <p>Deposits are processed instantly for most payment methods. Bank transfers may take 1-3 business days.</p>
+                
+                <h3>Withdrawal Processing</h3>
+                <p>Withdrawal requests are processed within 24-48 hours. Bank transfers may take additional 2-5 business days.</p>
+                
+                <h3>Support</h3>
+                <p>For any account access issues, contact our support team at support@tradepro.com</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contact Us Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('contactModal')">&times;</span>
+            <h2>Contact Us</h2>
+            <div class="modal-body">
+                <h3>Customer Support</h3>
+                <p><strong>Email:</strong> support@tradepro.com</p>
+                <p><strong>Phone:</strong> +91 9876543210</p>
+                <p><strong>Hours:</strong> Monday - Friday, 9:00 AM - 6:00 PM IST</p>
+                
+                <h3>Technical Support</h3>
+                <p><strong>Email:</strong> tech@tradepro.com</p>
+                <p><strong>Response Time:</strong> Within 2 hours during business hours</p>
+                
+                <h3>Business Address</h3>
+                <p>TradePro Technologies Pvt Ltd<br>
+                123 Business Park<br>
+                Mumbai, Maharashtra 400001<br>
+                India</p>
+                
+                <h3>Compliance</h3>
+                <p><strong>Email:</strong> compliance@tradepro.com</p>
+                <p>For regulatory inquiries and compliance matters</p>
+                
+                <h3>Social Media</h3>
+                <p>Follow us for updates and trading tips:</p>
+                <p>Twitter: @TradePro_Official</p>
+                <p>Telegram: @TradePro_Support</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cancellation & Refunds Modal -->
+    <div id="refundModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('refundModal')">&times;</span>
+            <h2>Cancellation & Refunds</h2>
+            <div class="modal-body">
+                <h3>Trade Cancellation</h3>
+                <p>Binary options trades cannot be cancelled once placed. All trades are final and executed immediately.</p>
+                
+                <h3>Account Closure</h3>
+                <p>You may close your account at any time by contacting customer support. Remaining balance will be refunded within 7-10 business days.</p>
+                
+                <h3>Deposit Refunds</h3>
+                <p>Deposits can be refunded within 24 hours if no trades have been placed. A processing fee of 2% may apply.</p>
+                
+                <h3>Withdrawal Policy</h3>
+                <p>Minimum withdrawal: ₹5,700<br>
+                Processing time: 24-48 hours<br>
+                No fees for withdrawals above ₹10,000</p>
+                
+                <h3>Dispute Resolution</h3>
+                <p>Any disputes regarding trades or account issues will be resolved within 5-7 business days through our internal review process.</p>
+                
+                <h3>Refund Process</h3>
+                <p>Approved refunds will be processed to the original payment method within 7-14 business days.</p>
+                
+                <h3>Contact for Refunds</h3>
+                <p>Email: refunds@tradepro.com<br>
+                Include account details and reason for refund request.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/auth.js"></script>
+    <script>
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

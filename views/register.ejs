@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradePro - Register</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo">
+                <h1>TradePro</h1>
+                <p>Create Your Account</p>
+            </div>
+            
+            <form class="login-form" id="registerForm">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="Choose Username" required>
+                    <span class="availability" id="usernameStatus"></span>
+                </div>
+                
+                <div class="input-group">
+                    <input type="email" id="email" placeholder="Email Address" required>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                </div>
+                
+                <button type="submit" class="login-btn">Create Account</button>
+            </form>
+            
+            <div class="register-link">
+                <p>Already have an account? <a href="/">Login here</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/auth.js"></script>
+</body>
+</html>

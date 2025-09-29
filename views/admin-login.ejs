@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - TradePro</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo">
+                <h1>🔐 Admin Panel</h1>
+                <p>TradePro Administration</p>
+            </div>
+            
+            <form id="adminLoginForm" onsubmit="adminLogin(event)">
+                <div class="input-group">
+                    <input type="text" id="adminUsername" placeholder="Admin Username" required>
+                </div>
+                
+                <div class="input-group">
+                    <input type="password" id="adminPassword" placeholder="Admin Password" required>
+                </div>
+                
+                <button type="submit" class="login-btn">Login to Admin Panel</button>
+            </form>
+            
+            <div id="loginError" style="color: #ff4444; text-align: center; margin-top: 15px; display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        function adminLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (username === 'aryan' && password === 'aryan123') {
+                // Store admin session
+                localStorage.setItem('admin_authenticated', 'true');
+                localStorage.setItem('admin_username', username);
+                window.location.href = '/admin';
+            } else {
+                errorDiv.textContent = 'Invalid username or password';
+                errorDiv.style.display = 'block';
+                
+                // Clear error after 3 seconds
+                setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // Check if already logged in
+        if (localStorage.getItem('admin_authenticated') === 'true') {
+            window.location.href = '/admin';
+        }
+    </script>
+</body>
+</html>

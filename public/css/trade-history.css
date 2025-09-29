@@ -1,0 +1,130 @@
+/* Trade History Styles */
+.trade-history-filter {
+    margin-bottom: 20px;
+}
+
+.trade-history-filter select {
+    padding: 10px;
+    border: 1px solid #2a3441;
+    border-radius: 6px;
+    background: #0f1419;
+    color: #fff;
+    font-size: 14px;
+}
+
+.trade-history-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.trade-history-item {
+    background: #0f1419;
+    border: 1px solid #2a3441;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.trade-history-item:hover {
+    background: #1a1f2e;
+    border-color: #00d4ff;
+}
+
+.trade-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.trade-asset {
+    font-weight: bold;
+    color: #00d4ff;
+    font-size: 16px;
+}
+
+.trade-result {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.trade-result.won {
+    background: #00ff88;
+    color: black;
+}
+
+.trade-result.lost {
+    background: #ff4444;
+    color: white;
+}
+
+.trade-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.trade-direction {
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.trade-direction.up {
+    background: rgba(0, 255, 136, 0.2);
+    color: #00ff88;
+}
+
+.trade-direction.down {
+    background: rgba(255, 68, 68, 0.2);
+    color: #ff4444;
+}
+
+.trade-amount {
+    color: #ccc;
+    font-weight: bold;
+}
+
+.trade-payout {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.trade-payout.positive {
+    color: #00ff88;
+}
+
+.trade-payout.negative {
+    color: #ff4444;
+}
+
+.trade-time {
+    color: #888;
+    font-size: 12px;
+    text-align: right;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .trade-history-item {
+        padding: 12px;
+    }
+    
+    .trade-asset {
+        font-size: 14px;
+    }
+    
+    .trade-details {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .trade-payout {
+        font-size: 14px;
+    }
+}

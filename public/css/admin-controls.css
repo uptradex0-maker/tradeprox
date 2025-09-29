@@ -1,0 +1,230 @@
+/* Trade Control Styles */
+.trade-control {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.control-btn {
+    padding: 15px 25px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+    text-align: center;
+}
+
+.loss-btn {
+    background: linear-gradient(135deg, #ff4444, #cc3333);
+    color: white;
+    border: 2px solid transparent;
+}
+
+.profit-btn {
+    background: linear-gradient(135deg, #00ff88, #00cc6a);
+    color: black;
+    border: 2px solid transparent;
+}
+
+.neutral-btn {
+    background: linear-gradient(135deg, #00d4ff, #5200ff);
+    color: white;
+    border: 2px solid transparent;
+}
+
+.control-btn.active {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border-color: #fff;
+}
+
+.control-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.control-info {
+    text-align: center;
+    background: #0f1419;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #2a3441;
+}
+
+.control-info p {
+    margin: 5px 0;
+    color: #ccc;
+}
+
+.control-info span {
+    color: #00d4ff;
+    font-weight: bold;
+}
+
+/* Price Control Styles */
+.price-control {
+    background: #0f1419;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #2a3441;
+}
+
+.price-item {
+    display: flex;
+    gap: 15px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.price-item label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: #ccc;
+    font-weight: bold;
+}
+
+.price-item input,
+.price-item select {
+    padding: 8px 12px;
+    border: 1px solid #2a3441;
+    border-radius: 6px;
+    background: #1a1f2e;
+    color: #fff;
+    font-size: 14px;
+}
+
+.price-item button {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #ff6b35, #e55a2b);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.price-item button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+}
+
+/* System Settings Styles */
+.system-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.setting-item {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+    background: #0f1419;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #2a3441;
+}
+
+.setting-item label {
+    color: #ccc;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.setting-item input,
+.setting-item select {
+    padding: 8px 12px;
+    border: 1px solid #2a3441;
+    border-radius: 6px;
+    background: #1a1f2e;
+    color: #fff;
+    font-size: 14px;
+}
+
+.setting-item button {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #00d4ff, #5200ff);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.setting-item button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+}
+
+/* Recent Trades Table */
+.recent-trades {
+    background: #0f1419;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #2a3441;
+}
+
+#tradesTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#tradesTable th {
+    background: #1a1f2e;
+    color: #00d4ff;
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 2px solid #2a3441;
+}
+
+#tradesTable td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #2a3441;
+    color: #ccc;
+}
+
+#tradesTable tr:hover {
+    background: #1a1f2e;
+}
+
+#tradesTable .up {
+    color: #00ff88;
+    font-weight: bold;
+}
+
+#tradesTable .down {
+    color: #ff4444;
+    font-weight: bold;
+}
+
+#tradesTable .won {
+    color: #00ff88;
+    font-weight: bold;
+}
+
+#tradesTable .lost {
+    color: #ff4444;
+    font-weight: bold;
+}
+
+#tradesTable .pending {
+    color: #ff9800;
+    font-weight: bold;
+}
