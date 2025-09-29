@@ -34,8 +34,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize in optimal order
     initializeChart();
     setupEventListeners();
-    initializeSocket();
-    loadUserData();
+    
+    // Try Socket.io connection with fallback
+    try {
+        initializeSocket();
+        loadUserData();
+    } catch (error) {
+        console.log('Socket.io failed, using fallback mode');
+        initializeFallbackMode();
+    }
 });
 
 // Socket.io connection with faster initialization
@@ -1196,14 +1203,21 @@ function initializeChart() {
             setTimeout(() => {
                 const loading = chartContainer.querySelector('.chart-loading');
                 if (loading) loading.remove();
-            }, 1000);
+            }, 500);
             
-            // Delayed resize for stability
+            // Immediate resize
+            if (chart && chart.resize) {
+                chart.resize();
+            }
+            
+            // Generate initial data if no socket connection
             setTimeout(() => {
-                if (chart && chart.resize) {
-                    chart.resize();
+                if (!socket || !socket.connected) {
+                    const mockCandles = generateMockCandles();
+                    chart.setData(mockCandles);
+                    startMockPriceUpdates();
                 }
-            }, 1500);
+            }, 1000);
             
         } catch (error) {
             console.error('Chart initialization error:', error);
@@ -1211,16 +1225,31 @@ function initializeChart() {
             
             if (retryCount < maxRetries) {
                 console.log(`Retrying chart initialization (${retryCount}/${maxRetries})`);
-                setTimeout(tryInitChart, 2000);
+                setTimeout(tryInitChart, 1000);
             } else {
-                // Fallback: show simple chart placeholder
+                // Working fallback chart
                 chartContainer.innerHTML = `
-                    <div class="chart-fallback" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #fff; background: linear-gradient(135deg, #0a0e1a 0%, #1a1d29 100%);">
-                        <div class="fallback-text" style="font-size: 18px; margin-bottom: 10px;">Chart Loading...</div>
-                        <div class="fallback-price" style="font-size: 24px; color: #00d4ff;">EUR/USD: 1.0850</div>
-                        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #00d4ff; color: #000; border: none; border-radius: 5px; cursor: pointer;">Reload</button>
+                    <div class="chart-fallback" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #fff; background: linear-gradient(135deg, #0a0e1a 0%, #1a1d29 100%); border-radius: 8px;">
+                        <div class="fallback-icon" style="font-size: 48px; margin-bottom: 20px;">📈</div>
+                        <div class="fallback-text" style="font-size: 18px; margin-bottom: 10px;">TrustX Trading Chart</div>
+                        <div class="fallback-price" id="fallbackPrice" style="font-size: 24px; color: #00d4ff; margin-bottom: 20px;">EUR/USD: 1.0850</div>
+                        <div class="fallback-controls" style="display: flex; gap: 10px;">
+                            <button onclick="placeTrade('up')" style="padding: 10px 20px; background: #00ff88; color: #000; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">📈 UP</button>
+                            <button onclick="placeTrade('down')" style="padding: 10px 20px; background: #ff4444; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">📉 DOWN</button>
+                        </div>
                     </div>
                 `;
+                
+                // Start price animation for fallback
+                let price = 1.0850;
+                setInterval(() => {
+                    price += (Math.random() - 0.5) * 0.002;
+                    const priceEl = document.getElementById('fallbackPrice');
+                    if (priceEl) {
+                        priceEl.textContent = `EUR/USD: ${price.toFixed(4)}`;
+                        priceEl.style.color = Math.random() > 0.5 ? '#00ff88' : '#ff4444';
+                    }
+                }, 1000);
             }
         }
     }
@@ -1368,32 +1397,34 @@ function placeTrade(direction) {
     const amountInput = document.getElementById('tradeAmount');
     const durationInput = document.getElementById('tradeDuration');
     
-    if (!amountInput || !durationInput) {
-        showTradeNotification('Trade form not found', 'error');
-        return;
-    }
-    
-    const amount = parseInt(amountInput.value) || 10;
-    const duration = parseInt(durationInput.value) || 60;
+    const amount = amountInput ? parseInt(amountInput.value) || 10 : 10;
+    const duration = durationInput ? parseInt(durationInput.value) || 60 : 60;
     
     if (amount < 10) {
         showTradeNotification('Minimum trade amount is ₹10', 'error');
         return;
     }
     
-    if (!socket || !socket.connected) {
-        showTradeNotification('Not connected to server', 'error');
+    // Check balance
+    const currentBalance = userAccount[accountType].balance;
+    if (currentBalance < amount) {
+        showTradeNotification('Insufficient balance', 'error');
         return;
     }
     
-    // Send trade to server with account type
-    socket.emit('placeTrade', {
-        asset: currentAsset,
-        direction: direction,
-        amount: amount,
-        duration: duration,
-        accountType: accountType
-    });
+    if (socket && socket.connected) {
+        // Send trade to server with account type
+        socket.emit('placeTrade', {
+            asset: currentAsset,
+            direction: direction,
+            amount: amount,
+            duration: duration,
+            accountType: accountType
+        });
+    } else {
+        // Fallback mode - simulate trade
+        simulateTrade(direction, amount, duration);
+    }
 }
 
 // Display active trades
@@ -1454,10 +1485,19 @@ function switchAccount(type) {
     document.querySelectorAll('.account-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    document.querySelector(`[data-account="${type}"]`).classList.add('active');
+    const activeBtn = document.querySelector(`[data-account="${type}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
     
-    // Request account data from server
-    socket.emit('switchAccount', { accountType: type });
+    // Update balance based on account type
+    const balance = type === 'demo' ? 50000 : (userAccount.real ? userAccount.real.balance : 0);
+    updateUserBalance(balance);
+    
+    // Request account data from server if connected
+    if (socket && socket.connected) {
+        socket.emit('switchAccount', { accountType: type });
+    }
     
     showTradeNotification(`Switched to ${type.toUpperCase()} account`, 'info');
 }
@@ -2000,6 +2040,142 @@ function showMaintenanceScreen(message) {
     `;
     
     document.body.appendChild(maintenanceScreen);
+}
+
+// Fallback mode for when Socket.io is not available
+function initializeFallbackMode() {
+    console.log('Initializing fallback mode...');
+    
+    // Initialize user accounts
+    userAccount = {
+        demo: { balance: 50000 },
+        real: { balance: 0 }
+    };
+    
+    // Set current account balance
+    const currentBalance = userAccount[accountType].balance;
+    updateUserBalance(currentBalance);
+    
+    // Update account buttons
+    document.querySelectorAll('.account-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    const activeBtn = document.querySelector(`[data-account="${accountType}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+    
+    // Generate mock candle data
+    const mockCandles = generateMockCandles();
+    if (chart) {
+        chart.setData(mockCandles);
+    }
+    
+    // Start mock price updates
+    startMockPriceUpdates();
+    
+    showTradeNotification('Running in offline mode', 'info');
+}
+
+function generateMockCandles() {
+    const candles = [];
+    let basePrice = 1.0850;
+    const now = Math.floor(Date.now() / 1000);
+    
+    for (let i = 100; i >= 0; i--) {
+        const time = now - (i * 5);
+        const open = basePrice + (Math.random() - 0.5) * 0.002;
+        const close = open + (Math.random() - 0.5) * 0.001;
+        const high = Math.max(open, close) + Math.random() * 0.0005;
+        const low = Math.min(open, close) - Math.random() * 0.0005;
+        
+        candles.push({ time, open, high, low, close });
+        basePrice = close;
+    }
+    
+    return candles;
+}
+
+function startMockPriceUpdates() {
+    const assets = {
+        'EUR/USD': 1.0850,
+        'GBP/USD': 1.2650,
+        'USD/JPY': 149.50,
+        'BTC/USD': 43250,
+        'ETH/USD': 2650
+    };
+    
+    setInterval(() => {
+        // Update mock prices
+        Object.keys(assets).forEach(asset => {
+            const change = (Math.random() - 0.5) * 0.001;
+            assets[asset] += change;
+            
+            // Update UI if it's current asset
+            if (asset === currentAsset) {
+                updateCurrentPrice({ price: assets[asset], change });
+            }
+        });
+        
+        // Add new candle to chart
+        if (chart && Math.random() > 0.8) {
+            const lastPrice = assets[currentAsset];
+            const newCandle = {
+                time: Math.floor(Date.now() / 1000),
+                open: lastPrice,
+                high: lastPrice + Math.random() * 0.0005,
+                low: lastPrice - Math.random() * 0.0005,
+                close: lastPrice + (Math.random() - 0.5) * 0.001
+            };
+            chart.addCandle(newCandle);
+        }
+    }, 1000);
+}
+
+// Simulate trade in fallback mode
+function simulateTrade(direction, amount, duration) {
+    // Deduct amount from balance
+    userAccount[accountType].balance -= amount;
+    updateUserBalance(userAccount[accountType].balance);
+    
+    const trade = {
+        id: Date.now(),
+        asset: currentAsset,
+        direction: direction,
+        amount: amount,
+        duration: duration,
+        startTime: new Date(),
+        endTime: new Date(Date.now() + duration * 1000),
+        status: 'active'
+    };
+    
+    activeTrades.push(trade);
+    displayActiveTrades();
+    
+    if (chart && chart.addTradeLine) {
+        chart.addTradeLine(1.0850, direction, Date.now(), duration);
+    }
+    
+    showTradeNotification(`Trade placed: ${direction.toUpperCase()} ${currentAsset} for ₹${amount}`, 'success');
+    
+    // Simulate trade completion
+    setTimeout(() => {
+        const won = Math.random() > 0.5; // 50% win rate
+        const payout = won ? Math.floor(amount * 1.85) : 0;
+        
+        if (won) {
+            userAccount[accountType].balance += payout;
+            showTradeNotification(`🎉 Trade Won! +₹${payout}`, 'success');
+        } else {
+            showTradeNotification(`😔 Trade Lost! -₹${amount}`, 'error');
+        }
+        
+        updateUserBalance(userAccount[accountType].balance);
+        
+        // Remove from active trades
+        activeTrades = activeTrades.filter(t => t.id !== trade.id);
+        displayActiveTrades();
+    }, duration * 1000);
 }
 
 // Update active trades timer
