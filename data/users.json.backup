@@ -458,5 +458,25 @@
         "totalLosses": 0
       }
     }
+  },
+  "user_1759137865766_ww22pnqd9": {
+    "id": "user_1759137865766_ww22pnqd9",
+    "currentAccount": "real",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
   }
 }
