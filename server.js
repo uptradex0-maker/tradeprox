@@ -404,7 +404,7 @@ app.get('/admin/requests', (req, res) => {
   res.json({ success: true, requests: depositRequests });
 });
 
-// Approve deposit request
+// Approve deposit request - FIXED
 app.post('/admin/approve', (req, res) => {
   const { requestId } = req.body;
   
@@ -414,30 +414,49 @@ app.post('/admin/approve', (req, res) => {
   }
   
   console.log('Approving deposit for user:', request.userId, 'amount:', request.amount);
+  console.log('All users in system:', Array.from(users.keys()));
   
-  // Find user and add balance
+  // Find user or create if not exists
   let found = false;
   let targetUserId = null;
   
+  // First try to find existing user
   users.forEach((user, id) => {
     const shortId = id.split('_')[1] || id.substring(0, 8);
     if (shortId === request.userId || id === request.userId) {
-      console.log('Found user:', id);
-      console.log('Current real balance:', user.accounts.real.balance);
-      
+      console.log('Found existing user:', id);
       user.accounts.real.balance += request.amount;
-      
-      console.log('New real balance:', user.accounts.real.balance);
-      
       targetUserId = id;
       found = true;
     }
   });
   
+  // If user not found, create new user with this deposit
+  if (!found) {
+    console.log('User not found, creating new user for:', request.userId);
+    
+    // Create full user ID from short ID
+    targetUserId = 'user_' + Date.now() + '_' + request.userId;
+    
+    // Create new user
+    const newUser = {
+      accounts: {
+        demo: { balance: 50000, totalTrades: 0, totalWins: 0, totalLosses: 0, totalDeposits: 0, totalWithdrawals: 0 },
+        real: { balance: request.amount, totalTrades: 0, totalWins: 0, totalLosses: 0, totalDeposits: request.amount, totalWithdrawals: 0 }
+      },
+      currentAccount: 'demo',
+      joinedAt: new Date()
+    };
+    
+    users.set(targetUserId, newUser);
+    console.log('Created new user:', targetUserId, 'with balance:', request.amount);
+    found = true;
+  }
+  
   if (found) {
     request.status = 'approved';
     
-    // Notify ALL connected sockets for this user
+    // Notify user if online
     const targetUser = users.get(targetUserId);
     io.sockets.sockets.forEach(socket => {
       if (socket.userId === targetUserId) {
@@ -449,11 +468,11 @@ app.post('/admin/approve', (req, res) => {
       }
     });
     
-    console.log('✅ Deposit approved successfully');
+    console.log('✅ Deposit approved successfully for user:', targetUserId);
     res.json({ success: true });
   } else {
-    console.log('❌ User not found for deposit approval');
-    res.json({ success: false, message: 'User not found' });
+    console.log('❌ Failed to process deposit');
+    res.json({ success: false, message: 'Failed to process deposit' });
   }
 });
 

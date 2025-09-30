@@ -260,6 +260,61 @@
     }
 }
 
+/* Mobile Login/Register Pages */
+@media (max-width: 768px) {
+    .auth-container {
+        padding: 20px !important;
+        margin: 0 !important;
+        min-height: 100vh !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .auth-form {
+        width: 100% !important;
+        max-width: 350px !important;
+        padding: 30px 20px !important;
+        margin: 0 !important;
+    }
+    
+    .auth-form h1 {
+        font-size: 24px !important;
+        margin-bottom: 20px !important;
+        text-align: center !important;
+    }
+    
+    .form-group {
+        margin-bottom: 20px !important;
+    }
+    
+    .form-group input {
+        width: 100% !important;
+        padding: 15px !important;
+        font-size: 16px !important;
+        border-radius: 8px !important;
+    }
+    
+    .auth-btn {
+        width: 100% !important;
+        padding: 15px !important;
+        font-size: 16px !important;
+        border-radius: 8px !important;
+        margin-top: 10px !important;
+    }
+    
+    .auth-links {
+        text-align: center !important;
+        margin-top: 20px !important;
+    }
+    
+    .auth-links a {
+        font-size: 14px !important;
+        display: block !important;
+        margin-top: 10px !important;
+    }
+}
+
 /* Desktop - hide mobile */
 @media (min-width: 769px) {
     .mobile-container {
