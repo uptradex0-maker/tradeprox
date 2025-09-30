@@ -1,474 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrustX - Trading Dashboard</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/admin.css">
-    <link rel="stylesheet" href="/css/mobile.css">
-    <link rel="stylesheet" href="/css/mobile-redesign.css">
-    <link rel="stylesheet" href="/css/chart-loading.css">
-    <link rel="stylesheet" href="/css/trade-history.css">
-    <link rel="stylesheet" href="/css/maintenance.css">
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TradeXpro - Trading Dashboard</title>
+<link rel="stylesheet" href="/css/dashboard.css" />
+<link rel="stylesheet" href="/css/mobile.css" />
 </head>
-<body class="dashboard-body">
-    <div class="dashboard-container">
-        <!-- Header -->
-        <header class="dashboard-header">
-            <div class="logo">TrustX</div>
-            <div class="user-info">
-                <div class="profile-menu" style="position: relative;">
-                    <button class="profile-btn" onclick="toggleProfileMenu()">👤</button>
-                    <div class="profile-dropdown" id="profileDropdown" style="position: absolute; right: 0; top: 100%; left: auto;">
-                        <a href="#" onclick="showSupportModal()">🎧 Support</a>
-                        <a href="#" onclick="showTransactionsModal()">💳 Transactions</a>
-                        <a href="#" onclick="showTradeHistoryModal()">📈 Trade History</a>
-                        <a href="#" onclick="showProfileModal()">⚙️ Profile</a>
-                        <a href="#" onclick="logout()">🚪 Logout</a>
-                    </div>
-                </div>
-                <div class="account-switcher">
-                    <button class="account-btn active" data-account="demo" onclick="switchAccount('demo')">DEMO</button>
-                    <button class="account-btn" data-account="real" onclick="switchAccount('real')">REAL</button>
-                </div>
-                <span class="balance">
-                    <span id="accountType" class="account-type demo">DEMO</span> Balance: ₹<span id="userBalance">50,000</span>
-                </span>
-                <button class="deposit-btn" onclick="window.location.href='/deposit'">Deposit</button>
-                <button class="withdraw-btn" onclick="showWithdrawModal()">Withdraw</button>
-            </div>
-        </header>
-
-        <div class="main-content">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <div class="assets-list">
-                    <h3>🔥 Live Assets</h3>
-                    
-                    <div class="asset-category">
-                        <h4>💱 Forex (OTC)</h4>
-                        <div class="asset-item active" data-asset="EUR/USD">
-                            <div class="asset-info">
-                                <span class="asset-name">EUR/USD <span class="otc-badge">[O]</span></span>
-                                <span class="asset-price" id="price-EUR/USD">1.0850</span>
-                            </div>
-                            <span class="asset-change positive" id="change-EUR/USD">+0.0012</span>
-                        </div>
-                        <div class="asset-item" data-asset="GBP/USD">
-                            <div class="asset-info">
-                                <span class="asset-name">GBP/USD <span class="otc-badge">[O]</span></span>
-                                <span class="asset-price" id="price-GBP/USD">1.2650</span>
-                            </div>
-                            <span class="asset-change negative" id="change-GBP/USD">-0.0025</span>
-                        </div>
-                        <div class="asset-item" data-asset="USD/JPY">
-                            <div class="asset-info">
-                                <span class="asset-name">USD/JPY <span class="otc-badge">[O]</span></span>
-                                <span class="asset-price" id="price-USD/JPY">149.50</span>
-                            </div>
-                            <span class="asset-change positive" id="change-USD/JPY">+0.45</span>
-                        </div>
-                        <div class="asset-item" data-asset="AUD/USD">
-                            <div class="asset-info">
-                                <span class="asset-name">AUD/USD <span class="otc-badge">[O]</span></span>
-                                <span class="asset-price" id="price-AUD/USD">0.6580</span>
-                            </div>
-                            <span class="asset-change positive" id="change-AUD/USD">+0.0018</span>
-                        </div>
-                        <div class="asset-item" data-asset="USD/CAD">
-                            <div class="asset-info">
-                                <span class="asset-name">USD/CAD <span class="otc-badge">[O]</span></span>
-                                <span class="asset-price" id="price-USD/CAD">1.3650</span>
-                            </div>
-                            <span class="asset-change negative" id="change-USD/CAD">-0.0032</span>
-                        </div>
-                    </div>
-                    
-                    <div class="asset-category">
-                        <h4>₿ Crypto (OTC)</h4>
-                        <div class="asset-item" data-asset="BTC/USD">
-                            <div class="asset-info">
-                                <span class="asset-name">BTC/USD <span class="otc-badge">[O]</span></span>
-                                <span class="asset-price" id="price-BTC/USD">43250</span>
-                            </div>
-                            <span class="asset-change positive" id="change-BTC/USD">+125.50</span>
-                        </div>
-                        <div class="asset-item" data-asset="ETH/USD">
-                            <div class="asset-info">
-                                <span class="asset-name">ETH/USD <span class="otc-badge">[O]</span></span>
-                                <span class="asset-price" id="price-ETH/USD">2650</span>
-                            </div>
-                            <span class="asset-change negative" id="change-ETH/USD">-15.25</span>
-                        </div>
-                        <div class="asset-item" data-asset="LTC/USD">
-                            <div class="asset-info">
-                                <span class="asset-name">LTC/USD <span class="otc-badge">[O]</span></span>
-                                <span class="asset-price" id="price-LTC/USD">72.50</span>
-                            </div>
-                            <span class="asset-change positive" id="change-LTC/USD">+2.15</span>
-                        </div>
-                        <div class="asset-item" data-asset="XRP/USD">
-                            <div class="asset-info">
-                                <span class="asset-name">XRP/USD <span class="otc-badge">[O]</span></span>
-                                <span class="asset-price" id="price-XRP/USD">0.6250</span>
-                            </div>
-                            <span class="asset-change negative" id="change-XRP/USD">-0.0125</span>
-                        </div>
-                    </div>
-                    
-                    <div class="asset-category">
-                        <h4>📈 Indices (OTC)</h4>
-                        <div class="asset-item" data-asset="US30">
-                            <div class="asset-info">
-                                <span class="asset-name">US30 <span class="otc-badge">[O]</span></span>
-                                <span class="asset-price" id="price-US30">37850</span>
-                            </div>
-                            <span class="asset-change positive" id="change-US30">+125.30</span>
-                        </div>
-                        <div class="asset-item" data-asset="SPX500">
-                            <div class="asset-info">
-                                <span class="asset-name">SPX500 <span class="otc-badge">[O]</span></span>
-                                <span class="asset-price" id="price-SPX500">4785</span>
-                            </div>
-                            <span class="asset-change negative" id="change-SPX500">-12.45</span>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- Chart Area -->
-            <main class="chart-area">
-                <div class="chart-header" style="display: none;"></div>
-                
-                <div class="chart-container">
-                    <!-- Mobile Asset Selector -->
-                    <div class="mobile-asset-selector" id="mobileAssetSelector" onclick="toggleMobileAssetDropdown()">
-                        <div class="current-asset">
-                            <span id="mobileCurrentAsset">EUR/USD</span>
-                            <span class="dropdown-arrow">▼</span>
-                        </div>
-                        <div class="mobile-asset-dropdown" id="mobileAssetDropdown">
-                            <div class="mobile-asset-category">
-                                <h4>💱 Forex</h4>
-                                <div class="mobile-asset-option active" data-asset="EUR/USD">
-                                    <span class="mobile-asset-name">EUR/USD</span>
-                                    <span class="mobile-asset-price" id="mobile-price-EUR/USD">1.0850</span>
-                                </div>
-                                <div class="mobile-asset-option" data-asset="GBP/USD">
-                                    <span class="mobile-asset-name">GBP/USD</span>
-                                    <span class="mobile-asset-price" id="mobile-price-GBP/USD">1.2650</span>
-                                </div>
-                                <div class="mobile-asset-option" data-asset="USD/JPY">
-                                    <span class="mobile-asset-name">USD/JPY</span>
-                                    <span class="mobile-asset-price" id="mobile-price-USD/JPY">149.50</span>
-                                </div>
-                            </div>
-                            <div class="mobile-asset-category">
-                                <h4>₿ Crypto</h4>
-                                <div class="mobile-asset-option" data-asset="BTC/USD">
-                                    <span class="mobile-asset-name">BTC/USD</span>
-                                    <span class="mobile-asset-price" id="mobile-price-BTC/USD">43250</span>
-                                </div>
-                                <div class="mobile-asset-option" data-asset="ETH/USD">
-                                    <span class="mobile-asset-name">ETH/USD</span>
-                                    <span class="mobile-asset-price" id="mobile-price-ETH/USD">2650</span>
-                                </div>
-                            </div>
-                            <div class="mobile-asset-category">
-                                <h4>📈 Indices</h4>
-                                <div class="mobile-asset-option" data-asset="US30">
-                                    <span class="mobile-asset-name">US30</span>
-                                    <span class="mobile-asset-price" id="mobile-price-US30">37850</span>
-                                </div>
-                                <div class="mobile-asset-option" data-asset="SPX500">
-                                    <span class="mobile-asset-name">SPX500</span>
-                                    <span class="mobile-asset-price" id="mobile-price-SPX500">4785</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="tradingChart">
-                        <div class="chart-loading">
-                            <div class="loading-spinner"></div>
-                            <div class="loading-text">Loading Chart...</div>
-                        </div>
-                    </div>
-                    <div class="chart-overlay">
-                        <div class="price-info">
-                            <div class="current-price" id="currentPrice">1.0850</div>
-                            <div class="price-change" id="priceChange">+0.0012 (+0.11%)</div>
-                        </div>
-                        <div class="price-direction" id="priceDirection">📈</div>
-                    </div>
-                    <div class="chart-controls">
-                        <button class="chart-control-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
-                        <button class="chart-control-btn" onclick="resetChart()" title="Reset Zoom">🔄</button>
-                        <button class="chart-control-btn" onclick="toggleChartType()" title="Chart Type">📊</button>
-                    </div>
-                </div>
-
-            </main>
-
-            <!-- Trading Panel -->
-            <aside class="trading-panel">
-                <div class="trade-controls">
-                    <div class="trade-inputs">
-                        <div class="trade-amount">
-                            <label>Amount (₹)</label>
-                            <input type="number" id="tradeAmount" value="100" min="10">
-                        </div>
-                        
-                        <div class="trade-time">
-                            <label>Duration</label>
-                            <select id="tradeDuration">
-                                <option value="5">5s</option>
-                                <option value="10">10s</option>
-                                <option value="15">15s</option>
-                                <option value="30">30s</option>
-                                <option value="60">1m</option>
-                                <option value="300">5m</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="trade-buttons">
-                        <button class="trade-btn up-btn" onclick="placeTrade('up')">
-                            <span>UP</span>
-                            <span class="payout">85%</span>
-                        </button>
-                        <button class="trade-btn down-btn" onclick="placeTrade('down')">
-                            <span>DOWN</span>
-                            <span class="payout">85%</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="active-trades">
-                    <h3>Active Trades</h3>
-                    <div id="activeTradesList">
-                        <!-- Active trades will be displayed here -->
-                    </div>
-                </div>
-            </aside>
-        </div>
+<body>
+<div id="app">
+  <aside class="sidebar">
+    <div class="logo">TradeXpro</div>
+    <nav class="nav-menu">
+      <ul>
+        <li class="active"><a href="#"><span class="icon">📈</span> Trading</a></li>
+        <li><a href="#"><span class="icon">💰</span> Finance</a></li>
+        <li><a href="#"><span class="icon">👤</span> Profile</a></li>
+        <li><a href="#"><span class="icon">🛒</span> Market</a></li>
+        <li><a href="#"><span class="icon">🏆</span> Achievements</a></li>
+        <li><a href="#"><span class="icon">🎯</span> Tournaments</a></li>
+        <li><a href="#"><span class="icon">💬</span> Chat</a></li>
+        <li><a href="#"><span class="icon">❓</span> Help</a></li>
+      </ul>
+    </nav>
+    <div class="promo">
+      <button class="promo-btn">PROMO</button>
+      <button class="friends-btn">POCKET FRIENDS</button>
     </div>
+  </aside>
 
-    <!-- Deposit Modal -->
-    <div id="depositModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('depositModal')">&times;</span>
-            <h2>Deposit Funds</h2>
-            <p>Minimum deposit: ₹2,720</p>
-            <input type="number" id="depositAmount" placeholder="Enter amount" min="2720">
-            <button onclick="processDeposit()">Deposit via Cashfree</button>
+  <main class="main-content">
+    <header class="top-bar">
+      <div class="asset-selector">
+        <select id="assetSelect">
+          <option>AED/CNY OTC</option>
+          <option>EUR/USD</option>
+          <option>BTC/USD</option>
+        </select>
+        <button class="chart-type-btn">📊</button>
+        <button class="settings-btn">⚙️</button>
+        <button class="tools-btn">🖌️</button>
+        <button class="more-btn">...</button>
+        <button class="layout-btn">☰</button>
+      </div>
+      <div class="account-info">
+        <span>QT Real USD</span>
+        <select id="accountSelect">
+          <option>USD</option>
+          <option>EUR</option>
+        </select>
+        <button class="topup-btn">TOP UP</button>
+        <div class="user-avatar"></div>
+      </div>
+    </header>
+
+    <section class="chart-section">
+      <div class="chart-header">
+        <div class="time-utc">16:06:31 UTC+5:30</div>
+        <div class="price-display">2.00152</div>
+      </div>
+      <div id="chartArea" class="chart-area">
+        <canvas id="candleChart"></canvas>
+      </div>
+    </section>
+
+    <aside class="trade-panel">
+      <div class="expiration-time">Expiration time 16:07:31</div>
+      <div class="trade-controls">
+        <label for="tradeTime">Time</label>
+        <input type="text" id="tradeTime" value="00:01:00" readonly />
+        <button class="time-picker-btn">⏰</button>
+
+        <label for="tradeAmount">Amount</label>
+        <input type="number" id="tradeAmount" value="1" min="1" />
+        <button class="currency-btn">$</button>
+
+        <div class="payout-info">
+          <div class="percent">+92%</div>
+          <div class="amount">+$1.92</div>
         </div>
-    </div>
 
-    <!-- Withdraw Modal -->
-    <div id="withdrawModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('withdrawModal')">&times;</span>
-            <h2>💸 Withdraw Funds</h2>
-            <p>Minimum withdrawal: ₹5,700</p>
-            <div class="withdraw-form">
-                <input type="number" id="withdrawAmount" placeholder="Enter amount" min="5700" required>
-                <input type="text" id="bankName" placeholder="Bank Name" required>
-                <input type="text" id="accountNumber" placeholder="Account Number" required>
-                <input type="text" id="ifscCode" placeholder="IFSC Code" required>
-                <input type="text" id="accountHolder" placeholder="Account Holder Name" required>
-                <button onclick="processWithdraw()">Request Withdrawal</button>
-            </div>
-        </div>
-    </div>
+        <button class="buy-btn">BUY</button>
+        <button class="sell-btn">SELL</button>
+      </div>
+    </aside>
+  </main>
 
-    <!-- Support Modal -->
-    <div id="supportModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('supportModal')">&times;</span>
-            <h2>🎧 Support Ticket</h2>
-            <form onsubmit="submitTicket(event)">
-                <select id="ticketCategory" required>
-                    <option value="">Select Issue Type</option>
-                    <option value="deposit">Deposit Issue</option>
-                    <option value="withdrawal">Withdrawal Issue</option>
-                    <option value="trading">Trading Problem</option>
-                    <option value="technical">Technical Issue</option>
-                    <option value="account">Account Problem</option>
-                    <option value="other">Other</option>
-                </select>
-                <input type="text" id="ticketSubject" placeholder="Subject" required>
-                <textarea id="ticketMessage" placeholder="Describe your issue..." rows="5" required></textarea>
-                <button type="submit">Submit Ticket</button>
-            </form>
-        </div>
-    </div>
+  <aside class="right-sidebar">
+    <ul class="right-menu">
+      <li><button>Trades</button></li>
+      <li><button>Signals</button></li>
+      <li><button>Social Trading</button></li>
+      <li><button>Express Trades</button></li>
+      <li><button>Pending Trades</button></li>
+      <li><button>Hotkeys</button></li>
+    </ul>
+  </aside>
+</div>
 
-    <!-- Profile Modal -->
-    <div id="profileModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('profileModal')">&times;</span>
-            <h2>⚙️ Profile Settings</h2>
-            <div class="profile-info">
-                <p><strong>Username:</strong> <span id="profileUsername">User123</span></p>
-                <p><strong>Account Type:</strong> <span id="profileAccountType">Demo</span></p>
-                <p><strong>Member Since:</strong> <span id="profileJoinDate">Jan 2024</span></p>
-                <p><strong>Total Trades:</strong> <span id="profileTotalTrades">0</span></p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Transactions Modal -->
-    <div id="transactionsModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('transactionsModal')">&times;</span>
-            <h2>💳 Transaction History</h2>
-            <div class="transactions-filter">
-                <select id="transactionFilter" onchange="filterTransactions()">
-                    <option value="all">All Transactions</option>
-                    <option value="deposit">Deposits</option>
-                    <option value="withdrawal">Withdrawals</option>
-                </select>
-            </div>
-            <div class="transactions-list" id="transactionsList">
-                <!-- Transactions will be populated here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Trade History Modal -->
-    <div id="tradeHistoryModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('tradeHistoryModal')">&times;</span>
-            <h2>📈 Trade History</h2>
-            <div class="trade-history-filter">
-                <select id="tradeHistoryFilter" onchange="filterTradeHistory()">
-                    <option value="all">All Trades</option>
-                    <option value="won">Won Trades</option>
-                    <option value="lost">Lost Trades</option>
-                </select>
-            </div>
-            <div class="trade-history-list" id="tradeHistoryList">
-                <!-- Trade history will be populated here -->
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Immediate chart container optimization
-        (function() {
-            const optimizeChart = () => {
-                const container = document.getElementById('tradingChart');
-                if (container) {
-                    container.style.display = 'block';
-                    container.style.width = '100%';
-                    container.style.height = '100%';
-                    container.style.minHeight = window.innerWidth <= 768 ? '280px' : '400px';
-                }
-            };
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', optimizeChart);
-            } else {
-                optimizeChart();
-            }
-        })();
-    </script>
-    <script src="/js/mobile-fixes.js"></script>
-    <script src="/js/dashboard.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="https://sdk.cashfree.com/js/v3/cashfree.js" async></script>
-    <script>
-        // Mobile Asset Selector Functions
-        function toggleMobileAssetDropdown() {
-            if (window.innerWidth <= 768) {
-                const dropdown = document.getElementById('mobileAssetDropdown');
-                const selector = document.getElementById('mobileAssetSelector');
-                
-                dropdown.classList.toggle('show');
-                selector.classList.toggle('open');
-            }
-        }
-        
-        // Mobile asset selection
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 768) {
-                if (event.target.closest('.mobile-asset-option')) {
-                    const option = event.target.closest('.mobile-asset-option');
-                    const asset = option.dataset.asset;
-                    
-                    // Update mobile selector
-                    document.getElementById('mobileCurrentAsset').textContent = asset;
-                    
-                    // Update active state
-                    document.querySelectorAll('.mobile-asset-option').forEach(opt => opt.classList.remove('active'));
-                    option.classList.add('active');
-                    
-                    // Update desktop selector and switch asset
-                    const currentAssetEl = document.getElementById('currentAsset');
-                    if (currentAssetEl) {
-                        currentAssetEl.textContent = asset;
-                    }
-                    
-                    const activeAsset = document.querySelector('.asset-item.active');
-                    if (activeAsset) {
-                        activeAsset.classList.remove('active');
-                    }
-                    
-                    const newActiveAsset = document.querySelector(`[data-asset="${asset}"]`);
-                    if (newActiveAsset) {
-                        newActiveAsset.classList.add('active');
-                    }
-                    
-                    // Switch chart asset - wait for dashboard.js to load
-                    setTimeout(() => {
-                        if (typeof window.switchAsset === 'function') {
-                            window.currentAsset = asset;
-                            window.switchAsset(asset);
-                        } else if (typeof switchAsset === 'function') {
-                            currentAsset = asset;
-                            switchAsset(asset);
-                        }
-                    }, 100);
-                    
-                    // Close dropdown
-                    toggleMobileAssetDropdown();
-                }
-                
-                // Close dropdown when clicking outside
-                if (!event.target.closest('.mobile-asset-selector')) {
-                    const dropdown = document.getElementById('mobileAssetDropdown');
-                    const selector = document.getElementById('mobileAssetSelector');
-                    dropdown.classList.remove('show');
-                    selector.classList.remove('open');
-                }
-            }
-        });
-        
-        // Update mobile asset prices
-        function updateMobileAssetPrices(assets) {
-            if (window.innerWidth <= 768) {
-                Object.keys(assets).forEach(asset => {
-                    const priceElement = document.getElementById(`mobile-price-${asset}`);
-                    if (priceElement) {
-                        const decimals = getAssetDecimals(asset);
-                        priceElement.textContent = assets[asset].price.toFixed(decimals);
-                    }
-                });
-            }
-        }
-        
-        // Override the original updateAssetPrices function
-        setTimeout(() => {
-            const originalUpdateAssetPrices = window.updateAssetPrices;
-            window.updateAssetPrices = function(assets) {
-                if (originalUpdateAssetPrices) {
-                    originalUpdateAssetPrices(assets);
-                }
-                updateMobileAssetPrices(assets);
-            };
-        }, 1000);
-    </script>
+<script src="/js/dashboard.js"></script>
+<script src="/js/mobile.js"></script>
 </body>
 </html>

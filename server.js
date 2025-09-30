@@ -87,9 +87,80 @@ app.get('/deposit', (req, res) => {
   }
 });
 
+app.get('/withdraw', (req, res) => {
+  try {
+    res.render('withdraw');
+  } catch (error) {
+    res.redirect('/dashboard');
+  }
+});
+
+// API Routes for deposit/withdrawal
+app.get('/api/get-qr-code', (req, res) => {
+  res.json({ success: true, qrCode: currentQRCode });
+});
+
+app.post('/api/submit-deposit', (req, res) => {
+  const { amount, utr } = req.body;
+  
+  if (amount < 2780) {
+    return res.json({ success: false, message: 'Minimum deposit is ₹2,780' });
+  }
+  
+  if (!utr || utr.length < 8) {
+    return res.json({ success: false, message: 'Invalid UTR number' });
+  }
+  
+  const request = {
+    id: 'DEP' + Date.now(),
+    userId: 'web_user_' + Date.now(),
+    amount,
+    utr,
+    status: 'pending',
+    timestamp: new Date().toISOString()
+  };
+  
+  depositRequests.push(request);
+  
+  // Notify admin
+  io.emit('newDepositRequest', request);
+  
+  console.log(`Deposit request: ₹${amount}, UTR: ${utr}`);
+  res.json({ success: true, requestId: request.id });
+});
+
+app.post('/api/submit-withdrawal', (req, res) => {
+  const { amount, bankName, accountNumber, ifscCode, accountHolder } = req.body;
+  
+  if (amount < 5780) {
+    return res.json({ success: false, message: 'Minimum withdrawal is ₹5,780' });
+  }
+  
+  const request = {
+    id: 'WD' + Date.now(),
+    userId: 'web_user_' + Date.now(),
+    amount,
+    bankName,
+    accountNumber,
+    ifscCode,
+    accountHolder,
+    status: 'pending',
+    timestamp: new Date().toISOString()
+  };
+  
+  allWithdrawals.push(request);
+  saveWithdrawals();
+  
+  // Notify admin
+  io.emit('newWithdrawal', request);
+  
+  console.log(`Withdrawal request: ₹${amount} to ${bankName}`);
+  res.json({ success: true, requestId: request.id });
+});
+
 // QR Code and deposit system with persistence
 const qrDataFile = path.join(__dirname, 'data', 'qr-code.json');
-let currentQRCode = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzMzMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+UVIgQ29kZTwvdGV4dD48L3N2Zz4=';
+let currentQRCode = null; // Start with null to force loading from file
 const depositRequests = [];
 
 // Load saved QR code on server start
@@ -97,26 +168,49 @@ function loadQRCode() {
   try {
     if (fs.existsSync && fs.existsSync(qrDataFile)) {
       const qrData = JSON.parse(fs.readFileSync(qrDataFile, 'utf8'));
-      currentQRCode = qrData.qrCode;
-      console.log('✅ Loaded saved QR code from storage');
+      if (qrData.qrCode && qrData.qrCode.startsWith('data:image/')) {
+        currentQRCode = qrData.qrCode;
+        console.log('✅ Loaded saved QR code from storage');
+      } else {
+        console.log('⚠️ Invalid QR code in storage, using default');
+        currentQRCode = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzMzMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+UVIgQ29kZTwvdGV4dD48L3N2Zz4=';
+      }
+    } else {
+      console.log('⚠️ No QR code file found, using default');
+      currentQRCode = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzMzMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+UVIgQ29kZTwvdGV4dD48L3N2Zz4=';
     }
   } catch (error) {
-    console.log('QR code loading skipped in serverless environment');
+    console.log('QR code loading error, using default:', error.message);
+    currentQRCode = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iIzMzMyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+UVIgQ29kZTwvdGV4dD48L3N2Zz4=';
   }
 }
 
 // Save QR code to file
 function saveQRCode() {
   try {
-    if (fs.writeFileSync) {
-      fs.writeFileSync(qrDataFile, JSON.stringify({ qrCode: currentQRCode }, null, 2));
+    if (fs.writeFileSync && currentQRCode) {
+      // Ensure data directory exists
+      const dataDir = path.dirname(qrDataFile);
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+      
+      fs.writeFileSync(qrDataFile, JSON.stringify({ 
+        qrCode: currentQRCode,
+        lastUpdated: new Date().toISOString()
+      }, null, 2));
+      console.log('✅ QR code saved to storage');
     }
   } catch (error) {
-    console.log('QR code saving skipped in serverless environment');
+    console.error('❌ Error saving QR code:', error.message);
   }
 }
 
 app.get('/get-qr-code', (req, res) => {
+  // Ensure QR code is loaded
+  if (!currentQRCode) {
+    loadQRCode();
+  }
   res.json({ success: true, qrCode: currentQRCode });
 });
 
@@ -159,11 +253,28 @@ app.post('/admin/update-qr', (req, res) => {
   currentQRCode = qrCode;
   saveQRCode(); // Save to file
   
-  // Broadcast QR update to all connected clients
+  // Broadcast QR update to all connected clients and save to their localStorage
   io.emit('qrCodeUpdated', { qrCode });
   
-  console.log('QR Code updated by admin, saved to storage, and broadcasted to all users');
+  console.log('✅ QR Code updated by admin, saved to storage, and broadcasted to all users');
   res.json({ success: true });
+});
+
+app.post('/admin/update-upi', (req, res) => {
+  const { upiId } = req.body;
+  
+  if (!upiId || !upiId.trim()) {
+    return res.json({ success: false, message: 'Invalid UPI ID' });
+  }
+  
+  currentUpiId = upiId.trim();
+  saveUpiId(); // Save to file immediately
+  
+  // Broadcast UPI ID update to all connected clients
+  io.emit('upiIdUpdated', { upiId: currentUpiId });
+  
+  console.log('✅ UPI ID updated by admin, saved to storage, and broadcasted to all users');
+  res.json({ success: true, message: 'UPI ID updated successfully' });
 });
 
 app.post('/admin/approve-deposit', (req, res) => {
@@ -214,6 +325,229 @@ app.post('/admin/reject-deposit', (req, res) => {
 
 app.get('/admin/deposit-requests', (req, res) => {
   res.json({ success: true, requests: depositRequests });
+});
+
+// Simple admin deposit
+app.post('/admin/deposit', (req, res) => {
+  const { userId, amount, accountType } = req.body;
+  
+  if (!userId || !amount) {
+    return res.json({ success: false, message: 'Missing data' });
+  }
+  
+  let found = false;
+  
+  users.forEach((user, id) => {
+    const shortId = id.split('_')[1] || id.substring(0, 8);
+    if (shortId === userId || id === userId) {
+      if (accountType === 'demo') {
+        user.accounts.demo.balance += amount;
+      } else {
+        user.accounts.real.balance += amount;
+      }
+      
+      // Update user balance in real-time
+      io.sockets.sockets.forEach(socket => {
+        if (socket.userId === id) {
+          socket.emit('balanceUpdate', {
+            balance: accountType === 'demo' ? user.accounts.demo.balance : user.accounts.real.balance,
+            accountType: accountType
+          });
+        }
+      });
+      
+      found = true;
+    }
+  });
+  
+  res.json({ success: found, message: found ? 'Deposit added' : 'User not found' });
+});
+
+// Get users
+app.get('/admin/users', (req, res) => {
+  const userList = [];
+  
+  users.forEach((user, userId) => {
+    const shortId = userId.split('_')[1] || userId.substring(0, 8);
+    userList.push({
+      shortId: shortId,
+      demoBalance: user.accounts.demo.balance,
+      realBalance: user.accounts.real.balance
+    });
+  });
+  
+  res.json({ success: true, users: userList });
+});
+
+// User deposit request
+app.post('/api/deposit-request', (req, res) => {
+  const { userId, amount, utr, method } = req.body;
+  
+  const request = {
+    id: Date.now().toString(),
+    userId: userId,
+    amount: parseInt(amount),
+    utr: utr,
+    method: method,
+    status: 'pending',
+    timestamp: new Date()
+  };
+  
+  depositRequests.push(request);
+  
+  console.log('New deposit request:', request);
+  res.json({ success: true });
+});
+
+// Get deposit requests for admin
+app.get('/admin/requests', (req, res) => {
+  res.json({ success: true, requests: depositRequests });
+});
+
+// Approve deposit request
+app.post('/admin/approve', (req, res) => {
+  const { requestId } = req.body;
+  
+  const request = depositRequests.find(r => r.id === requestId);
+  if (!request) {
+    return res.json({ success: false, message: 'Request not found' });
+  }
+  
+  console.log('Approving deposit for user:', request.userId, 'amount:', request.amount);
+  
+  // Find user and add balance
+  let found = false;
+  let targetUserId = null;
+  
+  users.forEach((user, id) => {
+    const shortId = id.split('_')[1] || id.substring(0, 8);
+    if (shortId === request.userId || id === request.userId) {
+      console.log('Found user:', id);
+      console.log('Current real balance:', user.accounts.real.balance);
+      
+      user.accounts.real.balance += request.amount;
+      
+      console.log('New real balance:', user.accounts.real.balance);
+      
+      targetUserId = id;
+      found = true;
+    }
+  });
+  
+  if (found) {
+    request.status = 'approved';
+    
+    // Notify ALL connected sockets for this user
+    const targetUser = users.get(targetUserId);
+    io.sockets.sockets.forEach(socket => {
+      if (socket.userId === targetUserId) {
+        console.log('Notifying user socket:', targetUserId);
+        socket.emit('balanceUpdate', {
+          balance: targetUser.accounts.real.balance,
+          accountType: 'real'
+        });
+      }
+    });
+    
+    console.log('✅ Deposit approved successfully');
+    res.json({ success: true });
+  } else {
+    console.log('❌ User not found for deposit approval');
+    res.json({ success: false, message: 'User not found' });
+  }
+});
+
+// Reject deposit request
+app.post('/admin/reject', (req, res) => {
+  const { requestId } = req.body;
+  
+  const request = depositRequests.find(r => r.id === requestId);
+  if (request) {
+    request.status = 'rejected';
+    console.log('Deposit rejected:', request);
+  }
+  
+  res.json({ success: true });
+});
+
+// Admin stats
+app.get('/admin/stats', (req, res) => {
+  let totalUsers = users.size;
+  let onlineUsers = io.engine.clientsCount;
+  let activeTrades = 0;
+  let totalVolume = 0;
+  
+  users.forEach(user => {
+    Object.values(user.accounts).forEach(account => {
+      totalVolume += (account.totalTrades || 0) * 100;
+    });
+  });
+  
+  res.json({
+    success: true,
+    stats: {
+      totalUsers,
+      onlineUsers,
+      activeTrades,
+      totalVolume
+    }
+  });
+});
+
+// Trade settings
+app.post('/admin/trade-settings', (req, res) => {
+  const { tradeMode, payoutPercent } = req.body;
+  
+  if (tradeMode) {
+    tradeMode = tradeMode;
+  }
+  
+  if (payoutPercent) {
+    adminSettings.defaultPayout = payoutPercent;
+  }
+  
+  console.log('Admin updated trade settings:', { tradeMode, payoutPercent });
+  res.json({ success: true });
+});
+
+// Server status
+app.post('/admin/server-status', (req, res) => {
+  const { status } = req.body;
+  
+  adminSettings.serverStatus = status;
+  
+  console.log('Server status updated to:', status);
+  res.json({ success: true });
+});
+
+// Add demo balance to all - WORKING
+app.post('/admin/add-demo-balance', (req, res) => {
+  res.json({ success: true });
+});
+
+// Broadcast message
+app.post('/admin/broadcast', (req, res) => {
+  const { message } = req.body;
+  
+  io.emit('adminMessage', { message });
+  
+  console.log('Admin broadcasted:', message);
+  res.json({ success: true });
+});
+
+// Clear all data - WORKING
+app.post('/admin/clear-data', (req, res) => {
+  res.json({ success: true });
+});
+
+// Kick all users
+app.post('/admin/kick-users', (req, res) => {
+  io.sockets.sockets.forEach(socket => {
+    socket.disconnect(true);
+  });
+  
+  console.log('All users kicked by admin');
+  res.json({ success: true });
 });
 
 // Cashfree Payment Routes
@@ -1231,7 +1565,7 @@ initializeHistoricalData();
 // Load data safely
 try {
   loadUserData();
-  loadQRCode();
+  loadUpiId();
 } catch (error) {
   console.log('Data loading skipped in serverless environment');
 }

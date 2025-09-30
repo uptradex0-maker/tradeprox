@@ -3,215 +3,355 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrustX - Deposit Funds</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/deposit.css">
-    <link rel="stylesheet" href="/css/mobile.css">
+    <title>Deposit - TrustX</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d1421 0%, #1a1d29 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #2b2f36;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .deposit-card {
+            background: linear-gradient(135deg, #1e2329 0%, #181a20 100%);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid #2b2f36;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .amount-section {
+            margin-bottom: 25px;
+        }
+        
+        .amount-input {
+            width: 100%;
+            padding: 15px;
+            background: #2b2f36;
+            border: 2px solid #3c4043;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .amount-input:focus {
+            border-color: #f0b90b;
+            box-shadow: 0 0 0 3px rgba(240, 185, 11, 0.2);
+        }
+        
+        .min-amount {
+            color: #848e9c;
+            font-size: 12px;
+            margin-top: 8px;
+            text-align: center;
+        }
+        
+        .quick-amounts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .quick-btn {
+            padding: 10px;
+            background: #2b2f36;
+            color: #848e9c;
+            border: 1px solid #3c4043;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .quick-btn:hover, .quick-btn.active {
+            background: #f0b90b;
+            color: #000;
+            border-color: #f0b90b;
+        }
+        
+        .proceed-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #f0b90b, #e6a800);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .proceed-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(240, 185, 11, 0.4);
+        }
+        
+        .payment-section {
+            display: none;
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .payment-info {
+            background: rgba(43, 47, 54, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .utr-input {
+            width: 100%;
+            padding: 12px;
+            background: #2b2f36;
+            border: 2px solid #3c4043;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            margin-top: 10px;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #02c076, #028a50);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: rgba(2, 192, 118, 0.1);
+            border: 1px solid #02c076;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
-<body class="deposit-body">
-    <div class="deposit-container">
-        <header class="deposit-header">
-            <div class="logo">TrustX</div>
-            <div class="header-actions">
-                <button onclick="goBack()" class="back-btn">← Back</button>
-                <div class="balance-info">Balance: ₹<span id="currentBalance">0</span></div>
+<body>
+    <a href="/dashboard" class="back-btn">
+        ← Back to Dashboard
+    </a>
+    
+    <div class="container">
+        <div class="header">
+            <h1 style="color: #f0b90b; margin-bottom: 10px;">💰 Deposit Funds</h1>
+            <p style="color: #848e9c;">Add money to your trading account</p>
+            <div style="background: rgba(43, 47, 54, 0.5); padding: 10px; border-radius: 6px; margin-top: 10px; text-align: center;">
+                <span style="color: #848e9c; font-size: 12px;">Your User ID: </span>
+                <span style="color: #f0b90b; font-weight: 600; font-size: 14px;" id="userIdDisplay">Loading...</span>
             </div>
-        </header>
-
-        <div class="deposit-content">
-            <div class="deposit-title">
-                <h1>💰 Deposit Funds</h1>
-                <p>Choose your preferred payment method</p>
-            </div>
-
-            <div class="amount-section">
-                <label>Enter Amount (₹)</label>
-                <input type="number" id="depositAmount" placeholder="Minimum ₹2,720" min="2720" value="2720">
-                <div class="quick-amounts">
-                    <button onclick="setAmount(2720)">₹2,720</button>
-                    <button onclick="setAmount(5000)">₹5,000</button>
-                    <button onclick="setAmount(10000)">₹10,000</button>
-                    <button onclick="setAmount(25000)">₹25,000</button>
-                </div>
-            </div>
-
-            <div class="payment-methods">
-                <h3>Payment Methods</h3>
+        </div>
+        
+        <div class="deposit-card">
+            <div id="amountSection" class="amount-section">
+                <label style="color: #848e9c; font-size: 14px; margin-bottom: 10px; display: block;">DEPOSIT AMOUNT</label>
+                <input type="number" id="depositAmount" class="amount-input" placeholder="₹2,780" min="2780">
+                <div class="min-amount">Minimum deposit: ₹2,780</div>
+                <div style="color: #f84960; font-size: 11px; margin-top: 5px; text-align: center;">⚠️ No deposits after 5 PM</div>
                 
-                <!-- UPI & Cards -->
-                <div class="payment-category">
-                    <h4>🏦 Banking & UPI</h4>
-                    <div class="payment-grid">
-                        <div class="payment-method" onclick="selectPayment('upi')">
-                            <div class="method-icon">📱</div>
-                            <div class="method-info">
-                                <div class="method-name">UPI Payment</div>
-                                <div class="method-desc">Scan QR & Pay</div>
-                            </div>
-                            <div class="method-badge instant">Instant</div>
-                        </div>
-                        
-                        <div class="payment-method" onclick="selectPayment('paytm')">
-                            <div class="method-icon">📱</div>
-                            <div class="method-info">
-                                <div class="method-name">Paytm</div>
-                                <div class="method-desc">Wallet & UPI</div>
-                            </div>
-                            <div class="method-badge instant">Instant</div>
-                        </div>
-                        
-                        <div class="payment-method" onclick="selectPayment('phonepe')">
-                            <div class="method-icon">💜</div>
-                            <div class="method-info">
-                                <div class="method-name">PhonePe</div>
-                                <div class="method-desc">UPI Payment</div>
-                            </div>
-                            <div class="method-badge instant">Instant</div>
-                        </div>
-                        
-                        <div class="payment-method" onclick="selectPayment('gpay')">
-                            <div class="method-icon">🔵</div>
-                            <div class="method-info">
-                                <div class="method-name">Google Pay</div>
-                                <div class="method-desc">UPI Payment</div>
-                            </div>
-                            <div class="method-badge instant">Instant</div>
-                        </div>
-                    </div>
+                <div class="quick-amounts">
+                    <button class="quick-btn" onclick="setAmount(2780)">₹2,780</button>
+                    <button class="quick-btn" onclick="setAmount(5000)">₹5,000</button>
+                    <button class="quick-btn" onclick="setAmount(10000)">₹10,000</button>
+                    <button class="quick-btn" onclick="setAmount(25000)">₹25,000</button>
+                    <button class="quick-btn" onclick="setAmount(50000)">₹50,000</button>
+                    <button class="quick-btn" onclick="setAmount(100000)">₹1,00,000</button>
                 </div>
-
-                <!-- Crypto -->
-                <div class="payment-category">
-                    <h4>₿ Cryptocurrency</h4>
-                    <div class="payment-grid">
-                        <div class="payment-method disabled">
-                            <div class="method-icon">₿</div>
-                            <div class="method-info">
-                                <div class="method-name">Bitcoin</div>
-                                <div class="method-desc">BTC Network</div>
-                            </div>
-                            <div class="method-badge coming-soon">Coming Soon</div>
-                        </div>
-                        
-                        <div class="payment-method disabled">
-                            <div class="method-icon">💲</div>
-                            <div class="method-info">
-                                <div class="method-name">USDT</div>
-                                <div class="method-desc">TRC20/ERC20</div>
-                            </div>
-                            <div class="method-badge coming-soon">Coming Soon</div>
-                        </div>
-                        
-                        <div class="payment-method disabled">
-                            <div class="method-icon">⟠</div>
-                            <div class="method-info">
-                                <div class="method-name">Ethereum</div>
-                                <div class="method-desc">ETH Network</div>
-                            </div>
-                            <div class="method-badge coming-soon">Coming Soon</div>
-                        </div>
-                        
-                        <div class="payment-method disabled">
-                            <div class="method-icon">◎</div>
-                            <div class="method-info">
-                                <div class="method-name">Solana</div>
-                                <div class="method-desc">SOL Network</div>
-                            </div>
-                            <div class="method-badge coming-soon">Coming Soon</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Other Methods -->
-                <div class="payment-category">
-                    <h4>🌐 Other Methods</h4>
-                    <div class="payment-grid">
-                        <div class="payment-method disabled">
-                            <div class="method-icon">🏛️</div>
-                            <div class="method-info">
-                                <div class="method-name">Bank Transfer</div>
-                                <div class="method-desc">NEFT/RTGS/IMPS</div>
-                            </div>
-                            <div class="method-badge coming-soon">Coming Soon</div>
-                        </div>
-                        
-                        <div class="payment-method disabled">
-                            <div class="method-icon">📦</div>
-                            <div class="method-info">
-                                <div class="method-name">Amazon Pay</div>
-                                <div class="method-desc">Wallet Payment</div>
-                            </div>
-                            <div class="method-badge coming-soon">Coming Soon</div>
-                        </div>
-                    </div>
-                </div>
+                
+                <button class="proceed-btn" onclick="proceedToPayment()">Proceed to Payment</button>
             </div>
-
-            <div class="deposit-footer">
-                <div class="security-info">
-                    <div class="security-item">
-                        <span class="security-icon">🔒</span>
-                        <span>256-bit SSL Encryption</span>
+            
+            <div id="paymentSection" class="payment-section">
+                <h3 style="color: #f0b90b; margin-bottom: 15px;">💳 Complete Payment</h3>
+                
+                <div class="payment-info">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #848e9c;">Amount:</span>
+                        <span style="color: #f0b90b; font-weight: 600;" id="paymentAmount">₹0</span>
                     </div>
-                    <div class="security-item">
-                        <span class="security-icon">⚡</span>
-                        <span>Instant Processing</span>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                        <span style="color: #848e9c;">Payment Method:</span>
+                        <span style="color: white;">UPI/Card/Net Banking</span>
                     </div>
-                    <div class="security-item">
-                        <span class="security-icon">🛡️</span>
-                        <span>100% Secure</span>
+                    
+                    <div style="background: rgba(2, 192, 118, 0.1); border: 1px solid #02c076; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                        <div style="color: #02c076; font-size: 14px; font-weight: 600; margin-bottom: 10px;">💡 Payment Instructions</div>
+                        <div style="color: #02c076; font-size: 12px; line-height: 1.5;">
+                            1. Click "Pay Now" to open Razorpay<br>
+                            2. Pay exactly ₹<span id="exactAmount">0</span><br>
+                            3. Come back and enter your UTR/Transaction ID<br>
+                            4. Wait 5-10 minutes for balance update
+                        </div>
                     </div>
+                    
+                    <button class="submit-btn" onclick="openPaymentLink()" style="background: linear-gradient(135deg, #02c076, #028a50); margin-bottom: 15px;">💳 Pay Now (Razorpay)</button>
+                    
+                    <div id="utrSection" style="display: none; margin-top: 20px;">
+                        <label style="color: #848e9c; font-size: 12px;">TRANSACTION ID / UTR NUMBER</label>
+                        <input type="text" id="utrNumber" class="utr-input" placeholder="Enter UTR/Transaction ID after payment" required>
+                        <button class="submit-btn" onclick="submitDeposit()" style="margin-top: 10px;">I Have Paid - Submit UTR</button>
+                    </div>
+                    
+                    <button onclick="showUtrSection()" style="background: #f0b90b; color: #000; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 10px; width: 100%; font-weight: 600;">I Have Completed Payment</button>
                 </div>
+                
+                <button style="background: #2b2f36; color: #848e9c; border: 1px solid #3c4043; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 15px;" onclick="goBack()">← Change Amount</button>
+            </div>
+            
+            <div id="successMessage" class="success-message">
+                <h3 style="color: #02c076; margin-bottom: 10px;">✅ Deposit Request Submitted!</h3>
+                <p style="color: #848e9c; margin-bottom: 15px;">Your deposit request has been submitted successfully. It will be processed within 5-10 minutes.</p>
+                <button style="background: #f0b90b; color: #000; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;" onclick="window.location.href='/dashboard'">Back to Dashboard</button>
             </div>
         </div>
     </div>
-
-    <!-- Payment Modals -->
-    <div id="upiModal" class="payment-modal">
-        <div class="modal-content">
-            <span class="close" onclick="closePaymentModal()">&times;</span>
-            <h3>📱 UPI Payment</h3>
-            <div class="payment-details">
-                <p>Amount: ₹<span id="upiAmount">0</span></p>
-                <div class="qr-section">
-                    <div class="qr-code-container">
-                        <img id="qrCodeImage" src="" alt="QR Code" style="width: 200px; height: 200px; border: 2px solid #00d4ff; border-radius: 8px;">
-                    </div>
-                    <p class="qr-instruction">Scan QR code with any UPI app</p>
-                </div>
-                <div class="utr-section">
-                    <label for="utrNumber">Enter UTR Number:</label>
-                    <input type="text" id="utrNumber" placeholder="Enter 12-digit UTR number" maxlength="12">
-                    <button onclick="submitUTR()" class="pay-btn">Submit Payment</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="cryptoModal" class="payment-modal">
-        <div class="modal-content">
-            <span class="close" onclick="closePaymentModal()">&times;</span>
-            <h3 id="cryptoTitle">₿ Crypto Payment</h3>
-            <div class="payment-details">
-                <p>Amount: ₹<span id="cryptoAmount">0</span></p>
-                <div class="crypto-address">
-                    <label>Send to Address:</label>
-                    <div class="address-box">
-                        <input type="text" id="cryptoAddress" readonly>
-                        <button onclick="copyAddress()" class="copy-btn">Copy</button>
-                    </div>
-                </div>
-                <div class="qr-code">
-                    <div id="qrCode">QR Code will appear here</div>
-                </div>
-                <p class="crypto-note">Send exact amount to the address above. Payment will be credited after network confirmation.</p>
-                <button onclick="confirmCryptoPayment()" class="pay-btn">I've Sent Payment</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/js/deposit.js"></script>
-
+    
+    <script>
+        let selectedAmount = 0;
+        
+        function setAmount(amount) {
+            selectedAmount = amount;
+            document.getElementById('depositAmount').value = amount;
+            
+            // Update button styles
+            document.querySelectorAll('.quick-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        function proceedToPayment() {
+            const amount = parseInt(document.getElementById('depositAmount').value);
+            
+            if (!amount || amount < 2780) {
+                alert('Please enter a valid amount (minimum ₹2,780)');
+                return;
+            }
+            
+            selectedAmount = amount;
+            document.getElementById('paymentAmount').textContent = `₹${amount.toLocaleString()}`;
+            document.getElementById('exactAmount').textContent = amount.toLocaleString();
+            
+            // Show payment section
+            document.getElementById('amountSection').style.display = 'none';
+            document.getElementById('paymentSection').style.display = 'block';
+        }
+        
+        function openPaymentLink() {
+            const paymentUrl = 'https://razorpay.me/@TrustX';
+            
+            // Open payment link in new tab
+            window.open(paymentUrl, '_blank');
+            
+            // Show UTR section after opening payment link
+            setTimeout(() => {
+                showUtrSection();
+            }, 2000);
+        }
+        
+        function showUtrSection() {
+            document.getElementById('utrSection').style.display = 'block';
+            event.target.style.display = 'none';
+        }
+        
+        function submitDeposit() {
+            const utr = document.getElementById('utrNumber').value.trim();
+            
+            if (!utr) {
+                alert('Please enter UTR/Transaction ID');
+                return;
+            }
+            
+            const userId = localStorage.getItem('tradepro_user_id') || 'user_' + Date.now();
+            const shortId = userId.split('_')[1] || userId.substring(0, 8);
+            
+            // Submit deposit request to admin
+            fetch('/api/deposit-request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: shortId,
+                    amount: selectedAmount,
+                    utr: utr,
+                    method: 'Razorpay'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('paymentSection').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+                } else {
+                    alert('Error submitting deposit request. Please try again.');
+                }
+            })
+            .catch(error => {
+                alert('Error submitting deposit request. Please try again.');
+            });
+        }
+        
+        function goBack() {
+            document.getElementById('paymentSection').style.display = 'none';
+            document.getElementById('amountSection').style.display = 'block';
+        }
+        
+        // Display user ID
+        document.addEventListener('DOMContentLoaded', function() {
+            const userId = localStorage.getItem('tradepro_user_id') || 'user_' + Date.now();
+            const shortId = userId.split('_')[1] || userId.substring(0, 8);
+            document.getElementById('userIdDisplay').textContent = shortId;
+        });
+    </script>
 </body>
 </html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw - TrustX</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d1421 0%, #1a1d29 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #2b2f36;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .withdraw-card {
+            background: linear-gradient(135deg, #1e2329 0%, #181a20 100%);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid #2b2f36;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .balance-info {
+            background: rgba(43, 47, 54, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            color: #848e9c;
+            font-size: 12px;
+            margin-bottom: 8px;
+            display: block;
+            font-weight: 600;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: #2b2f36;
+            border: 2px solid #3c4043;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            border-color: #f0b90b;
+            box-shadow: 0 0 0 3px rgba(240, 185, 11, 0.2);
+        }
+        
+        .amount-input {
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .min-amount {
+            color: #848e9c;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .quick-amounts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .quick-btn {
+            padding: 8px;
+            background: #2b2f36;
+            color: #848e9c;
+            border: 1px solid #3c4043;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .quick-btn:hover, .quick-btn.active {
+            background: #f0b90b;
+            color: #000;
+            border-color: #f0b90b;
+        }
+        
+        .withdraw-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #f84960, #d63447);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .withdraw-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(248, 73, 96, 0.4);
+        }
+        
+        .withdraw-btn:disabled {
+            background: #2b2f36;
+            color: #848e9c;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: rgba(2, 192, 118, 0.1);
+            border: 1px solid #02c076;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .warning {
+            background: rgba(248, 73, 96, 0.1);
+            border: 1px solid #f84960;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: #f84960;
+        }
+    </style>
+</head>
+<body>
+    <a href="/dashboard" class="back-btn">
+        ← Back to Dashboard
+    </a>
+    
+    <div class="container">
+        <div class="header">
+            <h1 style="color: #f84960; margin-bottom: 10px;">💸 Withdraw Funds</h1>
+            <p style="color: #848e9c;">Withdraw money from your trading account</p>
+        </div>
+        
+        <div class="withdraw-card">
+            <div class="balance-info">
+                <div style="color: #848e9c; font-size: 12px; margin-bottom: 5px;">AVAILABLE BALANCE</div>
+                <div style="color: #f0b90b; font-size: 24px; font-weight: 600;" id="availableBalance">₹0</div>
+            </div>
+            
+            <div class="warning">
+                ⚠️ Minimum withdrawal amount is ₹5,780. Processing time: 24-48 hours.
+            </div>
+            
+            <div id="withdrawForm">
+                <div class="form-group">
+                    <label class="form-label">WITHDRAWAL AMOUNT</label>
+                    <input type="number" id="withdrawAmount" class="form-input amount-input" placeholder="₹5,780" min="5780">
+                    <div class="min-amount">Minimum withdrawal: ₹5,780</div>
+                    
+                    <div class="quick-amounts">
+                        <button class="quick-btn" onclick="setAmount(5780)">₹5,780</button>
+                        <button class="quick-btn" onclick="setAmount(10000)">₹10,000</button>
+                        <button class="quick-btn" onclick="setAmount(25000)">₹25,000</button>
+                        <button class="quick-btn" onclick="setAmount(50000)">₹50,000</button>
+                        <button class="quick-btn" onclick="setAmount(100000)">₹1,00,000</button>
+                        <button class="quick-btn" onclick="setMaxAmount()">MAX</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">BANK NAME</label>
+                    <input type="text" id="bankName" class="form-input" placeholder="Enter bank name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">ACCOUNT NUMBER</label>
+                    <input type="text" id="accountNumber" class="form-input" placeholder="Enter account number" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">IFSC CODE</label>
+                    <input type="text" id="ifscCode" class="form-input" placeholder="Enter IFSC code" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">ACCOUNT HOLDER NAME</label>
+                    <input type="text" id="accountHolder" class="form-input" placeholder="Enter account holder name" required>
+                </div>
+                
+                <button class="withdraw-btn" onclick="submitWithdrawal()">Submit Withdrawal Request</button>
+            </div>
+            
+            <div id="successMessage" class="success-message">
+                <h3 style="color: #02c076; margin-bottom: 10px;">✅ Withdrawal Request Submitted!</h3>
+                <p style="color: #848e9c; margin-bottom: 15px;">Your withdrawal request has been submitted successfully. It will be processed within 24-48 hours.</p>
+                <button style="background: #f0b90b; color: #000; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;" onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentBalance = 0;
+        
+        // Load user balance
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserBalance();
+        });
+        
+        function loadUserBalance() {
+            // Get balance from localStorage or fetch from server
+            const userBalance = JSON.parse(localStorage.getItem('userBalance')) || { demo: 50000, real: 0 };
+            const accountType = localStorage.getItem('account_type') || 'demo';
+            
+            currentBalance = userBalance[accountType] ? 
+                (userBalance[accountType].balance !== undefined ? userBalance[accountType].balance : userBalance[accountType]) : 0;
+            
+            document.getElementById('availableBalance').textContent = `₹${currentBalance.toLocaleString()}`;
+        }
+        
+        function setAmount(amount) {
+            document.getElementById('withdrawAmount').value = amount;
+            
+            // Update button styles
+            document.querySelectorAll('.quick-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        function setMaxAmount() {
+            const maxWithdrawable = Math.max(0, currentBalance);
+            document.getElementById('withdrawAmount').value = maxWithdrawable;
+            
+            // Update button styles
+            document.querySelectorAll('.quick-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        function submitWithdrawal() {
+            const amount = parseInt(document.getElementById('withdrawAmount').value);
+            const bankName = document.getElementById('bankName').value.trim();
+            const accountNumber = document.getElementById('accountNumber').value.trim();
+            const ifscCode = document.getElementById('ifscCode').value.trim();
+            const accountHolder = document.getElementById('accountHolder').value.trim();
+            
+            // Validation
+            if (!amount || amount < 5780) {
+                alert('Please enter a valid amount (minimum ₹5,780)');
+                return;
+            }
+            
+            if (amount > currentBalance) {
+                alert('Insufficient balance for withdrawal');
+                return;
+            }
+            
+            if (!bankName || !accountNumber || !ifscCode || !accountHolder) {
+                alert('Please fill all bank details');
+                return;
+            }
+            
+            // Submit withdrawal request
+            fetch('/api/submit-withdrawal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: amount,
+                    bankName: bankName,
+                    accountNumber: accountNumber,
+                    ifscCode: ifscCode,
+                    accountHolder: accountHolder
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('withdrawForm').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+                } else {
+                    alert('Error submitting withdrawal request. Please try again.');
+                }
+            })
+            .catch(error => {
+                alert('Error submitting withdrawal request. Please try again.');
+            });
+        }
+    </script>
+</body>
+</html>

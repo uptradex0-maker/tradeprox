@@ -644,6 +644,26 @@
     "currentAccount": "demo",
     "accounts": {
       "demo": {
+        "balance": 47800,
+        "totalTrades": 22,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 10000,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759157523908_rxfazu2rz": {
+    "id": "user_1759157523908_rxfazu2rz",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
         "balance": 50000,
         "totalTrades": 0,
         "totalWins": 0,
@@ -652,6 +672,466 @@
       "real": {
         "balance": 0,
         "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759157527641_u2aftdstb": {
+    "id": "user_1759157527641_u2aftdstb",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759157528198_gx4mndciw": {
+    "id": "user_1759157528198_gx4mndciw",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759157528843_j3iuwpyfc": {
+    "id": "user_1759157528843_j3iuwpyfc",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759157529542_zr414fvy5": {
+    "id": "user_1759157529542_zr414fvy5",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759232886817_2lqxtby48": {
+    "id": "user_1759232886817_2lqxtby48",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759232889371_4vjwrch7z": {
+    "id": "user_1759232889371_4vjwrch7z",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759233208650_5b8f5dtn9": {
+    "id": "user_1759233208650_5b8f5dtn9",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759233950681_wbs4px74p": {
+    "id": "user_1759233950681_wbs4px74p",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759234653787_ogdcijhla": {
+    "id": "user_1759234653787_ogdcijhla",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759234983002_cfu0aiuux": {
+    "id": "user_1759234983002_cfu0aiuux",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759235011001_74dpak5ek": {
+    "id": "user_1759235011001_74dpak5ek",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759241830261_1gh0jr72b": {
+    "id": "user_1759241830261_1gh0jr72b",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759242092571_9sa5w1r6g": {
+    "id": "user_1759242092571_9sa5w1r6g",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759243481834_s6ocjwvwy": {
+    "id": "user_1759243481834_s6ocjwvwy",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759243874555_mvbu65kjx": {
+    "id": "user_1759243874555_mvbu65kjx",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759243876128_jtuzp12iz": {
+    "id": "user_1759243876128_jtuzp12iz",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759243876622_n4cuxbnr2": {
+    "id": "user_1759243876622_n4cuxbnr2",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759243876843_l6dt4rhll": {
+    "id": "user_1759243876843_l6dt4rhll",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759243877323_mpi71dde6": {
+    "id": "user_1759243877323_mpi71dde6",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759243878052_m8rl8hjj1": {
+    "id": "user_1759243878052_m8rl8hjj1",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "user_1759244311622_cz47fv0bl": {
+    "id": "user_1759244311622_cz47fv0bl",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 0,
+        "totalDeposits": 0,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "web_user_1759245104507": {
+    "id": "web_user_1759245104507",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 2780,
+        "totalDeposits": 2780,
+        "totalWithdrawals": 0,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      }
+    }
+  },
+  "web_user_1759245371659": {
+    "id": "web_user_1759245371659",
+    "currentAccount": "demo",
+    "accounts": {
+      "demo": {
+        "balance": 50000,
+        "totalTrades": 0,
+        "totalWins": 0,
+        "totalLosses": 0
+      },
+      "real": {
+        "balance": 10000,
+        "totalDeposits": 10000,
         "totalWithdrawals": 0,
         "totalTrades": 0,
         "totalWins": 0,
