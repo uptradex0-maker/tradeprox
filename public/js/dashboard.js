@@ -715,6 +715,29 @@ function connectToServer() {
             socket.emit('getUserData');
         });
         
+        socket.on('balanceUpdate', function(data) {
+            console.log('Balance update received:', data);
+            
+            // Update the specific account type from the server
+            const targetAccount = data.accountType || accountType;
+            
+            if (userBalance[targetAccount]) {
+                userBalance[targetAccount].balance = data.balance;
+            } else {
+                userBalance[targetAccount] = { balance: data.balance };
+            }
+            
+            localStorage.setItem('userBalance', JSON.stringify(userBalance));
+            
+            // Update balance display
+            const balanceEl = document.getElementById('userBalance');
+            if (balanceEl && targetAccount === accountType) {
+                balanceEl.textContent = `₹${data.balance.toLocaleString()}`;
+            }
+            
+            console.log('Updated balance for', targetAccount, ':', data.balance);
+        });
+        
         socket.on('tradeResult', function(data) {
             if (data.success) {
                 addTradeLineToChart(data.trade.direction, data.trade.duration);
