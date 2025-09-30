@@ -413,8 +413,25 @@ app.post('/admin/approve', (req, res) => {
     return res.json({ success: false, message: 'Request not found' });
   }
   
-  console.log('🔄 Processing deposit approval...');
-  console.log('Request ID:', requestId);
+  console.log('\n=== APPROVE REQUEST ===');
+  console.log('Received requestId:', requestId);
+  console.log('Type of requestId:', typeof requestId);
+  console.log('All deposit requests:');
+  depositRequests.forEach((req, index) => {
+    console.log(`  ${index}: ID="${req.id}" (type: ${typeof req.id}), Status: ${req.status}`);
+  });
+  
+  const request = depositRequests.find(r => {
+    console.log(`Comparing "${r.id}" === "${requestId}":`, r.id === requestId);
+    return r.id === requestId || r.id.toString() === requestId.toString();
+  });
+  
+  if (!request) {
+    console.log('❌ Request not found!');
+    return res.json({ success: false, message: 'Request not found' });
+  }
+  
+  console.log('✅ Found request:', request);
   console.log('User ID:', request.userId);
   console.log('Amount:', request.amount);
   

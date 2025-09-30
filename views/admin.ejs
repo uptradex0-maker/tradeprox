@@ -48,6 +48,8 @@
         }
         
         function approveRequest(requestId) {
+            console.log('Approving request ID:', requestId);
+            
             if (!confirm('Approve this deposit request?')) return;
             
             const xhr = new XMLHttpRequest();
@@ -56,13 +58,22 @@
             
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
-                    const data = JSON.parse(xhr.responseText);
-                    alert(data.success ? 'Request approved!' : 'Error: ' + data.message);
-                    if (data.success) loadRequests();
+                    console.log('Response status:', xhr.status);
+                    console.log('Response text:', xhr.responseText);
+                    
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        alert(data.success ? 'Request approved!' : 'Error: ' + data.message);
+                        if (data.success) loadRequests();
+                    } catch (e) {
+                        alert('Error parsing response');
+                    }
                 }
             };
             
-            xhr.send(JSON.stringify({ requestId }));
+            const payload = JSON.stringify({ requestId: requestId });
+            console.log('Sending payload:', payload);
+            xhr.send(payload);
         }
         
         function rejectRequest(requestId) {
