@@ -793,10 +793,18 @@ io.on('connection', (socket) => {
   }, 100);
   
   socket.on('getUserData', () => {
-    const user = users.get(socket.userId) || initializeUser(socket.userId);
+    let user = users.get(socket.userId);
+    
+    // Create user if doesn't exist
+    if (!user) {
+      user = initializeUser(socket.userId);
+      console.log('Created new user on getUserData:', socket.userId);
+    }
+    
     const trades = userTrades.get(socket.userId) || { demo: [], real: [] };
     const currentAccount = user.currentAccount;
     
+    // Send user data with proper structure
     socket.emit('accountData', {
       accounts: user.accounts,
       currentAccount: currentAccount
@@ -804,7 +812,7 @@ io.on('connection', (socket) => {
     
     socket.emit('userTrades', trades[currentAccount].filter(t => t.status === 'active'));
     
-    console.log(`Sent user data - Account: ${currentAccount}, Balance: ${user.accounts[currentAccount].balance}`);
+    console.log(`Sent user data - Account: ${currentAccount}, Demo: ${user.accounts.demo.balance}, Real: ${user.accounts.real.balance}`);
   });
   
   socket.on('switchAccount', (data) => {
