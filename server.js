@@ -404,7 +404,7 @@ app.get('/admin/requests', (req, res) => {
   res.json({ success: true, requests: depositRequests });
 });
 
-// Approve deposit request - FIXED
+// Approve deposit request - WORKING
 app.post('/admin/approve', (req, res) => {
   const { requestId } = req.body;
   
@@ -413,67 +413,69 @@ app.post('/admin/approve', (req, res) => {
     return res.json({ success: false, message: 'Request not found' });
   }
   
-  console.log('Approving deposit for user:', request.userId, 'amount:', request.amount);
-  console.log('All users in system:', Array.from(users.keys()));
+  console.log('🔄 Processing deposit approval...');
+  console.log('Request ID:', requestId);
+  console.log('User ID:', request.userId);
+  console.log('Amount:', request.amount);
   
-  // Find user or create if not exists
-  let found = false;
   let targetUserId = null;
+  let targetUser = null;
   
-  // First try to find existing user
-  users.forEach((user, id) => {
-    const shortId = id.split('_')[1] || id.substring(0, 8);
-    if (shortId === request.userId || id === request.userId) {
-      console.log('Found existing user:', id);
-      user.accounts.real.balance += request.amount;
-      targetUserId = id;
-      found = true;
+  // Search for user by short ID
+  for (const [fullId, user] of users.entries()) {
+    const shortId = fullId.split('_')[1] || fullId.substring(0, 8);
+    if (shortId === request.userId) {
+      targetUserId = fullId;
+      targetUser = user;
+      console.log('✅ Found user:', fullId);
+      break;
     }
-  });
+  }
   
-  // If user not found, create new user with this deposit
-  if (!found) {
-    console.log('User not found, creating new user for:', request.userId);
-    
-    // Create full user ID from short ID
+  // Create user if not found
+  if (!targetUser) {
     targetUserId = 'user_' + Date.now() + '_' + request.userId;
-    
-    // Create new user
-    const newUser = {
+    targetUser = {
       accounts: {
         demo: { balance: 50000, totalTrades: 0, totalWins: 0, totalLosses: 0, totalDeposits: 0, totalWithdrawals: 0 },
-        real: { balance: request.amount, totalTrades: 0, totalWins: 0, totalLosses: 0, totalDeposits: request.amount, totalWithdrawals: 0 }
+        real: { balance: 0, totalTrades: 0, totalWins: 0, totalLosses: 0, totalDeposits: 0, totalWithdrawals: 0 }
       },
       currentAccount: 'demo',
       joinedAt: new Date()
     };
-    
-    users.set(targetUserId, newUser);
-    console.log('Created new user:', targetUserId, 'with balance:', request.amount);
-    found = true;
+    users.set(targetUserId, targetUser);
+    console.log('✅ Created new user:', targetUserId);
   }
   
-  if (found) {
-    request.status = 'approved';
-    
-    // Notify user if online
-    const targetUser = users.get(targetUserId);
-    io.sockets.sockets.forEach(socket => {
-      if (socket.userId === targetUserId) {
-        console.log('Notifying user socket:', targetUserId);
-        socket.emit('balanceUpdate', {
-          balance: targetUser.accounts.real.balance,
-          accountType: 'real'
-        });
-      }
-    });
-    
-    console.log('✅ Deposit approved successfully for user:', targetUserId);
-    res.json({ success: true });
-  } else {
-    console.log('❌ Failed to process deposit');
-    res.json({ success: false, message: 'Failed to process deposit' });
-  }
+  // Add balance to real account
+  const oldBalance = targetUser.accounts.real.balance;
+  targetUser.accounts.real.balance += request.amount;
+  targetUser.accounts.real.totalDeposits += request.amount;
+  
+  console.log('💰 Balance updated:');
+  console.log('Old balance:', oldBalance);
+  console.log('New balance:', targetUser.accounts.real.balance);
+  
+  // Mark request as approved
+  request.status = 'approved';
+  
+  // Notify ALL sockets for this user
+  let notified = false;
+  io.sockets.sockets.forEach(socket => {
+    if (socket.userId === targetUserId) {
+      console.log('📡 Sending balance update to socket:', socket.id);
+      socket.emit('balanceUpdate', {
+        balance: targetUser.accounts.real.balance,
+        accountType: 'real'
+      });
+      notified = true;
+    }
+  });
+  
+  console.log('📱 User notified:', notified ? 'Yes' : 'No (offline)');
+  console.log('✅ Deposit approval completed');
+  
+  res.json({ success: true, message: 'Deposit approved successfully' });
 });
 
 // Reject deposit request
