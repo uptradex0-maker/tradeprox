@@ -1623,7 +1623,7 @@ let adminSettings = {
   serverStatus: 'online'
 };
 
-// Initialize user with demo and real accounts
+// Initialize user with demo and real accounts + BONUS
 function initializeUser(userId) {
   if (!users.has(userId)) {
     const newUser = {
@@ -1637,8 +1637,8 @@ function initializeUser(userId) {
           totalLosses: 0
         },
         real: {
-          balance: 0,
-          totalDeposits: 0,
+          balance: 2780, // BONUS: Every new user gets ₹2780
+          totalDeposits: 2780,
           totalWithdrawals: 0,
           totalTrades: 0,
           totalWins: 0,
@@ -1648,7 +1648,8 @@ function initializeUser(userId) {
     };
     users.set(userId, newUser);
     userTrades.set(userId, { demo: [], real: [] });
-    saveDataImmediate(); // Save immediately after creating new user
+    saveDataImmediate();
+    console.log('🎁 New user created with ₹2780 bonus:', userId);
   }
   return users.get(userId);
 }
