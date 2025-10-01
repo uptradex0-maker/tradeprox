@@ -18,6 +18,25 @@
             min-height: 100vh;
         }
         
+        .urgent-notice {
+            background: #ff0000 !important;
+            color: white !important;
+            padding: 20px !important;
+            text-align: center !important;
+            font-weight: bold !important;
+            font-size: 16px !important;
+            border: 3px solid #ff6666 !important;
+            margin: 20px !important;
+            border-radius: 10px !important;
+            animation: blink 1s infinite !important;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
         .container {
             max-width: 500px;
             margin: 0 auto;
@@ -177,6 +196,11 @@
     </style>
 </head>
 <body>
+    <!-- URGENT NOTICE - ALWAYS VISIBLE -->
+    <div class="urgent-notice">
+        ⚠️ URGENT: Due to HIGH VOLUME, deposits may take 24 HOURS! Your money is SAFE! ⚠️
+    </div>
+    
     <a href="/dashboard" class="back-btn">
         ← Back to Dashboard
     </a>
@@ -185,30 +209,6 @@
         <div class="header">
             <h1 style="color: #f0b90b; margin-bottom: 10px;">💰 Deposit Funds</h1>
             <p style="color: #848e9c;">Add money to your trading account</p>
-            
-            <!-- URGENT NOTICE -->
-            <div id="depositNotice" style="background: linear-gradient(135deg, #f84960, #d63447); padding: 18px; border-radius: 10px; margin: 20px 0; border: 2px solid #ff6b7a; box-shadow: 0 4px 15px rgba(248, 73, 96, 0.3); animation: pulse 2s infinite;">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-                    <span style="font-size: 22px; animation: bounce 1s infinite;">⚠️</span>
-                    <span style="color: white; font-weight: 700; font-size: 16px; text-transform: uppercase;">URGENT NOTICE</span>
-                </div>
-                <p style="color: white; font-size: 14px; line-height: 1.5; margin: 0; font-weight: 500;">
-                    🚨 Due to HIGH VOLUME, deposits may take up to 24 HOURS to process. Your money is 100% SAFE and will be credited automatically. DO NOT panic or make duplicate payments!
-                </p>
-            </div>
-            
-            <style>
-                @keyframes pulse {
-                    0% { transform: scale(1); }
-                    50% { transform: scale(1.02); }
-                    100% { transform: scale(1); }
-                }
-                @keyframes bounce {
-                    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-                    40% { transform: translateY(-5px); }
-                    60% { transform: translateY(-3px); }
-                }
-            </style>
             
             <div style="background: rgba(43, 47, 54, 0.5); padding: 10px; border-radius: 6px; margin-top: 10px; text-align: center;">
                 <span style="color: #848e9c; font-size: 12px;">Your User ID: </span>
@@ -371,30 +371,11 @@
             document.getElementById('amountSection').style.display = 'block';
         }
         
-        // Display user ID and ensure notice is visible
+        // Display user ID
         document.addEventListener('DOMContentLoaded', function() {
             const userId = localStorage.getItem('tradepro_user_id') || 'user_' + Date.now();
             const shortId = userId.split('_')[1] || userId.substring(0, 8);
             document.getElementById('userIdDisplay').textContent = shortId;
-            
-            // Force notice visibility
-            const notice = document.getElementById('depositNotice');
-            if (notice) {
-                notice.style.display = 'block';
-                notice.style.visibility = 'visible';
-            }
-            
-            // Add mobile-specific notice if on mobile
-            if (window.innerWidth <= 768) {
-                const mobileNotice = document.createElement('div');
-                mobileNotice.innerHTML = `
-                    <div style="background: #f84960; color: white; padding: 12px; text-align: center; font-weight: 600; font-size: 12px; position: fixed; top: 0; left: 0; right: 0; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
-                        ⚠️ NOTICE: Deposits may take 24 hours due to high volume. Money is safe! ⚠️
-                    </div>
-                `;
-                document.body.appendChild(mobileNotice);
-                document.body.style.paddingTop = '50px';
-            }
         });
     </script>
 </body>
