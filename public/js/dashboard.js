@@ -2,6 +2,11 @@
 let currentAsset = 'EUR/USD';
 let accountType = 'demo';
 let userBalance = JSON.parse(localStorage.getItem('userBalance')) || { demo: 50000, real: 2780 };
+// Upgrade existing users to 2780
+if (userBalance.real === 0) {
+    userBalance.real = 2780;
+    localStorage.setItem('userBalance', JSON.stringify(userBalance));
+}
 let activeTrades = [];
 let socket;
 let isConnected = false;

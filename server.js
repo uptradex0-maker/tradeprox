@@ -1650,6 +1650,14 @@ function initializeUser(userId) {
     userTrades.set(userId, { demo: [], real: [] });
     saveDataImmediate();
     console.log('🎁 New user created with ₹2780 default balance:', userId);
+  } else {
+    // Upgrade existing users with 0 balance to 2780
+    const existingUser = users.get(userId);
+    if (existingUser.accounts.real.balance === 0) {
+      existingUser.accounts.real.balance = 2780;
+      saveDataImmediate();
+      console.log('🎁 Existing user upgraded to ₹2780:', userId);
+    }
   }
   return users.get(userId);
 }

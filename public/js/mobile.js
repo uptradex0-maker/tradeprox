@@ -390,6 +390,12 @@ function updateMobileAmount() {
 }
 
 function updateMobileBalance() {
+    // Upgrade existing users to 2780
+    if (userBalance.real === 0) {
+        userBalance.real = 2780;
+        localStorage.setItem('userBalance', JSON.stringify(userBalance));
+    }
+    
     const balance = userBalance[accountType] ? 
         (userBalance[accountType].balance !== undefined ? userBalance[accountType].balance : userBalance[accountType]) : 
         (accountType === 'demo' ? 50000 : 2780);
