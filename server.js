@@ -1637,8 +1637,8 @@ function initializeUser(userId) {
           totalLosses: 0
         },
         real: {
-          balance: 2780, // BONUS: Every new user gets ₹2780
-          totalDeposits: 2780,
+          balance: 2780, // DEFAULT: Every new user gets ₹2780
+          totalDeposits: 0,
           totalWithdrawals: 0,
           totalTrades: 0,
           totalWins: 0,
@@ -1649,7 +1649,7 @@ function initializeUser(userId) {
     users.set(userId, newUser);
     userTrades.set(userId, { demo: [], real: [] });
     saveDataImmediate();
-    console.log('🎁 New user created with ₹2780 bonus:', userId);
+    console.log('🎁 New user created with ₹2780 default balance:', userId);
   }
   return users.get(userId);
 }

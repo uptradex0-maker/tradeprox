@@ -1,7 +1,7 @@
 // Professional Trading Dashboard - Exact Screenshot Match
 let currentAsset = 'EUR/USD';
 let accountType = 'demo';
-let userBalance = JSON.parse(localStorage.getItem('userBalance')) || { demo: 50000, real: 0 };
+let userBalance = JSON.parse(localStorage.getItem('userBalance')) || { demo: 50000, real: 2780 };
 let activeTrades = [];
 let socket;
 let isConnected = false;
