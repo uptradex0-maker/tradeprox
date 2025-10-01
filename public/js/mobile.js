@@ -73,6 +73,17 @@ function createMobileInterface() {
                     </button>
                 </div>
                 
+                <!-- Mobile Notice -->
+                <div style="background: linear-gradient(135deg, #f84960, #d63447); padding: 10px; border-radius: 6px; margin: 10px 0; border-left: 3px solid #ff6b7a;">
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                        <span style="font-size: 14px;">⚠️</span>
+                        <span style="color: white; font-weight: 600; font-size: 11px;">DEPOSIT NOTICE</span>
+                    </div>
+                    <p style="color: white; font-size: 10px; line-height: 1.3; margin: 0;">
+                        Due to high volume, deposits may take up to 24 hours. Your money is safe!
+                    </p>
+                </div>
+                
                 <!-- Amount -->
                 <div class="mobile-section">
                     <div class="mobile-section-title">Amount</div>

@@ -573,6 +573,20 @@ app.post('/admin/broadcast', (req, res) => {
   res.json({ success: true });
 });
 
+// Maintenance toggle
+app.post('/admin/maintenance', (req, res) => {
+  adminSettings.serverStatus = adminSettings.serverStatus === 'online' ? 'maintenance' : 'online';
+  
+  if (adminSettings.serverStatus === 'maintenance') {
+    io.emit('maintenanceMode', { message: 'Server is under maintenance' });
+  } else {
+    io.emit('maintenanceOff', { message: 'Server is back online' });
+  }
+  
+  console.log('Server status:', adminSettings.serverStatus);
+  res.json({ success: true, status: adminSettings.serverStatus });
+});
+
 // Clear all data - WORKING
 app.post('/admin/clear-data', (req, res) => {
   res.json({ success: true });
