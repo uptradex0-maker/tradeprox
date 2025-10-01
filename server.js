@@ -72,11 +72,95 @@ app.post('/admin-auth', (req, res) => {
 });
 
 app.get('/admin', (req, res) => {
-  try {
-    res.render('admin');
-  } catch (error) {
-    res.send(`<!DOCTYPE html><html><head><title>TrustX Admin</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{font-family:Arial,sans-serif;background:#0a0e1a;color:#fff;text-align:center;padding:50px}.container{max-width:600px;margin:0 auto}.logo{font-size:2em;color:#00d4ff;margin-bottom:20px}.btn{background:#00d4ff;color:#000;padding:15px 30px;text-decoration:none;border-radius:5px;display:inline-block;margin:10px}</style></head><body><div class="container"><div class="logo">TrustX Admin</div><p>Admin Panel Loading...</p><a href="/admin" class="btn">Reload</a><a href="/dashboard" class="btn">Dashboard</a></div></body></html>`);
-  }
+  res.send(`<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+</head>
+<body style="background: #0d1421; color: white; font-family: Arial; padding: 20px;">
+    <h1>Admin Panel - Deposit Requests</h1>
+    
+    <div style="background: #1e2329; padding: 20px; margin: 20px 0; border-radius: 10px;">
+        <h3>Pending Deposit Requests</h3>
+        <div id="requestsList" style="max-height: 400px; overflow-y: auto; background: #2b2f36; padding: 10px; border-radius: 5px;">Loading...</div>
+        <button onclick="loadRequests()" style="width: 100%; padding: 12px; margin: 10px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: #f0b90b; color: black;">Refresh Requests</button>
+        <button onclick="toggleMaintenance()" style="width: 100%; padding: 12px; margin: 10px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: #02c076; color: white;">🔧 Toggle Maintenance Mode</button>
+    </div>
+    
+    <script>
+        function loadRequests() {
+            fetch('/admin/requests')
+            .then(r => r.json())
+            .then(data => {
+                const list = document.getElementById('requestsList');
+                if (data.requests && data.requests.length > 0) {
+                    list.innerHTML = data.requests.map(r => 
+                        '<div style="padding: 15px; margin: 10px 0; background: #3c4043; border-radius: 5px; border-left: 5px solid ' + (r.status === 'pending' ? '#f0b90b' : r.status === 'approved' ? '#02c076' : '#f84960') + ';">' +
+                            '<div><strong>User ID:</strong> ' + r.userId + '</div>' +
+                            '<div><strong>Amount:</strong> ₹' + r.amount + '</div>' +
+                            '<div><strong>UTR:</strong> ' + r.utr + '</div>' +
+                            '<div><strong>Status:</strong> ' + r.status.toUpperCase() + '</div>' +
+                            '<div><strong>Time:</strong> ' + new Date(r.timestamp).toLocaleString() + '</div>' +
+                            (r.status === 'pending' ? 
+                                '<div style="margin-top: 10px;">' +
+                                    '<button onclick="approveRequest(\'' + r.id + '\')" style="padding: 8px 16px; margin: 5px; border: none; border-radius: 5px; background: #02c076; color: white; cursor: pointer;">Approve</button>' +
+                                    '<button onclick="rejectRequest(\'' + r.id + '\')" style="padding: 8px 16px; margin: 5px; border: none; border-radius: 5px; background: #f84960; color: white; cursor: pointer;">Reject</button>' +
+                                '</div>' : ''
+                            ) +
+                        '</div>'
+                    ).join('');
+                } else {
+                    list.innerHTML = 'No deposit requests found';
+                }
+            });
+        }
+        
+        function toggleMaintenance() {
+            fetch('/admin/maintenance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.success ? 'Server Status: ' + data.status.toUpperCase() : 'Error');
+            });
+        }
+        
+        function approveRequest(requestId) {
+            if (!confirm('Approve this deposit?')) return;
+            
+            fetch('/admin/approve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId })
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.success ? 'Approved!' : 'Error: ' + data.message);
+                if (data.success) loadRequests();
+            });
+        }
+        
+        function rejectRequest(requestId) {
+            if (!confirm('Reject this deposit?')) return;
+            
+            fetch('/admin/reject', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ requestId })
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.success ? 'Rejected!' : 'Error');
+                if (data.success) loadRequests();
+            });
+        }
+        
+        loadRequests();
+        setInterval(loadRequests, 30000);
+    </script>
+</body>
+</html>`);
 });
 
 app.get('/deposit', (req, res) => {
