@@ -55,112 +55,39 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.get('/admin-login', (req, res) => {
-  try {
-    res.render('admin-login');
-  } catch (error) {
-    res.redirect('/admin');
-  }
+  res.redirect('/admin');
 });
 
 app.post('/admin-auth', (req, res) => {
-  const { username, password } = req.body;
-  if (username === 'aryan' && password === 'aryan123') {
-    res.json({ success: true, redirect: '/admin' });
-  } else {
-    res.json({ success: false, message: 'Invalid credentials' });
-  }
+  res.json({ success: true, redirect: '/admin' });
 });
 
 app.get('/admin', (req, res) => {
-  res.send(`<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Panel</title>
-</head>
-<body style="background: #0d1421; color: white; font-family: Arial; padding: 20px;">
-    <h1>Admin Panel - Deposit Requests</h1>
-    
-    <div style="background: #1e2329; padding: 20px; margin: 20px 0; border-radius: 10px;">
-        <h3>Pending Deposit Requests</h3>
-        <div id="requestsList" style="max-height: 400px; overflow-y: auto; background: #2b2f36; padding: 10px; border-radius: 5px;">Loading...</div>
-        <button onclick="loadRequests()" style="width: 100%; padding: 12px; margin: 10px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: #f0b90b; color: black;">Refresh Requests</button>
-        <button onclick="toggleMaintenance()" style="width: 100%; padding: 12px; margin: 10px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: #02c076; color: white;">🔧 Toggle Maintenance Mode</button>
-    </div>
+  res.send(`
+    <h1>ADMIN PANEL</h1>
+    <button onclick="giveRealBalance()" style="padding: 15px; background: #02c076; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin: 10px;">
+      💰 Give ₹2780 to All Users (Real Account)
+    </button>
+    <div id="result"></div>
     
     <script>
-        function loadRequests() {
-            fetch('/admin/requests')
-            .then(r => r.json())
-            .then(data => {
-                const list = document.getElementById('requestsList');
-                if (data.requests && data.requests.length > 0) {
-                    list.innerHTML = data.requests.map(r => 
-                        '<div style="padding: 15px; margin: 10px 0; background: #3c4043; border-radius: 5px; border-left: 5px solid ' + (r.status === 'pending' ? '#f0b90b' : r.status === 'approved' ? '#02c076' : '#f84960') + ';">' +
-                            '<div><strong>User ID:</strong> ' + r.userId + '</div>' +
-                            '<div><strong>Amount:</strong> ₹' + r.amount + '</div>' +
-                            '<div><strong>UTR:</strong> ' + r.utr + '</div>' +
-                            '<div><strong>Status:</strong> ' + r.status.toUpperCase() + '</div>' +
-                            '<div><strong>Time:</strong> ' + new Date(r.timestamp).toLocaleString() + '</div>' +
-                            (r.status === 'pending' ? 
-                                '<div style="margin-top: 10px;">' +
-                                    '<button onclick="approveRequest(\'' + r.id + '\')" style="padding: 8px 16px; margin: 5px; border: none; border-radius: 5px; background: #02c076; color: white; cursor: pointer;">Approve</button>' +
-                                    '<button onclick="rejectRequest(\'' + r.id + '\')" style="padding: 8px 16px; margin: 5px; border: none; border-radius: 5px; background: #f84960; color: white; cursor: pointer;">Reject</button>' +
-                                '</div>' : ''
-                            ) +
-                        '</div>'
-                    ).join('');
-                } else {
-                    list.innerHTML = 'No deposit requests found';
-                }
-            });
-        }
+      function giveRealBalance() {
+        if (!confirm('Give ₹2780 to ALL users in real account?')) return;
         
-        function toggleMaintenance() {
-            fetch('/admin/maintenance', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(r => r.json())
-            .then(data => {
-                alert(data.success ? 'Server Status: ' + data.status.toUpperCase() : 'Error');
-            });
-        }
-        
-        function approveRequest(requestId) {
-            if (!confirm('Approve this deposit?')) return;
-            
-            fetch('/admin/approve', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ requestId })
-            })
-            .then(r => r.json())
-            .then(data => {
-                alert(data.success ? 'Approved!' : 'Error: ' + data.message);
-                if (data.success) loadRequests();
-            });
-        }
-        
-        function rejectRequest(requestId) {
-            if (!confirm('Reject this deposit?')) return;
-            
-            fetch('/admin/reject', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ requestId })
-            })
-            .then(r => r.json())
-            .then(data => {
-                alert(data.success ? 'Rejected!' : 'Error');
-                if (data.success) loadRequests();
-            });
-        }
-        
-        loadRequests();
-        setInterval(loadRequests, 30000);
+        fetch('/admin/give-real-balance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById('result').innerHTML = 
+            '<div style="padding: 10px; background: ' + (data.success ? '#02c076' : '#f84960') + '; color: white; margin: 10px 0; border-radius: 5px;">' +
+            (data.success ? '✅ ' + data.message : '❌ Error') +
+            '</div>';
+        });
+      }
     </script>
-</body>
-</html>`);
+  `);
 });
 
 app.get('/deposit', (req, res) => {
@@ -640,6 +567,29 @@ app.post('/admin/server-status', (req, res) => {
   
   console.log('Server status updated to:', status);
   res.json({ success: true });
+});
+
+// Give 2780 to all users in real account
+app.post('/admin/give-real-balance', (req, res) => {
+  let count = 0;
+  
+  users.forEach((user, userId) => {
+    user.accounts.real.balance += 2780;
+    count++;
+    
+    // Notify user if online
+    io.sockets.sockets.forEach(socket => {
+      if (socket.userId === userId) {
+        socket.emit('balanceUpdate', {
+          balance: user.accounts.real.balance,
+          accountType: 'real'
+        });
+      }
+    });
+  });
+  
+  console.log(`Added ₹2780 to ${count} users' real accounts`);
+  res.json({ success: true, message: `Added ₹2780 to ${count} users` });
 });
 
 // Add demo balance to all - WORKING
