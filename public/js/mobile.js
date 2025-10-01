@@ -392,7 +392,7 @@ function updateMobileAmount() {
 function updateMobileBalance() {
     const balance = userBalance[accountType] ? 
         (userBalance[accountType].balance !== undefined ? userBalance[accountType].balance : userBalance[accountType]) : 
-        (accountType === 'demo' ? 50000 : 0);
+        (accountType === 'demo' ? 50000 : 2780);
     
     const mobileBalanceEl = document.getElementById('mobileBalance');
     if (mobileBalanceEl) {

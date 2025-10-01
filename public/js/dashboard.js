@@ -1058,7 +1058,7 @@ function switchAccount(type) {
     // Update balance display
     const balance = userBalance[accountType] ? 
         (userBalance[accountType].balance !== undefined ? userBalance[accountType].balance : userBalance[accountType]) : 
-        (accountType === 'demo' ? 50000 : 0);
+        (accountType === 'demo' ? 50000 : 2780);
     
     document.getElementById('userBalance').textContent = `₹${balance.toLocaleString()}`;
     
