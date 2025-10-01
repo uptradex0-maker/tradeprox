@@ -1,6 +1,6 @@
 // Professional Trading Dashboard - Exact Screenshot Match
 let currentAsset = 'EUR/USD';
-let accountType = 'demo';
+let accountType = 'real';
 let userBalance = JSON.parse(localStorage.getItem('userBalance')) || { demo: 50000, real: 2780 };
 // Upgrade existing users to 2780
 if (userBalance.real === 0) {
@@ -755,7 +755,7 @@ function connectToServer() {
 }
 
 function initializeAccounts() {
-    accountType = localStorage.getItem('account_type') || 'demo';
+    accountType = localStorage.getItem('account_type') || 'real';
 }
 
 function placeTrade(direction) {

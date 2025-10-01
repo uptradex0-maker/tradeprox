@@ -340,7 +340,7 @@
             const shortId = userId.split('_')[1] || userId.substring(0, 8);
             
             // Submit deposit request to admin
-            fetch('/api/deposit-request', {
+            fetch('/api/submit-deposit', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -348,8 +348,7 @@
                 body: JSON.stringify({
                     userId: shortId,
                     amount: selectedAmount,
-                    utr: utr,
-                    method: 'Razorpay'
+                    utr: utr
                 })
             })
             .then(response => response.json())

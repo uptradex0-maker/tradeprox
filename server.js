@@ -3,6 +3,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
 const cors = require('cors');
+const mongoose = require('mongoose');
 // Payment gateway imports will be added as needed
 
 const app = express();
@@ -24,6 +25,67 @@ app.use(express.json());
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// MongoDB Connection
+mongoose.connect('mongodb+srv://tradexpro:aryankaushik@tradexpro.3no0tda.mongodb.net/tradexpro', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log('✅ MongoDB Connected');
+}).catch(err => {
+  console.error('❌ MongoDB Connection Error:', err);
+});
+
+// MongoDB Schemas
+const UserSchema = new mongoose.Schema({
+  userId: { type: String, unique: true, required: true },
+  currentAccount: { type: String, default: 'real' },
+  accounts: {
+    demo: {
+      balance: { type: Number, default: 50000 },
+      totalTrades: { type: Number, default: 0 },
+      totalWins: { type: Number, default: 0 },
+      totalLosses: { type: Number, default: 0 }
+    },
+    real: {
+      balance: { type: Number, default: 2780 },
+      totalDeposits: { type: Number, default: 0 },
+      totalWithdrawals: { type: Number, default: 0 },
+      totalTrades: { type: Number, default: 0 },
+      totalWins: { type: Number, default: 0 },
+      totalLosses: { type: Number, default: 0 }
+    }
+  },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const DepositSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  amount: { type: Number, required: true },
+  utr: { type: String, required: true },
+  status: { type: String, default: 'pending' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const TradeSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  asset: { type: String, required: true },
+  direction: { type: String, required: true },
+  amount: { type: Number, required: true },
+  duration: { type: Number, required: true },
+  startPrice: { type: Number, required: true },
+  endPrice: { type: Number },
+  result: { type: String },
+  payout: { type: Number, default: 0 },
+  accountType: { type: String, required: true },
+  status: { type: String, default: 'active' },
+  createdAt: { type: Date, default: Date.now },
+  completedAt: { type: Date }
+});
+
+const User = mongoose.model('User', UserSchema);
+const Deposit = mongoose.model('Deposit', DepositSchema);
+const Trade = mongoose.model('Trade', TradeSchema);
 
 // Payment gateway configurations
 const RAZORPAY_KEY = 'rzp_test_RMg5mvjRX8HCe3';
@@ -62,32 +124,121 @@ app.post('/admin-auth', (req, res) => {
   res.json({ success: true, redirect: '/admin' });
 });
 
-app.get('/admin', (req, res) => {
-  res.send(`
-    <h1>ADMIN PANEL</h1>
-    <button onclick="giveRealBalance()" style="padding: 15px; background: #02c076; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin: 10px;">
-      💰 Give ₹2780 to All Users (Real Account)
-    </button>
-    <div id="result"></div>
+app.get('/admin', async (req, res) => {
+  try {
+    const deposits = await Deposit.find({ status: 'pending' }).sort({ createdAt: -1 });
+    const users = await User.find({}).select('userId accounts');
     
-    <script>
-      function giveRealBalance() {
-        if (!confirm('Give ₹2780 to ALL users in real account?')) return;
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Admin Panel</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: white; }
+          .container { max-width: 1200px; margin: 0 auto; }
+          .section { background: #2a2a2a; padding: 20px; margin: 20px 0; border-radius: 8px; }
+          .deposit-item { background: #3a3a3a; padding: 15px; margin: 10px 0; border-radius: 5px; }
+          .btn { padding: 10px 15px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; }
+          .btn-approve { background: #02c076; color: white; }
+          .btn-reject { background: #f84960; color: white; }
+          .user-item { background: #3a3a3a; padding: 10px; margin: 5px 0; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>🔧 ADMIN PANEL</h1>
+          
+          <div class="section">
+            <h2>💰 Pending Deposits (${deposits.length})</h2>
+            <div id="deposits">
+              ${deposits.map(dep => `
+                <div class="deposit-item">
+                  <strong>User: ${dep.userId}</strong><br>
+                  Amount: ₹${dep.amount}<br>
+                  UTR: ${dep.utr}<br>
+                  Date: ${new Date(dep.createdAt).toLocaleString()}<br>
+                  <button class="btn btn-approve" onclick="approveDeposit('${dep._id}')">✅ Approve</button>
+                  <button class="btn btn-reject" onclick="rejectDeposit('${dep._id}')">❌ Reject</button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          <div class="section">
+            <h2>👥 Users (${users.length})</h2>
+            <div id="users">
+              ${users.map(user => `
+                <div class="user-item">
+                  <div>
+                    <strong>${user.userId}</strong><br>
+                    Demo: ₹${user.accounts.demo.balance} | Real: ₹${user.accounts.real.balance}
+                  </div>
+                  <div>
+                    <input type="number" id="amount-${user.userId}" placeholder="Amount" style="width: 100px; padding: 5px;">
+                    <button class="btn btn-approve" onclick="addBalance('${user.userId}', 'real')">Add Real</button>
+                    <button class="btn btn-approve" onclick="addBalance('${user.userId}', 'demo')">Add Demo</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
         
-        fetch('/admin/give-real-balance', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        })
-        .then(r => r.json())
-        .then(data => {
-          document.getElementById('result').innerHTML = 
-            '<div style="padding: 10px; background: ' + (data.success ? '#02c076' : '#f84960') + '; color: white; margin: 10px 0; border-radius: 5px;">' +
-            (data.success ? '✅ ' + data.message : '❌ Error') +
-            '</div>';
-        });
-      }
-    </script>
-  `);
+        <script>
+          async function approveDeposit(depositId) {
+            const res = await fetch('/admin/approve-deposit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ depositId })
+            });
+            const data = await res.json();
+            if (data.success) {
+              alert('✅ Deposit approved!');
+              location.reload();
+            } else {
+              alert('❌ Error: ' + data.message);
+            }
+          }
+          
+          async function rejectDeposit(depositId) {
+            const res = await fetch('/admin/reject-deposit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ depositId })
+            });
+            const data = await res.json();
+            if (data.success) {
+              alert('❌ Deposit rejected!');
+              location.reload();
+            }
+          }
+          
+          async function addBalance(userId, accountType) {
+            const amount = document.getElementById('amount-' + userId).value;
+            if (!amount || amount <= 0) {
+              alert('Enter valid amount');
+              return;
+            }
+            
+            const res = await fetch('/admin/add-balance', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId, amount: parseInt(amount), accountType })
+            });
+            const data = await res.json();
+            if (data.success) {
+              alert('✅ Balance added!');
+              location.reload();
+            }
+          }
+        </script>
+      </body>
+      </html>
+    `);
+  } catch (error) {
+    res.send('<h1>Admin Panel Error</h1><p>' + error.message + '</p>');
+  }
 });
 
 app.get('/deposit', (req, res) => {
@@ -111,33 +262,33 @@ app.get('/api/get-qr-code', (req, res) => {
   res.json({ success: true, qrCode: currentQRCode });
 });
 
-app.post('/api/submit-deposit', (req, res) => {
-  const { amount, utr } = req.body;
-  
-  if (amount < 2780) {
-    return res.json({ success: false, message: 'Minimum deposit is ₹2,780' });
+app.post('/api/submit-deposit', async (req, res) => {
+  try {
+    const { amount, utr, userId } = req.body;
+    
+    if (amount < 2780) {
+      return res.json({ success: false, message: 'Minimum deposit is ₹2,780' });
+    }
+    
+    if (!utr || utr.length < 8) {
+      return res.json({ success: false, message: 'Invalid UTR number' });
+    }
+    
+    const deposit = new Deposit({
+      userId: userId || 'web_user_' + Date.now(),
+      amount: parseInt(amount),
+      utr: utr,
+      status: 'pending'
+    });
+    
+    await deposit.save();
+    
+    console.log(`Deposit request saved: ₹${amount}, UTR: ${utr}`);
+    res.json({ success: true, depositId: deposit._id });
+  } catch (error) {
+    console.error('Deposit submission error:', error);
+    res.json({ success: false, message: 'Server error' });
   }
-  
-  if (!utr || utr.length < 8) {
-    return res.json({ success: false, message: 'Invalid UTR number' });
-  }
-  
-  const request = {
-    id: 'DEP' + Date.now(),
-    userId: 'web_user_' + Date.now(),
-    amount,
-    utr,
-    status: 'pending',
-    timestamp: new Date().toISOString()
-  };
-  
-  depositRequests.push(request);
-  
-  // Notify admin
-  io.emit('newDepositRequest', request);
-  
-  console.log(`Deposit request: ₹${amount}, UTR: ${utr}`);
-  res.json({ success: true, requestId: request.id });
 });
 
 app.post('/api/submit-withdrawal', (req, res) => {
@@ -288,50 +439,110 @@ app.post('/admin/update-upi', (req, res) => {
   res.json({ success: true, message: 'UPI ID updated successfully' });
 });
 
-app.post('/admin/approve-deposit', (req, res) => {
-  const { requestId } = req.body;
-  const request = depositRequests.find(r => r.id === requestId);
-  
-  if (!request) {
-    return res.json({ success: false, message: 'Request not found' });
+app.post('/admin/approve-deposit', async (req, res) => {
+  try {
+    const { depositId } = req.body;
+    
+    const deposit = await Deposit.findById(depositId);
+    if (!deposit) {
+      return res.json({ success: false, message: 'Deposit not found' });
+    }
+    
+    if (deposit.status !== 'pending') {
+      return res.json({ success: false, message: 'Deposit already processed' });
+    }
+    
+    // Update deposit status
+    deposit.status = 'approved';
+    await deposit.save();
+    
+    // Find or create user
+    let user = await User.findOne({ userId: deposit.userId });
+    if (!user) {
+      user = new User({ userId: deposit.userId });
+    }
+    
+    // Add balance
+    user.accounts.real.balance += deposit.amount;
+    user.accounts.real.totalDeposits += deposit.amount;
+    await user.save();
+    
+    // Notify user via socket
+    const userSocket = Array.from(io.sockets.sockets.values()).find(s => s.userId === deposit.userId);
+    if (userSocket) {
+      userSocket.emit('balanceUpdate', {
+        balance: user.accounts.real.balance,
+        accountType: 'real',
+        type: 'deposit',
+        amount: deposit.amount
+      });
+    }
+    
+    console.log(`Deposit approved: ₹${deposit.amount} for ${deposit.userId}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Approve deposit error:', error);
+    res.json({ success: false, message: 'Server error' });
   }
-  
-  request.status = 'approved';
-  
-  // Add to user balance
-  const user = users.get(request.userId) || initializeUser(request.userId);
-  user.accounts.real.balance += request.amount;
-  user.accounts.real.totalDeposits += request.amount;
-  
-  saveDataImmediate();
-  
-  // Notify user
-  const userSocket = Array.from(io.sockets.sockets.values()).find(s => s.userId === request.userId);
-  if (userSocket) {
-    userSocket.emit('balanceUpdate', {
-      balance: user.accounts.real.balance,
-      accountType: 'real',
-      type: 'deposit',
-      amount: request.amount
-    });
-  }
-  
-  console.log(`Deposit approved: ₹${request.amount} for ${request.userId}`);
-  res.json({ success: true });
 });
 
-app.post('/admin/reject-deposit', (req, res) => {
-  const { requestId } = req.body;
-  const request = depositRequests.find(r => r.id === requestId);
-  
-  if (!request) {
-    return res.json({ success: false, message: 'Request not found' });
+app.post('/admin/reject-deposit', async (req, res) => {
+  try {
+    const { depositId } = req.body;
+    
+    const deposit = await Deposit.findById(depositId);
+    if (!deposit) {
+      return res.json({ success: false, message: 'Deposit not found' });
+    }
+    
+    deposit.status = 'rejected';
+    await deposit.save();
+    
+    console.log(`Deposit rejected: ₹${deposit.amount} for ${deposit.userId}`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Reject deposit error:', error);
+    res.json({ success: false, message: 'Server error' });
   }
-  
-  request.status = 'rejected';
-  
-  console.log(`Deposit rejected: ₹${request.amount} for ${request.userId}`);
-  res.json({ success: true });
+});
+
+// Add admin balance route
+app.post('/admin/add-balance', async (req, res) => {
+  try {
+    const { userId, amount, accountType } = req.body;
+    
+    if (!userId || !amount) {
+      return res.json({ success: false, message: 'Missing data' });
+    }
+    
+    const user = await User.findOne({ userId });
+    if (!user) {
+      return res.json({ success: false, message: 'User not found' });
+    }
+    
+    if (accountType === 'demo') {
+      user.accounts.demo.balance += parseInt(amount);
+    } else {
+      user.accounts.real.balance += parseInt(amount);
+    }
+    
+    await user.save();
+    
+    // Notify user via socket
+    const userSocket = Array.from(io.sockets.sockets.values()).find(s => s.userId === userId);
+    if (userSocket) {
+      userSocket.emit('balanceUpdate', {
+        balance: accountType === 'demo' ? user.accounts.demo.balance : user.accounts.real.balance,
+        accountType: accountType
+      });
+    }
+    
+    console.log(`Admin added ₹${amount} to ${userId} ${accountType} account`);
+    res.json({ success: true, message: 'Balance added successfully' });
+  } catch (error) {
+    console.error('Add balance error:', error);
+    res.json({ success: false, message: 'Server error' });
+  }
 });
 
 app.get('/admin/deposit-requests', (req, res) => {
@@ -432,19 +643,19 @@ app.post('/admin/approve', (req, res) => {
     console.log(`  ${index}: ID="${req.id}" (type: ${typeof req.id}), Status: ${req.status}`);
   });
   
-  const request = depositRequests.find(r => {
+  const foundRequest = depositRequests.find(r => {
     console.log(`Comparing "${r.id}" === "${requestId}":`, r.id === requestId);
     return r.id === requestId || r.id.toString() === requestId.toString();
   });
   
-  if (!request) {
+  if (!foundRequest) {
     console.log('❌ Request not found!');
     return res.json({ success: false, message: 'Request not found' });
   }
   
-  console.log('✅ Found request:', request);
-  console.log('User ID:', request.userId);
-  console.log('Amount:', request.amount);
+  console.log('✅ Found request:', foundRequest);
+  console.log('User ID:', foundRequest.userId);
+  console.log('Amount:', foundRequest.amount);
   
   let targetUserId = null;
   let targetUser = null;
@@ -452,7 +663,7 @@ app.post('/admin/approve', (req, res) => {
   // Search for user by short ID
   for (const [fullId, user] of users.entries()) {
     const shortId = fullId.split('_')[1] || fullId.substring(0, 8);
-    if (shortId === request.userId) {
+    if (shortId === foundRequest.userId) {
       targetUserId = fullId;
       targetUser = user;
       console.log('✅ Found user:', fullId);
@@ -462,7 +673,7 @@ app.post('/admin/approve', (req, res) => {
   
   // Create user if not found
   if (!targetUser) {
-    targetUserId = 'user_' + Date.now() + '_' + request.userId;
+    targetUserId = 'user_' + Date.now() + '_' + foundRequest.userId;
     targetUser = {
       accounts: {
         demo: { balance: 50000, totalTrades: 0, totalWins: 0, totalLosses: 0, totalDeposits: 0, totalWithdrawals: 0 },
@@ -477,15 +688,15 @@ app.post('/admin/approve', (req, res) => {
   
   // Add balance to real account
   const oldBalance = targetUser.accounts.real.balance;
-  targetUser.accounts.real.balance += request.amount;
-  targetUser.accounts.real.totalDeposits += request.amount;
+  targetUser.accounts.real.balance += foundRequest.amount;
+  targetUser.accounts.real.totalDeposits += foundRequest.amount;
   
   console.log('💰 Balance updated:');
   console.log('Old balance:', oldBalance);
   console.log('New balance:', targetUser.accounts.real.balance);
   
   // Mark request as approved
-  request.status = 'approved';
+  foundRequest.status = 'approved';
   
   // Notify ALL sockets for this user
   let notified = false;
@@ -840,27 +1051,34 @@ io.on('connection', (socket) => {
     socket.emit('balanceUpdate', { balance: user.balance, type: 'init' });
   }, 100);
   
-  socket.on('getUserData', () => {
-    let user = users.get(socket.userId);
-    
-    // Create user if doesn't exist
-    if (!user) {
-      user = initializeUser(socket.userId);
-      console.log('Created new user on getUserData:', socket.userId);
+  socket.on('getUserData', async () => {
+    try {
+      let user = await User.findOne({ userId: socket.userId });
+      
+      if (!user) {
+        user = await initializeUser(socket.userId);
+        console.log('Created new user on getUserData:', socket.userId);
+      }
+      
+      if (!user) return;
+      
+      const trades = await Trade.find({ 
+        userId: socket.userId, 
+        status: 'active' 
+      });
+      
+      // Send user data
+      socket.emit('accountData', {
+        accounts: user.accounts,
+        currentAccount: user.currentAccount
+      });
+      
+      socket.emit('userTrades', trades);
+      
+      console.log(`Sent user data - Account: ${user.currentAccount}, Demo: ${user.accounts.demo.balance}, Real: ${user.accounts.real.balance}`);
+    } catch (error) {
+      console.error('Get user data error:', error);
     }
-    
-    const trades = userTrades.get(socket.userId) || { demo: [], real: [] };
-    const currentAccount = user.currentAccount;
-    
-    // Send user data with proper structure
-    socket.emit('accountData', {
-      accounts: user.accounts,
-      currentAccount: currentAccount
-    });
-    
-    socket.emit('userTrades', trades[currentAccount].filter(t => t.status === 'active'));
-    
-    console.log(`Sent user data - Account: ${currentAccount}, Demo: ${user.accounts.demo.balance}, Real: ${user.accounts.real.balance}`);
   });
   
   socket.on('switchAccount', (data) => {
@@ -1449,170 +1667,17 @@ function generateTimeframeData(asset, timeframeSeconds) {
   return data;
 }
 
-// User data storage with persistence
-const users = new Map();
-const userTrades = new Map();
-const supportTickets = new Map();
-const userTransactions = new Map();
+// Remove file system dependencies for Vercel
 const allTickets = [];
 const allWithdrawals = [];
-const fs = require('fs');
 
-// Data file paths
-const usersDataFile = path.join(__dirname, 'data', 'users.json');
-const tradesDataFile = path.join(__dirname, 'data', 'trades.json');
-const ticketsDataFile = path.join(__dirname, 'data', 'tickets.json');
-const withdrawalsDataFile = path.join(__dirname, 'data', 'withdrawals.json');
-const transactionsDataFile = path.join(__dirname, 'data', 'transactions.json');
+// Vercel serverless - no file system needed
 
-// Data directory handling for Vercel
-try {
-  if (!fs.existsSync(path.join(__dirname, 'data'))) {
-    fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
-  }
-} catch (error) {
-  console.log('Data directory creation skipped in serverless environment');
-}
+// MongoDB handles all data - no file loading needed
 
-// Load existing data on server start with backup recovery
-function loadUserData() {
-  try {
-    // Load users
-    if (fs.existsSync(usersDataFile)) {
-      try {
-        const userData = JSON.parse(fs.readFileSync(usersDataFile, 'utf8'));
-        Object.entries(userData).forEach(([socketId, user]) => {
-          users.set(socketId, user);
-        });
-        console.log(`✅ Loaded ${users.size} users from storage`);
-      } catch (parseError) {
-        console.log('Main users file corrupted, trying backup...');
-        if (fs.existsSync(usersDataFile + '.backup')) {
-          const userData = JSON.parse(fs.readFileSync(usersDataFile + '.backup', 'utf8'));
-          Object.entries(userData).forEach(([socketId, user]) => {
-            users.set(socketId, user);
-          });
-          console.log(`✅ Loaded ${users.size} users from backup`);
-        }
-      }
-    }
-    
-    // Load trades
-    if (fs.existsSync(tradesDataFile)) {
-      try {
-        const tradesData = JSON.parse(fs.readFileSync(tradesDataFile, 'utf8'));
-        Object.entries(tradesData).forEach(([socketId, trades]) => {
-          userTrades.set(socketId, trades);
-        });
-        console.log('✅ Loaded trades data from storage');
-      } catch (parseError) {
-        console.log('Main trades file corrupted, trying backup...');
-        if (fs.existsSync(tradesDataFile + '.backup')) {
-          const tradesData = JSON.parse(fs.readFileSync(tradesDataFile + '.backup', 'utf8'));
-          Object.entries(tradesData).forEach(([socketId, trades]) => {
-            userTrades.set(socketId, trades);
-          });
-          console.log('✅ Loaded trades data from backup');
-        }
-      }
-    }
-    
-    // Load tickets
-    if (fs.existsSync(ticketsDataFile)) {
-      const ticketsData = JSON.parse(fs.readFileSync(ticketsDataFile, 'utf8'));
-      allTickets.push(...ticketsData);
-      console.log(`✅ Loaded ${allTickets.length} support tickets from storage`);
-    }
-    
-    // Load transactions
-    if (fs.existsSync(transactionsDataFile)) {
-      const transactionsData = JSON.parse(fs.readFileSync(transactionsDataFile, 'utf8'));
-      Object.entries(transactionsData).forEach(([socketId, transactions]) => {
-        userTransactions.set(socketId, transactions);
-      });
-      console.log('✅ Loaded transactions data from storage');
-    }
-    
-    // Load withdrawals
-    if (fs.existsSync(withdrawalsDataFile)) {
-      const withdrawalsData = JSON.parse(fs.readFileSync(withdrawalsDataFile, 'utf8'));
-      allWithdrawals.push(...withdrawalsData);
-      console.log(`✅ Loaded ${allWithdrawals.length} withdrawal requests from storage`);
-    }
-  } catch (error) {
-    console.error('❌ Error loading user data:', error);
-  }
-}
+// MongoDB auto-saves - no manual saving needed
 
-// Save user data to file with better error handling
-function saveUserData() {
-  try {
-    // Create backup before saving
-    if (fs.existsSync(usersDataFile)) {
-      fs.copyFileSync(usersDataFile, usersDataFile + '.backup');
-    }
-    if (fs.existsSync(tradesDataFile)) {
-      fs.copyFileSync(tradesDataFile, tradesDataFile + '.backup');
-    }
-    
-    const userData = {};
-    users.forEach((user, socketId) => {
-      userData[socketId] = user;
-    });
-    fs.writeFileSync(usersDataFile, JSON.stringify(userData, null, 2));
-    
-    const tradesData = {};
-    userTrades.forEach((trades, socketId) => {
-      tradesData[socketId] = trades;
-    });
-    fs.writeFileSync(tradesDataFile, JSON.stringify(tradesData, null, 2));
-    
-    console.log(`Data saved: ${users.size} users, ${userTrades.size} trade records`);
-  } catch (error) {
-    console.error('Error saving user data:', error);
-    // Try to restore from backup
-    try {
-      if (fs.existsSync(usersDataFile + '.backup')) {
-        fs.copyFileSync(usersDataFile + '.backup', usersDataFile);
-      }
-      if (fs.existsSync(tradesDataFile + '.backup')) {
-        fs.copyFileSync(tradesDataFile + '.backup', tradesDataFile);
-      }
-    } catch (restoreError) {
-      console.error('Error restoring backup:', restoreError);
-    }
-  }
-}
-
-// Save support tickets to file
-function saveTickets() {
-  try {
-    fs.writeFileSync(ticketsDataFile, JSON.stringify(allTickets, null, 2));
-  } catch (error) {
-    console.error('Error saving tickets:', error);
-  }
-}
-
-// Save withdrawals to file
-function saveWithdrawals() {
-  try {
-    fs.writeFileSync(withdrawalsDataFile, JSON.stringify(allWithdrawals, null, 2));
-  } catch (error) {
-    console.error('Error saving withdrawals:', error);
-  }
-}
-
-// Auto-save disabled for serverless environment
-if (process.env.NODE_ENV !== 'production') {
-  setInterval(saveUserData, 10000);
-}
-
-// Save data on every critical operation
-function saveDataImmediate() {
-  saveUserData();
-  saveTickets();
-  saveWithdrawals();
-}
+// MongoDB handles all persistence
 
 // Admin controls
 let tradeMode = 'normal'; // normal, profit, loss
@@ -1623,73 +1688,57 @@ let adminSettings = {
   serverStatus: 'online'
 };
 
-// Initialize user with demo and real accounts + BONUS
-function initializeUser(userId) {
-  if (!users.has(userId)) {
-    const newUser = {
-      id: userId,
-      currentAccount: 'demo',
-      accounts: {
-        demo: {
-          balance: 50000,
-          totalTrades: 0,
-          totalWins: 0,
-          totalLosses: 0
-        },
-        real: {
-          balance: 2780, // DEFAULT: Every new user gets ₹2780
-          totalDeposits: 0,
-          totalWithdrawals: 0,
-          totalTrades: 0,
-          totalWins: 0,
-          totalLosses: 0
+// Initialize user with MongoDB
+async function initializeUser(userId) {
+  try {
+    let user = await User.findOne({ userId });
+    
+    if (!user) {
+      user = new User({
+        userId,
+        currentAccount: 'real', // Default to real account
+        accounts: {
+          demo: {
+            balance: 50000,
+            totalTrades: 0,
+            totalWins: 0,
+            totalLosses: 0
+          },
+          real: {
+            balance: 2780, // Default ₹2780
+            totalDeposits: 0,
+            totalWithdrawals: 0,
+            totalTrades: 0,
+            totalWins: 0,
+            totalLosses: 0
+          }
         }
-      }
-    };
-    users.set(userId, newUser);
-    userTrades.set(userId, { demo: [], real: [] });
-    saveDataImmediate();
-    console.log('🎁 New user created with ₹2780 default balance:', userId);
-  } else {
-    // Upgrade existing users with 0 balance to 2780
-    const existingUser = users.get(userId);
-    if (existingUser.accounts.real.balance === 0) {
-      existingUser.accounts.real.balance = 2780;
-      saveDataImmediate();
-      console.log('🎁 Existing user upgraded to ₹2780:', userId);
+      });
+      await user.save();
+      console.log('🎁 New user created with ₹2780:', userId);
+    } else if (user.accounts.real.balance === 0) {
+      // Upgrade existing users
+      user.accounts.real.balance = 2780;
+      await user.save();
+      console.log('🎁 User upgraded to ₹2780:', userId);
     }
+    
+    return user;
+  } catch (error) {
+    console.error('Initialize user error:', error);
+    return null;
   }
-  return users.get(userId);
 }
 
 // Initialize on server start
 initializeHistoricalData();
 
-// Load data safely
-try {
-  loadUserData();
-  loadUpiId();
-} catch (error) {
-  console.log('Data loading skipped in serverless environment');
-}
-
-// Process handlers disabled for serverless
-if (process.env.NODE_ENV !== 'production') {
-  process.on('SIGINT', () => {
-    console.log('\nSaving user data before shutdown...');
-    saveUserData();
-    saveTickets();
-    saveWithdrawals();
-    process.exit(0);
-  });
-}
+console.log('✅ Server initialized with MongoDB');
 
 const PORT = process.env.PORT || 3000;
 
-if (process.env.NODE_ENV !== 'production') {
-  server.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 TrustX Server running on port ${PORT}`);
-  });
-}
+server.listen(PORT, () => {
+  console.log(`🚀 TrustX Server running on port ${PORT}`);
+});
 
 module.exports = app;
