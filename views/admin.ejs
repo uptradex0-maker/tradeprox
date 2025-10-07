@@ -472,7 +472,7 @@
 
     <script>
         // Check authentication
-        if (localStorage.getItem('admin_authenticated') !== 'true') {
+        if (localStorage.getItem('admin_logged_in') !== 'true') {
             window.location.href = '/admin-login';
         }
 
@@ -778,7 +778,7 @@
 
         // Logout
         function logout() {
-            localStorage.removeItem('admin_authenticated');
+            localStorage.removeItem('admin_logged_in');
             localStorage.removeItem('admin_username');
             window.location.href = '/admin-login';
         }
