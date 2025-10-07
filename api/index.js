@@ -147,12 +147,19 @@ app.get('/api/balance/:userId', (req, res) => {
 app.post('/api/trade', (req, res) => {
   try {
     const { userId, amount, direction, accountType = 'demo' } = req.body;
-    const user = users[userId];
     
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+    // Create user if doesn't exist
+    if (!users[userId]) {
+      users[userId] = {
+        id: userId,
+        username: userId,
+        demoBalance: 50000,
+        realBalance: 0,
+        currentAccount: 'demo'
+      };
     }
-
+    
+    const user = users[userId];
     const tradeAmount = parseFloat(amount);
     const currentBalance = accountType === 'demo' ? user.demoBalance : user.realBalance;
     
