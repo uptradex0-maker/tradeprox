@@ -164,7 +164,7 @@
             </div>
             
             <button type="submit" class="btn">Submit Deposit Request</button>
-            <button type="button" class="btn btn-secondary" onclick="window.location.href='/'">Back to Trading</button>
+            <button type="button" class="btn btn-secondary" onclick="goBackToTrading()">← Back to Trading</button>
         </form>
     </div>
 
@@ -178,8 +178,24 @@
             if (data.userId === userId) {
                 document.getElementById('demoBalance').textContent = `₹${data.demoBalance.toLocaleString()}`;
                 document.getElementById('realBalance').textContent = `₹${data.realBalance.toLocaleString()}`;
+                
+                // Update localStorage cache for trading page sync
+                const balanceCache = {
+                    demoBalance: data.demoBalance,
+                    realBalance: data.realBalance,
+                    currentAccount: localStorage.getItem('tradepro_current_account') || 'demo',
+                    lastUpdated: new Date().toISOString()
+                };
+                localStorage.setItem('tradepro_balance_cache', JSON.stringify(balanceCache));
             }
         });
+        
+        function goBackToTrading() {
+            // Force refresh balance cache before going back
+            loadUserBalance().then(() => {
+                window.location.href = '/';
+            });
+        }
     </script>
     <script>
         // Load QR code
@@ -273,6 +289,15 @@
                 if (result.success) {
                     document.getElementById('demoBalance').textContent = `₹${result.demoBalance.toLocaleString()}`;
                     document.getElementById('realBalance').textContent = `₹${result.realBalance.toLocaleString()}`;
+                    
+                    // Update localStorage cache for trading page sync
+                    const balanceCache = {
+                        demoBalance: result.demoBalance,
+                        realBalance: result.realBalance,
+                        currentAccount: result.currentAccount || 'demo',
+                        lastUpdated: new Date().toISOString()
+                    };
+                    localStorage.setItem('tradepro_balance_cache', JSON.stringify(balanceCache));
                 }
             } catch (error) {
                 console.error('Error loading balance:', error);
