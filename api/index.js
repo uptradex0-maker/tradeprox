@@ -21,13 +21,20 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
 
-// In-memory storage
+// In-memory storage with persistence
 let users = {};
 let trades = [];
 let depositRequests = [];
-let qrCode = null;
+let qrCode = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='; // Default QR placeholder
 let maintenanceMode = 'off';
 let alwaysLoss = 'off';
+
+// Global QR storage to prevent loss
+if (!global.persistentQR) {
+  global.persistentQR = qrCode;
+} else {
+  qrCode = global.persistentQR;
+}
 
 // Price generation
 let currentPrice = 85000;
@@ -254,11 +261,13 @@ app.get('/api/trades/:userId', (req, res) => {
 });
 
 app.get('/api/qr-code', (req, res) => {
-  res.json({ success: true, qrCode });
+  const currentQR = global.persistentQR || qrCode;
+  res.json({ success: true, qrCode: currentQR });
 });
 
 app.get('/api/admin/qr-code', (req, res) => {
-  res.json({ success: true, qrCode });
+  const currentQR = global.persistentQR || qrCode;
+  res.json({ success: true, qrCode: currentQR });
 });
 
 app.post('/api/admin/upload-qr', upload.single('qrCode'), (req, res) => {
@@ -268,6 +277,7 @@ app.post('/api/admin/upload-qr', upload.single('qrCode'), (req, res) => {
 
   const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
   qrCode = base64Image;
+  global.persistentQR = base64Image; // Store globally
   
   res.json({ success: true, message: 'QR code uploaded successfully', qrCode });
 });
