@@ -471,11 +471,6 @@
     </div>
 
     <script>
-        // Check authentication
-        if (localStorage.getItem('admin_logged_in') !== 'true') {
-            window.location.href = '/admin-login';
-        }
-
         // Tab switching
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
