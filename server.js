@@ -576,9 +576,8 @@ app.get('/api/admin/stats', async (req, res) => {
 app.get('/api/qr-code', async (req, res) => {
   try {
     console.log('QR Code API called');
-    const qrData = await readJSON(QR_CODE_FILE);
-    console.log('QR Data:', qrData);
-    res.json({ success: true, qrCode: qrData.qrCode || null });
+    // Serve the static QR code
+    res.json({ success: true, qrCode: '/qr-code.jpeg' });
   } catch (error) {
     console.error('QR Code API error:', error);
     res.status(500).json({ success: false, message: error.message });

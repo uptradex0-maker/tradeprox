@@ -25,7 +25,7 @@ app.set('views', path.join(__dirname, '../views'));
 let users = {};
 let trades = [];
 let depositRequests = [];
-let qrCode = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='; // Default QR placeholder
+let qrCode = '/QrCode%20(2).jpeg'; // Static QR code file
 let maintenanceMode = 'off';
 let alwaysLoss = 'off';
 
