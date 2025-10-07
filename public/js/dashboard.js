@@ -227,8 +227,8 @@ function initializeChart() {
             </div>
             
             <!-- Chart Area -->
-            <div style="margin-top: 60px; height: calc(100vh - 200px); padding: 10px; position: relative;">
-                <canvas id="candlestickChart" style="width: 100%; height: 100%; background: #0d1421; display: block;"></canvas>
+            <div style="margin-top: 60px; height: calc(100vh - 200px); padding: 10px; background: #1a1a1a;">
+                <canvas id="candlestickChart" width="800" height="400" style="width: 100%; height: 100%; background: #1a1a1a; border: 1px solid #333;"></canvas>
             </div>
             
             <!-- Mobile Trading Panel -->
@@ -279,7 +279,28 @@ function initializeChart() {
         candleStartTime[asset] = Date.now();
     });
     
-    initializeCandlestickChart();
+    // Force chart initialization
+    setTimeout(() => {
+        forceInitChart();
+    }, 100);
+}
+
+function forceInitChart() {
+    const canvas = document.getElementById('candlestickChart');
+    if (!canvas) return;
+    
+    canvas.width = 800;
+    canvas.height = 400;
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Generate sample data
+    generateCandleData();
+    
+    // Draw immediately
+    drawChart(ctx, 800, 400);
+    
+    console.log('Chart forced to initialize');
 }
 
 function updateBalance() {
@@ -480,55 +501,7 @@ function logout() {
 }
 
 function initializeCandlestickChart() {
-    const canvas = document.getElementById('candlestickChart');
-    if (!canvas) {
-        console.log('Canvas not found');
-        return;
-    }
-    
-    // Set fixed canvas size
-    canvas.width = window.innerWidth - 20;
-    canvas.height = window.innerHeight - 200;
-    canvas.style.display = 'block';
-    
-    const ctx = canvas.getContext('2d');
-    console.log('Canvas initialized:', canvas.width, 'x', canvas.height);
-    
-    // Generate initial candle data for all assets
-    generateCandleData();
-    
-    // Start current candle for all assets
-    assets.forEach(asset => {
-        const lastClose = chartData[asset].length > 0 ? chartData[asset][chartData[asset].length - 1].close : getInitialPrice(asset);
-        currentCandle[asset] = {
-            open: lastClose,
-            high: lastClose,
-            low: lastClose,
-            close: lastClose,
-            time: Date.now()
-        };
-        candleStartTime[asset] = Date.now();
-    });
-    
-    // Draw chart immediately
-    console.log('Drawing initial chart');
-    drawChart(ctx, canvas.width, canvas.height);
-    
-    // Add resize handler
-    window.addEventListener('resize', () => {
-        setTimeout(() => {
-            const canvas = document.getElementById('candlestickChart');
-            if (canvas) {
-                const container = canvas.parentElement;
-                canvas.width = container.offsetWidth || window.innerWidth - 20;
-                canvas.height = container.offsetHeight || window.innerHeight - 200;
-                canvas.style.width = canvas.width + 'px';
-                canvas.style.height = canvas.height + 'px';
-                const ctx = canvas.getContext('2d');
-                drawChart(ctx, canvas.width, canvas.height);
-            }
-        }, 100);
-    });
+    forceInitChart();
 }
 
 function getInitialPrice(asset) {
