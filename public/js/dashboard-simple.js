@@ -16,8 +16,11 @@ let timeframe = 60000;
 const assets = ['EUR/USD', 'GBP/USD', 'BTC/USD'];
 
 document.addEventListener('DOMContentLoaded', function() {
-    username = localStorage.getItem('tradepro_username') || ('user_' + Date.now());
-    localStorage.setItem('tradepro_username', username);
+    username = localStorage.getItem('tradepro_username');
+    if (!username) {
+        window.location.href = '/login';
+        return;
+    }
     
     const storedAccount = localStorage.getItem('tradepro_current_account');
     currentAccount = storedAccount === 'real' ? 'real' : 'demo';
@@ -254,7 +257,7 @@ function showNotification(message, color) {
 
 function logout() {
     localStorage.clear();
-    location.reload();
+    window.location.href = '/login';
 }
 
 function initializeCandlestickChart() {

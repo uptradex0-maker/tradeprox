@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - TrustX</title>
+    <title>Register - TradePro</title>
     <style>
         * {
             margin: 0;
@@ -12,8 +12,8 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0d1421 0%, #1a1d29 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d1421, #1e2329);
             color: white;
             min-height: 100vh;
             display: flex;
@@ -21,14 +21,14 @@
             justify-content: center;
         }
         
-        .register-container {
-            background: linear-gradient(135deg, #1e2329 0%, #181a20 100%);
+        .container {
+            background: rgba(30, 35, 41, 0.9);
             padding: 40px;
-            border-radius: 15px;
-            border: 1px solid #2b2f36;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             width: 100%;
             max-width: 400px;
+            backdrop-filter: blur(10px);
         }
         
         .logo {
@@ -38,96 +38,93 @@
         
         .logo h1 {
             color: #f0b90b;
-            font-size: 32px;
-            margin-bottom: 10px;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        .logo p {
+            color: #848e9c;
+            font-size: 14px;
         }
         
         .form-group {
             margin-bottom: 20px;
         }
         
-        .form-group label {
+        label {
             display: block;
+            margin-bottom: 8px;
             color: #848e9c;
             font-size: 14px;
-            margin-bottom: 8px;
         }
         
-        .form-group input {
+        input {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             background: #2b2f36;
-            border: 2px solid #3c4043;
-            border-radius: 8px;
+            border: 1px solid #3c4043;
+            border-radius: 6px;
             color: white;
             font-size: 16px;
             outline: none;
-            transition: all 0.3s;
         }
         
-        .form-group input:focus {
+        input:focus {
             border-color: #f0b90b;
-            box-shadow: 0 0 0 3px rgba(240, 185, 11, 0.2);
         }
         
-        .register-btn {
+        .btn {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #02c076, #028a50);
-            color: white;
+            padding: 12px;
+            background: linear-gradient(135deg, #f0b90b, #d4a017);
+            color: #0d1421;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 20px;
+            transition: all 0.3s ease;
         }
         
-        .register-btn:hover {
+        .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(2, 192, 118, 0.4);
+            box-shadow: 0 5px 15px rgba(240, 185, 11, 0.3);
         }
         
-        .login-link {
+        .switch-link {
             text-align: center;
-            color: #848e9c;
-            font-size: 14px;
+            margin-top: 20px;
         }
         
-        .login-link a {
+        .switch-link a {
             color: #f0b90b;
             text-decoration: none;
         }
         
         .error {
-            background: rgba(248, 73, 96, 0.1);
-            border: 1px solid #f84960;
-            color: #f84960;
+            background: #f84960;
+            color: white;
             padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            font-size: 14px;
+            border-radius: 6px;
+            margin-bottom: 20px;
             display: none;
         }
         
         .success {
-            background: rgba(2, 192, 118, 0.1);
-            border: 1px solid #02c076;
-            color: #02c076;
+            background: #02c076;
+            color: white;
             padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            font-size: 14px;
+            border-radius: 6px;
+            margin-bottom: 20px;
             display: none;
         }
     </style>
 </head>
 <body>
-    <div class="register-container">
+    <div class="container">
         <div class="logo">
-            <h1>TrustX</h1>
-            <p style="color: #848e9c;">Create Trading Account</p>
+            <h1>TradePro</h1>
+            <p>Binary Options Trading</p>
         </div>
         
         <div id="error" class="error"></div>
@@ -135,18 +132,8 @@
         
         <form id="registerForm">
             <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" name="name" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone" required>
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required minlength="3">
             </div>
             
             <div class="form-group">
@@ -154,53 +141,60 @@
                 <input type="password" id="password" name="password" required minlength="6">
             </div>
             
-            <button type="submit" class="register-btn">Create Account</button>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+            </div>
+            
+            <button type="submit" class="btn">Register</button>
         </form>
         
-        <div class="login-link">
-            Already have an account? <a href="/">Login Here</a>
+        <div class="switch-link">
+            <p>Already have an account? <a href="/login">Login here</a></p>
         </div>
     </div>
-    
+
     <script>
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
+            const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
             const errorDiv = document.getElementById('error');
             const successDiv = document.getElementById('success');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            if (password !== confirmPassword) {
+                errorDiv.textContent = 'Passwords do not match';
+                errorDiv.style.display = 'block';
+                return;
+            }
             
             try {
                 const response = await fetch('/api/register', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ name, email, phone, password })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
                 });
                 
-                const data = await response.json();
+                const result = await response.json();
                 
-                if (data.success) {
-                    successDiv.innerHTML = `Account created! Your UID: <strong>${data.uid}</strong><br>Redirecting to login...`;
+                if (result.success) {
+                    successDiv.textContent = 'Registration successful! Redirecting to login...';
                     successDiv.style.display = 'block';
-                    errorDiv.style.display = 'none';
-                    
                     setTimeout(() => {
-                        window.location.href = '/';
-                    }, 3000);
+                        window.location.href = '/login';
+                    }, 2000);
                 } else {
-                    errorDiv.textContent = data.message;
+                    errorDiv.textContent = result.message;
                     errorDiv.style.display = 'block';
-                    successDiv.style.display = 'none';
                 }
             } catch (error) {
                 errorDiv.textContent = 'Registration failed. Please try again.';
                 errorDiv.style.display = 'block';
-                successDiv.style.display = 'none';
             }
         });
     </script>

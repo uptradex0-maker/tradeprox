@@ -85,6 +85,13 @@
 
     <div id="tradingChart" class="chart-container"></div>
 
+    <script>
+        // Check if user is logged in
+        const username = localStorage.getItem('tradepro_username');
+        if (!username) {
+            window.location.href = '/login';
+        }
+    </script>
     <script src="/js/dashboard-simple.js"></script>
 </body>
 </html>
