@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradePro - Binary Options Trading</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1d29 100%);
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container { 
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+        .header {
+            grid-column: 1 / -1;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .balance-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        .account-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .account-btn {
+            padding: 8px 16px;
+            border: 1px solid #333;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .account-btn.active {
+            background: #00ff88;
+            color: black;
+        }
+        .left-panel {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .chart-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .right-panel {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .trade-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .trade-form input, .trade-form select {
+            padding: 10px;
+            border: 1px solid #333;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border-radius: 5px;
+        }
+        .trade-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .trade-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .trade-btn.up {
+            background: #00ff88;
+            color: black;
+        }
+        .trade-btn.down {
+            background: #ff4444;
+            color: white;
+        }
+        #tradingChart {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .active-trades {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <h2>TradePro</h2>
+            </div>
+            <div class="balance-info">
+                <div>
+                    <span id="accountType">DEMO</span> Balance: 
+                    ₹<span id="userBalance">50000</span>
+                </div>
+                <div class="account-buttons">
+                    <button class="account-btn active" data-account="demo" onclick="switchAccount('demo')">Demo</button>
+                    <button class="account-btn" data-account="real" onclick="switchAccount('real')">Real</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="left-panel">
+            <h3>Trade Settings</h3>
+            <div class="trade-form">
+                <label>Asset</label>
+                <select id="assetSelect">
+                    <option value="EUR/USD">EUR/USD</option>
+                    <option value="GBP/USD">GBP/USD</option>
+                    <option value="USD/JPY">USD/JPY</option>
+                    <option value="BTC/USD">BTC/USD</option>
+                </select>
+
+                <label>Amount (₹)</label>
+                <input type="number" id="tradeAmount" value="100" min="10" max="10000">
+
+                <label>Duration (seconds)</label>
+                <input type="number" id="tradeDuration" value="60" min="30" max="300">
+
+                <div class="trade-buttons">
+                    <button class="trade-btn up" onclick="placeTrade('up')">
+                        ↑ UP
+                    </button>
+                    <button class="trade-btn down" onclick="placeTrade('down')">
+                        ↓ DOWN
+                    </button>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <a href="/deposit" style="display: inline-block; padding: 10px 20px; background: #00ff88; color: black; text-decoration: none; border-radius: 5px; font-weight: bold;">Deposit</a>
+                <a href="/withdraw" style="display: inline-block; padding: 10px 20px; background: #ff4444; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin-left: 10px;">Withdraw</a>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3>Live Chart - <span id="currentAsset">EUR/USD</span></h3>
+            <div id="tradingChart"></div>
+        </div>
+
+        <div class="right-panel">
+            <h3>Active Trades</h3>
+            <div id="activeTradesList" class="active-trades">
+                <p style="color: #ccc; text-align: center; padding: 20px;">No active trades</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>

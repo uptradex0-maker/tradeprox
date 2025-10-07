@@ -1,16 +1,29 @@
-# TODO: Upgrade Chart with Real-time Candle Formation Animation
-
-## Steps to Complete
-- [x] Create professional custom canvas candlestick chart
-- [x] Remove price display and buttons from chart area
-- [x] Add scrolling and zooming functionality
-- [x] Add trade markers on chart at exact positions
-- [x] Style the chart to look very cool and professional
-- [x] Add real-time candle formation animation (show candle building during timeframe, very slow speed)
-- [x] Add personal cool effects and improvements (particles, glow, progress bar)
-- [x] Support different timeframes (1s, 5s, 15s, 30s, 1m)
-- [x] Fix panning to always show forming candle
-- [ ] Fix trade markers not showing on chart
-- [ ] Add cool lines and visual elements to chart
-- [ ] Add trade duration lines (show lines from entry to exit based on trade duration)
-- [ ] Test the enhanced chart functionality
+- [x] Analyze the candle chart implementation in dashboard.js
+- [x] Identify the issue with abrupt candle additions causing up-down movements
+- [x] Plan to implement real-time candle formation with smoother updates
+- [x] Add variables for current candle and start time
+- [x] Modify initializeCandlestickChart to start a current candle
+- [x] Update updateChart to incrementally update the current candle with smaller changes
+- [x] Modify drawChart to include the current forming candle
+- [x] Change update interval to 1 second for smoother animation
+- [x] Implement the changes in dashboard.js
+- [x] Set up Prisma database with SQLite
+- [x] Install required packages (@prisma/client, prisma, razorpay)
+- [x] Generate Prisma client
+- [x] Push database schema
+- [x] Integrate Razorpay payment gateway
+- [x] Update deposit page with Razorpay checkout
+- [x] Add payment verification endpoints
+- [x] Test server startup
+- [x] Add timeframe selector (1m, 5m, 15m, 1h)
+- [x] Create multiple assets (EUR/USD, GBP/USD, BTC/USD) with separate chart data
+- [x] Update UI to include asset and timeframe selectors
+- [x] Modify chart logic to handle multiple assets and timeframes
+- [x] Enhance chart visuals (add volume bars, gradients, animations)
+- [x] Add login and register APIs to server.js
+- [x] Add online user tracking in login/register APIs
+- [x] Modify admin.js to display online users in admin panel
+- [x] Add online users table to admin.ejs
+- [x] Update deposit dropdown to show all users with clear IDs and status
+- [x] Create test user data to populate admin panel
+- [ ] Test multi-asset charts with different timeframes

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code Test</title>
+</head>
+<body>
+    <h1>QR Code Test</h1>
+    <div id="result"></div>
+    <img id="qrImage" style="max-width: 300px; border: 1px solid #ccc;" />
+    
+    <script>
+        async function testQR() {
+            try {
+                const response = await fetch('/api/qr-code');
+                const data = await response.json();
+                console.log('QR Response:', data);
+                
+                document.getElementById('result').innerHTML = `
+                    <p>Success: ${data.success}</p>
+                    <p>QR Code: ${data.qrCode}</p>
+                `;
+                
+                if (data.qrCode) {
+                    document.getElementById('qrImage').src = data.qrCode;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+        
+        testQR();
+    </script>
+</body>
+</html>

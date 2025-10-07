@@ -1,381 +1,347 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Deposit - TrustX</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #0d1421 0%, #1a1d29 100%);
             color: white;
             min-height: 100vh;
-        }
-        
-        .urgent-notice {
-            background: #ff0000 !important;
-            color: white !important;
-            padding: 20px !important;
-            text-align: center !important;
-            font-weight: bold !important;
-            font-size: 16px !important;
-            border: 3px solid #ff6666 !important;
-            margin: 20px !important;
-            border-radius: 10px !important;
-            animation: blink 1s infinite !important;
-        }
-        
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
-        
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
+            margin: 0;
             padding: 20px;
         }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px 0;
-        }
-        
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: #2b2f36;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .deposit-card {
-            background: linear-gradient(135deg, #1e2329 0%, #181a20 100%);
-            border-radius: 15px;
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #1e2329;
             padding: 30px;
-            border: 1px solid #2b2f36;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(240, 185, 11, 0.5);
         }
-        
-        .amount-section {
-            margin-bottom: 25px;
+        h1 {
+            color: #f0b90b;
+            text-align: center;
+            margin-bottom: 20px;
         }
-        
-        .amount-input {
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #ccc;
+        }
+        input {
             width: 100%;
-            padding: 15px;
-            background: #2b2f36;
-            border: 2px solid #3c4043;
-            border-radius: 10px;
-            color: white;
-            font-size: 18px;
-            font-weight: 600;
-            text-align: center;
-            outline: none;
-            transition: all 0.3s;
-        }
-        
-        .amount-input:focus {
-            border-color: #f0b90b;
-            box-shadow: 0 0 0 3px rgba(240, 185, 11, 0.2);
-        }
-        
-        .min-amount {
-            color: #848e9c;
-            font-size: 12px;
-            margin-top: 8px;
-            text-align: center;
-        }
-        
-        .quick-amounts {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .quick-btn {
-            padding: 10px;
-            background: #2b2f36;
-            color: #848e9c;
-            border: 1px solid #3c4043;
+            padding: 12px;
             border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
+            border: none;
+            font-size: 16px;
+            margin-bottom: 15px;
+            background: #2b2f36;
+            color: white;
         }
-        
-        .quick-btn:hover, .quick-btn.active {
-            background: #f0b90b;
-            color: #000;
-            border-color: #f0b90b;
-        }
-        
-        .proceed-btn {
+        button {
             width: 100%;
             padding: 15px;
             background: linear-gradient(135deg, #f0b90b, #e6a800);
-            color: #000;
             border: none;
             border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 18px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 20px;
+            color: #000;
+            transition: background 0.3s ease;
+            margin-bottom: 10px;
         }
-        
-        .proceed-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(240, 185, 11, 0.4);
+        button:hover {
+            background: linear-gradient(135deg, #e6a800, #f0b90b);
         }
-        
-        .payment-section {
-            display: none;
+        #userIdDisplay {
             text-align: center;
-            margin-top: 30px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #f0b90b;
         }
-        
-        .payment-info {
-            background: rgba(43, 47, 54, 0.5);
-            padding: 20px;
-            border-radius: 10px;
+        .qr-section {
+            text-align: center;
             margin: 20px 0;
-        }
-        
-        .utr-input {
-            width: 100%;
-            padding: 12px;
+            padding: 20px;
             background: #2b2f36;
-            border: 2px solid #3c4043;
+            border-radius: 10px;
+        }
+        .qr-code {
+            max-width: 200px;
+            width: 100%;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #3c4043;
+            margin: 0 5px;
+        }
+        .step-dot.active {
+            background: #f0b90b;
+        }
+        .amount-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f0b90b;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .instruction {
+            background: #2b2f36;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #f0b90b;
+        }
+        .balance-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: #2b2f36;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
             border-radius: 8px;
             color: white;
-            font-size: 14px;
-            outline: none;
-            margin-top: 10px;
+            font-weight: bold;
+            z-index: 1001;
+            max-width: 300px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
-        
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #02c076, #028a50);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 15px;
+        .notification.success {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
         }
-        
-        .success-message {
-            display: none;
-            text-align: center;
-            padding: 30px;
-            background: rgba(2, 192, 118, 0.1);
-            border: 1px solid #02c076;
-            border-radius: 10px;
-            margin-top: 20px;
+        .notification.error {
+            background: linear-gradient(135deg, #ff4444, #cc3333);
+        }
+        .notification.info {
+            background: linear-gradient(135deg, #00d4ff, #5200ff);
         }
     </style>
 </head>
 <body>
-    <!-- URGENT NOTICE - ALWAYS VISIBLE -->
-    <div class="urgent-notice">
-        ⚠️ URGENT: Due to HIGH VOLUME, deposits may take 24 HOURS! Your money is SAFE! ⚠️
-    </div>
-    
-    <a href="/dashboard" class="back-btn">
-        ← Back to Dashboard
-    </a>
-    
     <div class="container">
-        <div class="header">
-            <h1 style="color: #f0b90b; margin-bottom: 10px;">💰 Deposit Funds</h1>
-            <p style="color: #848e9c;">Add money to your trading account</p>
-            
-            <div style="background: rgba(43, 47, 54, 0.5); padding: 10px; border-radius: 6px; margin-top: 10px; text-align: center;">
-                <span style="color: #848e9c; font-size: 12px;">Your User ID: </span>
-                <span style="color: #f0b90b; font-weight: 600; font-size: 14px;" id="userIdDisplay">Loading...</span>
-            </div>
-        </div>
+        <h1>💰 Deposit Funds</h1>
+        <div id="userIdDisplay">Loading User ID...</div>
         
-        <div class="deposit-card">
-            <div id="amountSection" class="amount-section">
-                <label style="color: #848e9c; font-size: 14px; margin-bottom: 10px; display: block;">DEPOSIT AMOUNT</label>
-                <input type="number" id="depositAmount" class="amount-input" placeholder="₹2,780" min="2780">
-                <div class="min-amount">Minimum deposit: ₹2,780</div>
-                <div style="color: #f84960; font-size: 11px; margin-top: 5px; text-align: center;">⚠️ No deposits after 5 PM</div>
-                
-                <div class="quick-amounts">
-                    <button class="quick-btn" onclick="setAmount(2780)">₹2,780</button>
-                    <button class="quick-btn" onclick="setAmount(5000)">₹5,000</button>
-                    <button class="quick-btn" onclick="setAmount(10000)">₹10,000</button>
-                    <button class="quick-btn" onclick="setAmount(25000)">₹25,000</button>
-                    <button class="quick-btn" onclick="setAmount(50000)">₹50,000</button>
-                    <button class="quick-btn" onclick="setAmount(100000)">₹1,00,000</button>
+        <div class="step-indicator">
+            <div class="step-dot active" id="dot1"></div>
+            <div class="step-dot" id="dot2"></div>
+            <div class="step-dot" id="dot3"></div>
+        </div>
+
+        <!-- Step 1: Enter Amount -->
+        <div class="step active" id="step1">
+            <label for="depositAmount">Deposit Amount (₹)</label>
+            <input type="number" id="depositAmount" min="100" placeholder="Minimum ₹100" />
+            <button id="proceedBtn">Proceed to Payment</button>
+        </div>
+
+        <!-- Step 2: QR Code Payment -->
+        <div class="step" id="step2">
+            <div class="amount-display">Amount: ₹<span id="displayAmount">0</span></div>
+            <div class="qr-section">
+                <h3>Scan QR Code to Pay</h3>
+                <img id="qrCode" class="qr-code" src="" alt="QR Code" style="display: none;" />
+                <div class="instruction">
+                    📱 Scan this QR code with any UPI app (PhonePe, Paytm, GPay, etc.) and make the payment
                 </div>
-                
-                <button class="proceed-btn" onclick="proceedToPayment()">Proceed to Payment</button>
             </div>
-            
-            <div id="paymentSection" class="payment-section">
-                <h3 style="color: #f0b90b; margin-bottom: 15px;">💳 Complete Payment</h3>
-                
-                <div class="payment-info">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span style="color: #848e9c;">Amount:</span>
-                        <span style="color: #f0b90b; font-weight: 600;" id="paymentAmount">₹0</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                        <span style="color: #848e9c;">Payment Method:</span>
-                        <span style="color: white;">UPI/Card/Net Banking</span>
-                    </div>
-                    
-                    <div style="background: rgba(2, 192, 118, 0.1); border: 1px solid #02c076; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
-                        <div style="color: #02c076; font-size: 14px; font-weight: 600; margin-bottom: 10px;">💡 Payment Instructions</div>
-                        <div style="color: #02c076; font-size: 12px; line-height: 1.5;">
-                            1. Click "Pay Now" to open Razorpay<br>
-                            2. Pay exactly ₹<span id="exactAmount">0</span><br>
-                            3. Come back and enter your UTR/Transaction ID<br>
-                            4. Wait 5-10 minutes for balance update
-                        </div>
-                    </div>
-                    
-                    <button class="submit-btn" onclick="openPaymentLink()" style="background: linear-gradient(135deg, #02c076, #028a50); margin-bottom: 15px;">💳 Pay Now (Razorpay)</button>
-                    
-                    <div id="utrSection" style="display: none; margin-top: 20px;">
-                        <label style="color: #848e9c; font-size: 12px;">TRANSACTION ID / UTR NUMBER</label>
-                        <input type="text" id="utrNumber" class="utr-input" placeholder="Enter UTR/Transaction ID after payment" required>
-                        <button class="submit-btn" onclick="submitDeposit()" style="margin-top: 10px;">I Have Paid - Submit UTR</button>
-                    </div>
-                    
-                    <button onclick="showUtrSection()" style="background: #f0b90b; color: #000; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 10px; width: 100%; font-weight: 600;">I Have Completed Payment</button>
-                </div>
-                
-                <button style="background: #2b2f36; color: #848e9c; border: 1px solid #3c4043; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 15px;" onclick="goBack()">← Change Amount</button>
+            <button id="paymentDoneBtn">Payment Done</button>
+        </div>
+
+        <!-- Step 3: UTR Verification -->
+        <div class="step" id="step3">
+            <div class="amount-display">Amount: ₹<span id="displayAmount2">0</span></div>
+            <div class="instruction">
+                ✅ Payment completed! Please enter your UTR/Transaction ID below:
             </div>
-            
-            <div id="successMessage" class="success-message">
-                <h3 style="color: #02c076; margin-bottom: 10px;">✅ Deposit Request Submitted!</h3>
-                <p style="color: #848e9c; margin-bottom: 15px;">Your deposit request has been submitted successfully. It will be processed within 5-10 minutes.</p>
-                <button style="background: #f0b90b; color: #000; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;" onclick="window.location.href='/dashboard'">Back to Dashboard</button>
+            <label for="utrInput">UTR/Transaction ID</label>
+            <input type="text" id="utrInput" placeholder="Enter 12-digit UTR number" />
+            <button id="submitUtrBtn">Submit for Approval</button>
+            <button id="backToQrBtn" style="background: #666;">Back to QR Code</button>
+        </div>
+
+        <!-- Balance Display -->
+        <div class="balance-display">
+            <div style="margin-bottom: 10px;">Current Balance:</div>
+            <div style="font-size: 20px; font-weight: bold; color: #f0b90b;">
+                Real: ₹<span id="realBalance">0</span> | Demo: ₹<span id="demoBalance">50000</span>
             </div>
+            <button id="refreshBalanceBtn" style="margin-top: 10px; padding: 8px 16px; font-size: 14px;">Refresh Balance</button>
         </div>
     </div>
-    
+
     <script>
-        let selectedAmount = 0;
-        
-        function setAmount(amount) {
-            selectedAmount = amount;
-            document.getElementById('depositAmount').value = amount;
-            
-            // Update button styles
-            document.querySelectorAll('.quick-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-        }
-        
-        function proceedToPayment() {
-            const amount = parseInt(document.getElementById('depositAmount').value);
-            
-            if (!amount || amount < 2780) {
-                alert('Please enter a valid amount (minimum ₹2,780)');
+        let currentStep = 1;
+        let depositAmount = 0;
+        let userId = '';
+        let balanceCheckInterval;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            userId = localStorage.getItem('tradepro_user_id') || localStorage.getItem('tradepro_username');
+            const userIdDisplay = document.getElementById('userIdDisplay');
+            if (!userId) {
+                userIdDisplay.textContent = 'User not logged in. Please login first.';
+                document.getElementById('proceedBtn').disabled = true;
                 return;
             }
-            
-            selectedAmount = amount;
-            document.getElementById('paymentAmount').textContent = `₹${amount.toLocaleString()}`;
-            document.getElementById('exactAmount').textContent = amount.toLocaleString();
-            
-            // Show payment section
-            document.getElementById('amountSection').style.display = 'none';
-            document.getElementById('paymentSection').style.display = 'block';
-        }
-        
-        function openPaymentLink() {
-            const paymentUrl = 'https://razorpay.me/@TrustX';
-            
-            // Open payment link in new tab
-            window.open(paymentUrl, '_blank');
-            
-            // Show UTR section after opening payment link
-            setTimeout(() => {
-                showUtrSection();
-            }, 2000);
-        }
-        
-        function showUtrSection() {
-            document.getElementById('utrSection').style.display = 'block';
-            event.target.style.display = 'none';
-        }
-        
-        function submitDeposit() {
-            const utr = document.getElementById('utrNumber').value.trim();
-            
-            if (!utr) {
-                alert('Please enter UTR/Transaction ID');
-                return;
-            }
-            
-            const userId = localStorage.getItem('tradepro_user_id') || 'user_' + Date.now();
-            const shortId = userId.split('_')[1] || userId.substring(0, 8);
-            
-            // Submit deposit request to admin
-            fetch('/api/submit-deposit', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    userId: shortId,
-                    amount: selectedAmount,
-                    utr: utr
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('paymentSection').style.display = 'none';
-                    document.getElementById('successMessage').style.display = 'block';
-                } else {
-                    alert('Error submitting deposit request. Please try again.');
-                }
-            })
-            .catch(error => {
-                alert('Error submitting deposit request. Please try again.');
-            });
-        }
-        
-        function goBack() {
-            document.getElementById('paymentSection').style.display = 'none';
-            document.getElementById('amountSection').style.display = 'block';
-        }
-        
-        // Display user ID
-        document.addEventListener('DOMContentLoaded', function() {
-            const userId = localStorage.getItem('tradepro_user_id') || 'user_' + Date.now();
-            const shortId = userId.split('_')[1] || userId.substring(0, 8);
-            document.getElementById('userIdDisplay').textContent = shortId;
+            userIdDisplay.textContent = `User ID: ${userId}`;
+            loadQRCode();
+            loadUserBalance();
+            startBalanceMonitoring();
         });
+
+        async function loadQRCode() {
+            try {
+                const response = await fetch('/api/qr-code');
+                const data = await response.json();
+                
+                if (data.success && data.qrCode) {
+                    const qrImg = document.getElementById('qrCode');
+                    qrImg.src = data.qrCode;
+                    qrImg.style.display = 'block';
+                } else {
+                    showQRError('QR Code not available. Please contact admin.');
+                }
+            } catch (error) {
+                showQRError('Failed to load QR code. Please try again.');
+            }
+        }
+
+        function showQRError(message) {
+            document.getElementById('qrCode').style.display = 'none';
+            document.querySelector('.qr-section h3').textContent = message;
+            document.querySelector('.qr-section h3').style.color = '#ff6b6b';
+        }
+
+        function showStep(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.step-dot').forEach(d => d.classList.remove('active'));
+            
+            document.getElementById(`step${step}`).classList.add('active');
+            document.getElementById(`dot${step}`).classList.add('active');
+            currentStep = step;
+        }
+
+        document.getElementById('proceedBtn').addEventListener('click', () => {
+            const amount = parseInt(document.getElementById('depositAmount').value);
+            if (!amount || amount < 100) {
+                showNotification('Please enter a valid amount (minimum ₹100)', 'error');
+                return;
+            }
+            depositAmount = amount;
+            document.getElementById('displayAmount').textContent = amount;
+            document.getElementById('displayAmount2').textContent = amount;
+            loadQRCode();
+            showStep(2);
+        });
+
+        document.getElementById('paymentDoneBtn').addEventListener('click', () => {
+            showStep(3);
+        });
+
+        document.getElementById('backToQrBtn').addEventListener('click', () => {
+            showStep(2);
+        });
+
+        document.getElementById('submitUtrBtn').addEventListener('click', async () => {
+            const utr = document.getElementById('utrInput').value.trim();
+            if (!utr) {
+                showNotification('Please enter UTR/Transaction ID', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/deposit-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: userId,
+                        amount: depositAmount,
+                        utr: utr
+                    })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Deposit request submitted! Waiting for admin approval...', 'success');
+                    document.getElementById('depositAmount').value = '';
+                    document.getElementById('utrInput').value = '';
+                    showStep(1);
+                    startBalanceMonitoring();
+                } else {
+                    showNotification(data.message || 'Failed to submit deposit request', 'error');
+                }
+            } catch (error) {
+                showNotification('Error submitting deposit request. Please try again.', 'error');
+            }
+        });
+
+        async function loadUserBalance() {
+            try {
+                const response = await fetch(`/api/balance/${userId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const oldBalance = parseInt(document.getElementById('realBalance').textContent.replace(/,/g, '')) || 0;
+                    const newBalance = data.realBalance || 0;
+                    
+                    document.getElementById('realBalance').textContent = newBalance.toLocaleString();
+                    document.getElementById('demoBalance').textContent = (data.demoBalance || 50000).toLocaleString();
+                    
+                    if (newBalance > oldBalance && oldBalance >= 0) {
+                        const addedAmount = newBalance - oldBalance;
+                        if (addedAmount > 0) {
+                            showNotification(`🎉 Deposit Approved! ₹${addedAmount.toLocaleString()} added to your balance!`, 'success');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load balance:', error);
+            }
+        }
+
+        function startBalanceMonitoring() {
+            if (balanceCheckInterval) clearInterval(balanceCheckInterval);
+            balanceCheckInterval = setInterval(loadUserBalance, 2000);
+        }
+
+        document.getElementById('refreshBalanceBtn').addEventListener('click', loadUserBalance);
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
     </script>
 </body>
 </html>

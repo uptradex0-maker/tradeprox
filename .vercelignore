@@ -1,1 +1,14 @@
-node_modules
+data/
+prisma/
+lib/
+node_modules/
+.env
+*.md
+working-server.js
+server.js
+simple-server.js
+start.js
+balance-system.js
+test-*.js
+reset-data.js
+.qodo/

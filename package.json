@@ -1,20 +1,21 @@
 {
-  "name": "tradexpro",
+  "name": "tradepro-binary-options",
   "version": "1.0.0",
   "description": "Binary Options Trading Platform",
-  "main": "server.js",
+  "main": "api/index.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node api/index.js",
+    "dev": "node working-server.js",
+    "vercel-build": "echo 'Build complete'"
   },
   "dependencies": {
     "express": "^4.18.2",
     "socket.io": "^4.7.2",
     "ejs": "^3.1.9",
-    "cors": "^2.8.5",
-    "mongoose": "^7.5.0"
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.0"
   },
   "engines": {
-    "node": "18.x"
+    "node": ">=18.0.0"
   }
 }

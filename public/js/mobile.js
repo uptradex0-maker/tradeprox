@@ -1,18 +1,62 @@
-// Mobile Trading Interface - COMPLETELY REWRITTEN
+// Mobile Trading Interface - Firebase Integration
 let mobileAmount = 100;
 let mobileDuration = 60;
 let mobileChart = null;
 let mobileCandles = [];
-let mobileTimeframe = 60000; // 1 minute default
-let mobileInterval = null;
-let mobileTradeLines = [];
+let userBalance = 2780;
+let username = '';
+let activeTrades = [];
+
+// Firebase imports
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getDatabase, ref, get, set, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+const firebaseConfig = {
+    databaseURL: "https://tradexpro-e0e35-default-rtdb.firebaseio.com/"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
 
 // Initialize mobile on page load
 document.addEventListener('DOMContentLoaded', function() {
+    username = localStorage.getItem('tradepro_username');
+    if (!username) {
+        window.location.href = '/';
+        return;
+    }
+    
     if (window.innerWidth <= 768) {
+        loadUserData();
         createMobileInterface();
     }
 });
+
+async function loadUserData() {
+    try {
+        const userRef = ref(database, 'users/' + username);
+        const snapshot = await get(userRef);
+        
+        if (snapshot.exists()) {
+            const userData = snapshot.val();
+            userBalance = userData.balance || 2780;
+        }
+    } catch (error) {
+        console.error('Error loading user data:', error);
+    }
+}
+
+async function saveUserData() {
+    try {
+        const userRef = ref(database, 'users/' + username);
+        await update(userRef, {
+            balance: userBalance,
+            lastUpdated: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Error saving user data:', error);
+    }
+}
 
 // Create mobile interface
 function createMobileInterface() {
@@ -22,14 +66,11 @@ function createMobileInterface() {
             <div class="mobile-header">
                 <div class="mobile-logo">TrustX</div>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="display: flex; gap: 5px;">
-                        <button class="mobile-account-btn active" data-account="demo" onclick="switchMobileAccount('demo')" style="padding: 4px 8px; background: #f0b90b; color: #000; border: none; border-radius: 4px; font-size: 10px; font-weight: 600; cursor: pointer;">DEMO</button>
-                        <button class="mobile-account-btn" data-account="real" onclick="switchMobileAccount('real')" style="padding: 4px 8px; background: #2b2f36; color: #848e9c; border: 1px solid #3c4043; border-radius: 4px; font-size: 10px; font-weight: 600; cursor: pointer;">REAL</button>
-                    </div>
                     <div style="text-align: right;">
-                    <div class="mobile-balance" id="mobileBalance">₹50,000</div>
-                    <div style="color: #848e9c; font-size: 9px;" id="mobileUserId">ID: Loading...</div>
-                </div>
+                        <div class="mobile-balance" id="mobileBalance">₹${userBalance.toLocaleString()}</div>
+                        <div style="color: #848e9c; font-size: 9px;" id="mobileUsername">${username}</div>
+                    </div>
+                    <button onclick="logout()" style="padding: 4px 8px; background: #f84960; color: white; border: none; border-radius: 4px; font-size: 10px; cursor: pointer;">Logout</button>
                 </div>
             </div>
             
@@ -41,11 +82,6 @@ function createMobileInterface() {
                         <div style="color: #ffffff; font-size: 18px; font-weight: 600;" id="mobilePrice">1.0850</div>
                         <div style="font-size: 12px; margin-top: 2px; color: #02c076;" id="mobileChange">+0.0012 (+0.11%)</div>
                     </div>
-                </div>
-                <div style="position: absolute; top: 50px; left: 10px; display: flex; gap: 5px; z-index: 110;">
-                    <button onclick="changeMobileTimeframe(5000)" style="padding: 4px 8px; background: rgba(255,255,255,0.1); color: #848e9c; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; font-size: 10px; cursor: pointer;">5s</button>
-                    <button onclick="changeMobileTimeframe(60000)" style="padding: 4px 8px; background: #f0b90b; color: #000; border: none; border-radius: 4px; font-size: 10px; cursor: pointer;">1m</button>
-                    <button onclick="changeMobileTimeframe(300000)" style="padding: 4px 8px; background: rgba(255,255,255,0.1); color: #848e9c; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; font-size: 10px; cursor: pointer;">5m</button>
                 </div>
                 <canvas id="mobileCandleChart" style="width: 100%; height: 100%; display: block;"></canvas>
             </div>
@@ -63,27 +99,6 @@ function createMobileInterface() {
             
             <!-- Controls -->
             <div class="mobile-controls">
-                <!-- Wallet -->
-                <div class="mobile-wallet">
-                    <button class="mobile-wallet-btn mobile-deposit" onclick="window.location.href='/deposit'">
-                        💰 DEPOSIT
-                    </button>
-                    <button class="mobile-wallet-btn mobile-withdraw" onclick="window.location.href='/withdraw'">
-                        💸 WITHDRAW
-                    </button>
-                </div>
-                
-                <!-- Mobile Notice -->
-                <div style="background: linear-gradient(135deg, #f84960, #d63447); padding: 10px; border-radius: 6px; margin: 10px 0; border-left: 3px solid #ff6b7a;">
-                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-                        <span style="font-size: 14px;">⚠️</span>
-                        <span style="color: white; font-weight: 600; font-size: 11px;">DEPOSIT NOTICE</span>
-                    </div>
-                    <p style="color: white; font-size: 10px; line-height: 1.3; margin: 0;">
-                        Due to high volume, deposits may take up to 24 hours. Your money is safe!
-                    </p>
-                </div>
-                
                 <!-- Amount -->
                 <div class="mobile-section">
                     <div class="mobile-section-title">Amount</div>
@@ -131,22 +146,26 @@ function createMobileInterface() {
                         📉 DOWN
                     </button>
                 </div>
+                
+                <!-- Active Trades -->
+                <div class="mobile-section">
+                    <div class="mobile-section-title">Active Trades</div>
+                    <div id="mobileActiveTradesList">
+                        <p style="color: #848e9c; text-align: center; font-size: 12px;">No active trades</p>
+                    </div>
+                </div>
             </div>
         </div>
     `;
     
     document.body.insertAdjacentHTML('beforeend', mobileHTML);
-    updateMobileBalance();
     updateMobilePayout();
-    updateMobileUserId();
     
-    // Initialize chart
     setTimeout(() => {
         initMobileChart();
     }, 200);
 }
 
-// SIMPLE CHART SYSTEM
 function initMobileChart() {
     const canvas = document.getElementById('mobileCandleChart');
     if (!canvas) return;
@@ -155,11 +174,8 @@ function initMobileChart() {
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
     
-    // Generate initial candles
     generateCandles();
     drawChart();
-    
-    // Start updates
     startChartUpdates();
 }
 
@@ -186,10 +202,8 @@ function drawChart() {
     const width = canvas.width;
     const height = canvas.height;
     
-    // Clear
     mobileChart.clearRect(0, 0, width, height);
     
-    // Get price range
     const prices = mobileCandles.flatMap(c => [c.high, c.low]);
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
@@ -197,7 +211,6 @@ function drawChart() {
     
     const candleWidth = width / mobileCandles.length;
     
-    // Draw candles
     mobileCandles.forEach((candle, i) => {
         const x = i * candleWidth + candleWidth / 2;
         
@@ -209,7 +222,6 @@ function drawChart() {
         const isUp = candle.close >= candle.open;
         const color = isUp ? '#02c076' : '#f84960';
         
-        // Wick
         mobileChart.strokeStyle = color;
         mobileChart.lineWidth = 1;
         mobileChart.beginPath();
@@ -217,7 +229,6 @@ function drawChart() {
         mobileChart.lineTo(x, lowY);
         mobileChart.stroke();
         
-        // Body
         const bodyTop = Math.min(openY, closeY);
         const bodyHeight = Math.abs(closeY - openY) || 1;
         const bodyWidth = candleWidth * 0.7;
@@ -230,58 +241,16 @@ function drawChart() {
             mobileChart.fillRect(x - bodyWidth/2, bodyTop, bodyWidth, bodyHeight);
         }
     });
-    
-    // Draw trade lines
-    mobileTradeLines.forEach(line => {
-        const y = 80 + (maxPrice - line.price) / priceRange * (height - 120);
-        
-        // Dashed line
-        mobileChart.setLineDash([8, 4]);
-        mobileChart.strokeStyle = line.color;
-        mobileChart.lineWidth = 2;
-        mobileChart.globalAlpha = 0.8;
-        
-        mobileChart.beginPath();
-        mobileChart.moveTo(0, y);
-        mobileChart.lineTo(width, y);
-        mobileChart.stroke();
-        
-        mobileChart.globalAlpha = 1;
-        mobileChart.setLineDash([]);
-        
-        // Entry point
-        mobileChart.fillStyle = line.color;
-        mobileChart.beginPath();
-        mobileChart.arc(20, y, 4, 0, 2 * Math.PI);
-        mobileChart.fill();
-        
-        // Direction arrow
-        mobileChart.fillStyle = line.color;
-        mobileChart.font = 'bold 14px Arial';
-        mobileChart.fillText(line.direction === 'up' ? '↗' : '↘', 30, y + 5);
-        
-        // Timer
-        const timeLeft = Math.max(0, Math.ceil((line.endTime - Date.now()) / 1000));
-        mobileChart.fillStyle = 'rgba(13, 20, 33, 0.9)';
-        mobileChart.fillRect(width - 60, y - 10, 50, 20);
-        mobileChart.fillStyle = line.color;
-        mobileChart.font = 'bold 12px Arial';
-        mobileChart.fillText(`${timeLeft}s`, width - 55, y + 2);
-    });
 }
 
 function startChartUpdates() {
-    if (mobileInterval) clearInterval(mobileInterval);
-    
-    mobileInterval = setInterval(() => {
-        // Update last candle
+    setInterval(() => {
         const lastCandle = mobileCandles[mobileCandles.length - 1];
         const change = (Math.random() - 0.5) * 0.005;
         lastCandle.close += change;
         lastCandle.high = Math.max(lastCandle.high, lastCandle.close);
         lastCandle.low = Math.min(lastCandle.low, lastCandle.close);
         
-        // Sometimes add new candle
         if (Math.random() < 0.3) {
             const open = lastCandle.close;
             const newChange = (Math.random() - 0.5) * 0.008;
@@ -295,29 +264,7 @@ function startChartUpdates() {
         
         drawChart();
         updatePriceDisplay();
-        updateTradeLines();
     }, 2000);
-}
-
-function changeMobileTimeframe(timeframe) {
-    mobileTimeframe = timeframe;
-    
-    // Update buttons
-    document.querySelectorAll('[onclick^="changeMobileTimeframe"]').forEach(btn => {
-        btn.style.background = 'rgba(255,255,255,0.1)';
-        btn.style.color = '#848e9c';
-        btn.style.border = '1px solid rgba(255,255,255,0.2)';
-    });
-    
-    event.target.style.background = '#f0b90b';
-    event.target.style.color = '#000';
-    event.target.style.border = 'none';
-    
-    // Restart chart
-    if (mobileInterval) clearInterval(mobileInterval);
-    generateCandles();
-    drawChart();
-    startChartUpdates();
 }
 
 function updatePriceDisplay() {
@@ -333,36 +280,11 @@ function updatePriceDisplay() {
     document.getElementById('mobileChange').style.color = change >= 0 ? '#02c076' : '#f84960';
 }
 
-// Mobile account switching
-function switchMobileAccount(type) {
-    accountType = type;
-    localStorage.setItem('account_type', type);
-    
-    document.querySelectorAll('.mobile-account-btn').forEach(btn => {
-        btn.style.background = '#2b2f36';
-        btn.style.color = '#848e9c';
-        btn.style.border = '1px solid #3c4043';
-    });
-    
-    const activeBtn = document.querySelector(`[data-account="${type}"]`);
-    if (activeBtn) {
-        activeBtn.style.background = '#f0b90b';
-        activeBtn.style.color = '#000';
-        activeBtn.style.border = 'none';
-    }
-    
-    updateMobileBalance();
-}
-
 function selectMobileAsset(asset) {
-    currentAsset = asset;
-    
     document.querySelectorAll('.mobile-asset').forEach(el => el.classList.remove('active'));
     event.target.classList.add('active');
     
     document.getElementById('mobileAsset').textContent = asset;
-    
-    // Reset chart for new asset
     generateCandles();
     drawChart();
 }
@@ -389,33 +311,6 @@ function updateMobileAmount() {
     updateMobilePayout();
 }
 
-function updateMobileBalance() {
-    // Upgrade existing users to 2780
-    if (userBalance.real === 0) {
-        userBalance.real = 2780;
-        localStorage.setItem('userBalance', JSON.stringify(userBalance));
-    }
-    
-    const balance = userBalance[accountType] ? 
-        (userBalance[accountType].balance !== undefined ? userBalance[accountType].balance : userBalance[accountType]) : 
-        (accountType === 'demo' ? 50000 : 2780);
-    
-    const mobileBalanceEl = document.getElementById('mobileBalance');
-    if (mobileBalanceEl) {
-        mobileBalanceEl.textContent = `₹${balance.toLocaleString()}`;
-    }
-}
-
-function updateMobileUserId() {
-    const userId = localStorage.getItem('tradepro_user_id') || 'user_' + Date.now();
-    const shortId = userId.split('_')[1] || userId.substring(0, 8);
-    
-    const mobileUserIdEl = document.getElementById('mobileUserId');
-    if (mobileUserIdEl) {
-        mobileUserIdEl.textContent = `ID: ${shortId}`;
-    }
-}
-
 function updateMobilePayout() {
     const profit = Math.floor(mobileAmount * 0.85);
     const total = mobileAmount + profit;
@@ -424,91 +319,178 @@ function updateMobilePayout() {
     document.getElementById('mobileTotal').textContent = `₹${total}`;
 }
 
-function placeMobileTrade(direction) {
-    const currentBalance = userBalance[accountType] ? 
-        (userBalance[accountType].balance !== undefined ? userBalance[accountType].balance : userBalance[accountType]) : 0;
-    
-    if (currentBalance < mobileAmount) {
+async function placeMobileTrade(direction) {
+    if (userBalance < mobileAmount) {
         alert('Insufficient balance');
         return;
     }
     
-    // Add trade line to chart
-    const currentPrice = mobileCandles[mobileCandles.length - 1]?.close || 1.0850;
-    const tradeLine = {
-        id: Date.now(),
-        direction: direction,
-        price: currentPrice,
-        color: direction === 'up' ? '#02c076' : '#f84960',
-        startTime: Date.now(),
-        endTime: Date.now() + (mobileDuration * 1000)
-    };
-    
-    mobileTradeLines.push(tradeLine);
-    
-    // Deduct balance
-    if (userBalance[accountType]) {
-        if (userBalance[accountType].balance !== undefined) {
-            userBalance[accountType].balance -= mobileAmount;
-        } else {
-            userBalance[accountType] -= mobileAmount;
-        }
-        localStorage.setItem('userBalance', JSON.stringify(userBalance));
-        updateMobileBalance();
+    if (mobileAmount < 10) {
+        alert('Minimum trade amount is ₹10');
+        return;
     }
     
-    // Simulate trade
-    setTimeout(() => {
-        const endPrice = mobileCandles[mobileCandles.length - 1]?.close || currentPrice;
-        let won = false;
+    // Deduct balance
+    userBalance -= mobileAmount;
+    updateMobileBalance();
+    await saveUserData();
+    
+    // Create trade
+    const trade = {
+        id: Date.now().toString(),
+        asset: document.getElementById('mobileAsset').textContent,
+        direction: direction,
+        amount: mobileAmount,
+        duration: mobileDuration,
+        startTime: new Date().toISOString(),
+        endTime: new Date(Date.now() + mobileDuration * 1000).toISOString(),
+        status: 'active',
+        startPrice: mobileCandles[mobileCandles.length - 1]?.close || 1.0850
+    };
+    
+    // Save trade to Firebase
+    try {
+        const tradeRef = ref(database, 'trades/' + username + '/' + trade.id);
+        await set(tradeRef, trade);
         
-        if (direction === 'up' && endPrice > currentPrice) {
-            won = true;
-        } else if (direction === 'down' && endPrice < currentPrice) {
-            won = true;
-        }
+        activeTrades.push(trade);
+        displayMobileActiveTrades();
         
-        const message = won ? `🎉 Won! +₹${Math.floor(mobileAmount * 0.85)}` : `😞 Lost! -₹${mobileAmount}`;
+        // Set timer for trade completion
+        setTimeout(() => completeMobileTrade(trade.id), mobileDuration * 1000);
         
-        // Remove trade line
-        mobileTradeLines = mobileTradeLines.filter(line => line.id !== tradeLine.id);
-        
-        // Show notification
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
-            background: ${won ? '#02c076' : '#f84960'}; color: white;
-            padding: 12px 20px; border-radius: 8px; font-weight: 600;
-            z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        `;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => notification.remove(), 3000);
-        
-        // Update balance if won
-        if (won) {
-            const payout = Math.floor(mobileAmount * 1.85);
-            if (userBalance[accountType].balance !== undefined) {
-                userBalance[accountType].balance += payout;
-            } else {
-                userBalance[accountType] += payout;
-            }
-            localStorage.setItem('userBalance', JSON.stringify(userBalance));
-            updateMobileBalance();
-        }
-    }, mobileDuration * 1000);
+    } catch (error) {
+        console.error('Error saving trade:', error);
+        // Refund on error
+        userBalance += mobileAmount;
+        updateMobileBalance();
+        await saveUserData();
+    }
 }
 
-function updateTradeLines() {
-    // Remove expired trade lines
-    const now = Date.now();
-    mobileTradeLines = mobileTradeLines.filter(line => line.endTime > now);
+async function completeMobileTrade(tradeId) {
+    const tradeIndex = activeTrades.findIndex(t => t.id === tradeId);
+    if (tradeIndex === -1) return;
+    
+    const trade = activeTrades[tradeIndex];
+    const won = Math.random() > 0.5; // 50% win rate
+    
+    let payout = 0;
+    if (won) {
+        payout = Math.floor(trade.amount * 1.85); // 85% profit
+        userBalance += payout;
+    }
+    
+    // Update trade status in Firebase
+    try {
+        const tradeRef = ref(database, 'trades/' + username + '/' + tradeId);
+        await update(tradeRef, {
+            status: 'completed',
+            result: won ? 'won' : 'lost',
+            payout: payout,
+            completedAt: new Date().toISOString()
+        });
+        
+        // Update user stats
+        const userRef = ref(database, 'users/' + username);
+        const userSnapshot = await get(userRef);
+        const userData = userSnapshot.val();
+        
+        await update(userRef, {
+            balance: userBalance,
+            totalWins: userData.totalWins + (won ? 1 : 0),
+            totalLosses: userData.totalLosses + (won ? 0 : 1),
+            totalTrades: userData.totalTrades + 1
+        });
+    } catch (error) {
+        console.error('Error updating trade:', error);
+    }
+    
+    // Remove from active trades
+    activeTrades.splice(tradeIndex, 1);
+    displayMobileActiveTrades();
+    updateMobileBalance();
+    
+    // Show notification
+    const message = won ? `🎉 Won! +₹${payout - trade.amount}` : `😞 Lost! -₹${trade.amount}`;
+    showMobileNotification(message, won ? '#02c076' : '#f84960');
 }
+
+function displayMobileActiveTrades() {
+    const container = document.getElementById('mobileActiveTradesList');
+    if (!container) return;
+    
+    if (activeTrades.length === 0) {
+        container.innerHTML = '<p style="color: #848e9c; text-align: center; font-size: 12px;">No active trades</p>';
+        return;
+    }
+    
+    container.innerHTML = activeTrades.map(trade => {
+        const timeLeft = Math.max(0, Math.floor((new Date(trade.endTime) - new Date()) / 1000));
+        
+        return `
+            <div style="background: rgba(43, 47, 54, 0.5); padding: 8px; margin-bottom: 5px; border-radius: 4px; border-left: 2px solid ${trade.direction === 'up' ? '#02c076' : '#f84960'};">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="color: white; font-size: 11px; font-weight: 600;">${trade.asset}</div>
+                        <div style="color: ${trade.direction === 'up' ? '#02c076' : '#f84960'}; font-size: 9px;">${trade.direction.toUpperCase()} ₹${trade.amount}</div>
+                    </div>
+                    <div style="color: #f0b90b; font-size: 12px; font-weight: 600;">${timeLeft}s</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Update countdown
+    setTimeout(() => {
+        if (activeTrades.length > 0) {
+            displayMobileActiveTrades();
+        }
+    }, 1000);
+}
+
+function updateMobileBalance() {
+    const mobileBalanceEl = document.getElementById('mobileBalance');
+    if (mobileBalanceEl) {
+        mobileBalanceEl.textContent = `₹${userBalance.toLocaleString()}`;
+    }
+}
+
+function showMobileNotification(message, color) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+        background: ${color}; color: white; padding: 12px 20px;
+        border-radius: 8px; font-weight: 600; z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.remove(), 3000);
+}
+
+function logout() {
+    localStorage.removeItem('tradepro_username');
+    localStorage.removeItem('tradepro_user_data');
+    window.location.href = '/';
+}
+
+// Make functions global
+window.selectMobileAsset = selectMobileAsset;
+window.setMobileAmount = setMobileAmount;
+window.setMobileDuration = setMobileDuration;
+window.updateMobileAmount = updateMobileAmount;
+window.placeMobileTrade = placeMobileTrade;
+window.logout = logout;
 
 // Auto-initialize on resize
 window.addEventListener('resize', function() {
     if (window.innerWidth <= 768 && !document.querySelector('.mobile-container')) {
-        createMobileInterface();
+        const user = localStorage.getItem('tradepro_username');
+        if (user) {
+            loadUserData();
+            createMobileInterface();
+        }
     }
 });

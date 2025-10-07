@@ -1,594 +1,446 @@
-// Admin Panel JavaScript with Full Functionality
+// Admin Panel JavaScript - Complete Implementation
 
-let socket;
-let currentTradeMode = 'normal';
-let adminStats = {
-    totalUsers: 0,
-    onlineUsers: 0,
-    activeTrades: 0,
-    totalVolume: 0,
-    serverRevenue: 0
-};
-
-// Initialize admin panel
+// Check authentication on load
 document.addEventListener('DOMContentLoaded', function() {
-    // Check admin authentication
     if (localStorage.getItem('admin_authenticated') !== 'true') {
         window.location.href = '/admin-login';
         return;
     }
     
-    initializeSocket();
-    loadAdminData();
-    startStatsUpdate();
+    // Initialize admin panel
+    initializeAdminPanel();
 });
 
-// Socket connection for admin
-function initializeSocket() {
-    socket = io({
-        query: { 
-            isAdmin: true,
-            adminUsername: localStorage.getItem('admin_username') || 'admin'
-        }
-    });
+function initializeAdminPanel() {
+    console.log('Admin Panel Initialized');
+    loadStats();
     
-    socket.on('connect', function() {
-        console.log('Admin connected to server');
-        requestAdminData();
-    });
-    
-    socket.on('adminStats', function(stats) {
-        updateAdminStats(stats);
-    });
-    
-    socket.on('newTrade', function(trade) {
-        addTradeToTable(trade);
-        updateStats();
-    });
-    
-    socket.on('tradeCompleted', function(trade) {
-        updateTradeInTable(trade);
-        updateStats();
-    });
-    
-    socket.on('supportTickets', function(tickets) {
-        displayTickets(tickets);
-    });
-    
-    socket.on('withdrawalRequests', function(withdrawals) {
-        displayWithdrawals(withdrawals);
-    });
-    
-    socket.on('assetUpdated', function(data) {
-        showNotification(`Asset ${data.asset} updated successfully`, 'success');
-    });
-    
-    socket.on('tradingSettingsUpdated', function(data) {
-        showNotification('Trading settings updated successfully', 'success');
-    });
+    // Auto-refresh stats every 10 seconds
+    setInterval(loadStats, 10000);
 }
 
-// Asset Management Functions
-function updateAsset(asset) {
-    const basePrice = parseFloat(document.getElementById(`base-${asset}`).value);
-    const volatility = parseFloat(document.getElementById(`vol-${asset}`).value);
-    const trend = document.getElementById(`trend-${asset}`).value;
+// Tab switching function
+function switchTab(tabName) {
+    // Remove active class from all tabs and contents
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
     
-    const assetData = {
-        asset: asset,
-        basePrice: basePrice,
-        volatility: volatility,
-        trend: trend
-    };
+    // Add active class to clicked tab
+    event.target.classList.add('active');
+    document.getElementById(tabName).classList.add('active');
     
-    if (socket && socket.connected) {
-        socket.emit('updateAsset', assetData);
-        showNotification(`Updating ${asset}...`, 'info');
-    } else {
-        showNotification('Not connected to server', 'error');
+    // Load data based on tab
+    switch(tabName) {
+        case 'users':
+            loadUsers();
+            break;
+        case 'withdrawals':
+            loadWithdrawals();
+            break;
+        case 'dashboard':
+            loadStats();
+            break;
     }
 }
 
-// Trading Settings
-function updateTradingSettings() {
-    const settings = {
-        defaultPayout: parseInt(document.getElementById('defaultPayout').value),
-        maxTradeAmount: parseInt(document.getElementById('maxTradeAmount').value),
-        minTradeAmount: parseInt(document.getElementById('minTradeAmount').value)
-    };
-    
-    if (socket && socket.connected) {
-        socket.emit('updateTradingSettings', settings);
-        showNotification('Updating trading settings...', 'info');
-    } else {
-        showNotification('Not connected to server', 'error');
-    }
-}
-
-// Trade Control Functions
-function setTradeMode(mode) {
-    currentTradeMode = mode;
-    
-    // Update UI
-    document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(mode === 'loss' ? 'lossBtn' : mode === 'profit' ? 'profitBtn' : 'normalBtn').classList.add('active');
-    document.getElementById('currentMode').textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
-    
-    // Send to server
-    if (socket && socket.connected) {
-        socket.emit('setTradeMode', { mode: mode });
-        showNotification(`Trade mode set to: ${mode}`, 'success');
-    }
-}
-
-// Price Manipulation
-function manipulatePrice() {
-    const asset = document.getElementById('manipulateAsset').value;
-    const targetPrice = parseFloat(document.getElementById('targetPrice').value);
-    const duration = parseInt(document.getElementById('manipulateDuration').value);
-    
-    if (!targetPrice || targetPrice <= 0) {
-        showNotification('Please enter a valid target price', 'error');
-        return;
-    }
-    
-    const manipulationData = {
-        asset: asset,
-        targetPrice: targetPrice,
-        duration: duration
-    };
-    
-    if (socket && socket.connected) {
-        socket.emit('manipulatePrice', manipulationData);
-        showNotification(`Manipulating ${asset} price to ${targetPrice} for ${duration}s`, 'info');
-    }
-}
-
-// System Settings
-function updateServerStatus() {
-    const status = document.getElementById('serverStatus').value;
-    
-    if (socket && socket.connected) {
-        socket.emit('updateServerStatus', { status: status });
-        
-        if (status === 'maintenance') {
-            showNotification('⚠️ Server entering maintenance mode - All users will be notified', 'info');
-        } else if (status === 'online') {
-            showNotification('✅ Server is now online', 'success');
-        } else if (status === 'offline') {
-            showNotification('🔴 Server marked as offline', 'error');
-        }
-    } else {
-        showNotification('Not connected to server', 'error');
-    }
-}
-
-function updateMaxUsers() {
-    const maxUsers = parseInt(document.getElementById('maxUsers').value);
-    
-    if (socket && socket.connected) {
-        socket.emit('updateMaxUsers', { maxUsers: maxUsers });
-        showNotification(`Max users limit set to: ${maxUsers}`, 'success');
-    }
-}
-
-function updateTradingHours() {
-    const startTime = document.getElementById('tradingStart').value;
-    const endTime = document.getElementById('tradingEnd').value;
-    
-    if (socket && socket.connected) {
-        socket.emit('updateTradingHours', { 
-            startTime: startTime, 
-            endTime: endTime 
-        });
-        showNotification(`Trading hours updated: ${startTime} - ${endTime}`, 'success');
-    }
-}
-
-// Statistics Functions
-function updateAdminStats(stats) {
-    adminStats = stats;
-    
-    document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
-    document.getElementById('onlineUsers').textContent = stats.onlineUsers || 0;
-    document.getElementById('liveActiveTrades').textContent = stats.activeTrades || 0;
-    document.getElementById('totalVolume').textContent = (stats.totalVolume || 0).toLocaleString();
-    document.getElementById('profitLossRatio').textContent = `${stats.winRate || 50}/${100 - (stats.winRate || 50)}`;
-    document.getElementById('serverRevenue').textContent = (stats.serverRevenue || 0).toLocaleString();
-    document.getElementById('activeTradesCount').textContent = stats.activeTrades || 0;
-}
-
-function updateStats() {
-    if (socket && socket.connected) {
-        socket.emit('getAdminStats');
-    }
-}
-
-// Trades Table Functions
-function addTradeToTable(trade) {
-    const tableBody = document.getElementById('tradesTableBody');
-    const row = document.createElement('tr');
-    row.id = `trade-${trade.id}`;
-    
-    row.innerHTML = `
-        <td>${new Date(trade.startTime).toLocaleTimeString()}</td>
-        <td>${trade.userId.substring(0, 8)}...</td>
-        <td>${trade.asset}</td>
-        <td class="${trade.direction}">${trade.direction.toUpperCase()}</td>
-        <td>₹${trade.amount}</td>
-        <td class="pending">Pending</td>
-        <td>-</td>
-    `;
-    
-    tableBody.insertBefore(row, tableBody.firstChild);
-    
-    // Keep only last 50 trades
-    while (tableBody.children.length > 50) {
-        tableBody.removeChild(tableBody.lastChild);
-    }
-}
-
-function updateTradeInTable(trade) {
-    const row = document.getElementById(`trade-${trade.id}`);
-    if (row) {
-        const resultCell = row.children[5];
-        const payoutCell = row.children[6];
-        
-        resultCell.textContent = trade.won ? 'Won' : 'Lost';
-        resultCell.className = trade.won ? 'won' : 'lost';
-        payoutCell.textContent = trade.won ? `₹${trade.payout}` : `₹${trade.amount}`;
-    }
-}
-
-// Support Tickets Functions
-function showTicketsModal() {
-    document.getElementById('ticketsModal').style.display = 'block';
-    loadTickets();
-}
-
-function loadTickets() {
-    if (socket && socket.connected) {
-        socket.emit('getTickets');
-    }
-    
-    // Load from localStorage as backup
-    const tickets = JSON.parse(localStorage.getItem('support_tickets') || '[]');
-    displayTickets(tickets);
-}
-
-function displayTickets(tickets) {
-    const container = document.getElementById('ticketsList');
-    const filter = document.getElementById('ticketFilter').value;
-    
-    let filteredTickets = tickets;
-    if (filter !== 'all') {
-        filteredTickets = tickets.filter(t => t.status === filter);
-    }
-    
-    if (filteredTickets.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #ccc; padding: 20px;">No tickets found</p>';
-        return;
-    }
-    
-    container.innerHTML = filteredTickets.map(ticket => `
-        <div class="ticket-item" onclick="showTicketDetails('${ticket.id}')">
-            <div class="ticket-header">
-                <span class="ticket-id">#${ticket.id}</span>
-                <span class="ticket-status ${ticket.status}">${ticket.status.toUpperCase()}</span>
-            </div>
-            <div class="ticket-subject">${ticket.subject}</div>
-            <div class="ticket-meta">
-                ${ticket.category} • ${new Date(ticket.timestamp).toLocaleString()}
-            </div>
-        </div>
-    `).join('');
-}
-
-function showTicketDetails(ticketId) {
-    const tickets = JSON.parse(localStorage.getItem('support_tickets') || '[]');
-    const ticket = tickets.find(t => t.id === ticketId);
-    
-    if (!ticket) return;
-    
-    document.getElementById('ticketDetails').innerHTML = `
-        <div class="ticket-info">
-            <h3>Ticket #${ticket.id}</h3>
-            <p><strong>Category:</strong> ${ticket.category}</p>
-            <p><strong>Subject:</strong> ${ticket.subject}</p>
-            <p><strong>User:</strong> ${ticket.userId}</p>
-            <p><strong>Status:</strong> <span class="ticket-status ${ticket.status}">${ticket.status.toUpperCase()}</span></p>
-            <p><strong>Created:</strong> ${new Date(ticket.timestamp).toLocaleString()}</p>
-            <div class="ticket-message">
-                <strong>Message:</strong><br>
-                ${ticket.message}
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('ticketDetailsModal').style.display = 'block';
-    window.currentTicketId = ticketId;
-}
-
-function respondToTicket() {
-    const response = document.getElementById('adminResponse').value.trim();
-    if (!response) {
-        showNotification('Please enter a response', 'error');
-        return;
-    }
-    
-    const ticketId = window.currentTicketId;
-    
-    if (socket && socket.connected) {
-        socket.emit('respondToTicket', {
-            ticketId: ticketId,
-            response: response,
-            adminUsername: localStorage.getItem('admin_username')
-        });
-    }
-    
-    // Update local storage
-    const tickets = JSON.parse(localStorage.getItem('support_tickets') || '[]');
-    const ticketIndex = tickets.findIndex(t => t.id === ticketId);
-    if (ticketIndex !== -1) {
-        tickets[ticketIndex].status = 'pending';
-        tickets[ticketIndex].adminResponse = response;
-        tickets[ticketIndex].responseTime = new Date().toISOString();
-        localStorage.setItem('support_tickets', JSON.stringify(tickets));
-    }
-    
-    showNotification('Response sent successfully', 'success');
-    document.getElementById('adminResponse').value = '';
-    closeModal('ticketDetailsModal');
-    loadTickets();
-}
-
-function closeTicket() {
-    const ticketId = window.currentTicketId;
-    
-    if (socket && socket.connected) {
-        socket.emit('closeTicket', { ticketId: ticketId });
-    }
-    
-    // Update local storage
-    const tickets = JSON.parse(localStorage.getItem('support_tickets') || '[]');
-    const ticketIndex = tickets.findIndex(t => t.id === ticketId);
-    if (ticketIndex !== -1) {
-        tickets[ticketIndex].status = 'closed';
-        tickets[ticketIndex].closedTime = new Date().toISOString();
-        localStorage.setItem('support_tickets', JSON.stringify(tickets));
-    }
-    
-    showNotification('Ticket closed successfully', 'success');
-    closeModal('ticketDetailsModal');
-    loadTickets();
-}
-
-function filterTickets() {
-    loadTickets();
-}
-
-// Withdrawals Functions
-function showWithdrawalsModal() {
-    document.getElementById('withdrawalsModal').style.display = 'block';
-    loadWithdrawals();
-}
-
-function loadWithdrawals() {
-    if (socket && socket.connected) {
-        socket.emit('getWithdrawals');
-    }
-    
-    // Load from localStorage as backup
-    const withdrawals = JSON.parse(localStorage.getItem('withdrawal_requests') || '[]');
-    displayWithdrawals(withdrawals);
-}
-
-function displayWithdrawals(withdrawals) {
-    const container = document.getElementById('withdrawalsList');
-    const filter = document.getElementById('withdrawalFilter').value;
-    
-    let filteredWithdrawals = withdrawals;
-    if (filter !== 'all') {
-        filteredWithdrawals = withdrawals.filter(w => w.status === filter);
-    }
-    
-    if (filteredWithdrawals.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #ccc; padding: 20px;">No withdrawal requests found</p>';
-        return;
-    }
-    
-    container.innerHTML = filteredWithdrawals.map(withdrawal => `
-        <div class="withdrawal-item">
-            <div class="withdrawal-header">
-                <span class="withdrawal-amount">₹${withdrawal.amount}</span>
-                <span class="withdrawal-status ${withdrawal.status}">${withdrawal.status.toUpperCase()}</span>
-            </div>
-            <div class="withdrawal-details">
-                <strong>User:</strong> ${withdrawal.userId}<br>
-                <strong>Requested:</strong> ${new Date(withdrawal.timestamp).toLocaleString()}
-            </div>
-            <div class="bank-details">
-                <strong>Bank:</strong> ${withdrawal.bankDetails.bankName}<br>
-                <strong>Account:</strong> ${withdrawal.bankDetails.accountNumber}<br>
-                <strong>IFSC:</strong> ${withdrawal.bankDetails.ifscCode}<br>
-                <strong>Holder:</strong> ${withdrawal.bankDetails.accountHolder}
-            </div>
-            ${withdrawal.status === 'pending' ? `
-                <div class="withdrawal-actions">
-                    <button onclick="approveWithdrawal('${withdrawal.id}')" class="approve-btn">Approve</button>
-                    <button onclick="rejectWithdrawal('${withdrawal.id}')" class="reject-btn">Reject</button>
-                </div>
-            ` : ''}
-        </div>
-    `).join('');
-}
-
-function approveWithdrawal(withdrawalId) {
-    if (socket && socket.connected) {
-        socket.emit('approveWithdrawal', { withdrawalId: withdrawalId });
-    }
-    
-    // Update local storage
-    const withdrawals = JSON.parse(localStorage.getItem('withdrawal_requests') || '[]');
-    const withdrawalIndex = withdrawals.findIndex(w => w.id === withdrawalId);
-    if (withdrawalIndex !== -1) {
-        withdrawals[withdrawalIndex].status = 'approved';
-        withdrawals[withdrawalIndex].approvedTime = new Date().toISOString();
-        localStorage.setItem('withdrawal_requests', JSON.stringify(withdrawals));
-    }
-    
-    showNotification('Withdrawal approved successfully', 'success');
-    loadWithdrawals();
-}
-
-function rejectWithdrawal(withdrawalId) {
-    if (socket && socket.connected) {
-        socket.emit('rejectWithdrawal', { withdrawalId: withdrawalId });
-    }
-    
-    // Update local storage
-    const withdrawals = JSON.parse(localStorage.getItem('withdrawal_requests') || '[]');
-    const withdrawalIndex = withdrawals.findIndex(w => w.id === withdrawalId);
-    if (withdrawalIndex !== -1) {
-        withdrawals[withdrawalIndex].status = 'rejected';
-        withdrawals[withdrawalIndex].rejectedTime = new Date().toISOString();
-        localStorage.setItem('withdrawal_requests', JSON.stringify(withdrawals));
-    }
-    
-    showNotification('Withdrawal rejected', 'info');
-    loadWithdrawals();
-}
-
-function filterWithdrawals() {
-    loadWithdrawals();
-}
-
-// Utility Functions
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
-}
-
+// Show notification
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
-    notification.className = `admin-notification ${type}`;
+    notification.className = `notification ${type}`;
     notification.textContent = message;
-    
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 8px;
-        color: white;
-        font-weight: bold;
-        z-index: 1001;
-        animation: slideInRight 0.3s ease;
-        max-width: 300px;
-        ${
-            type === 'success' ? 'background: linear-gradient(135deg, #00ff88, #00cc6a);' :
-            type === 'error' ? 'background: linear-gradient(135deg, #ff4444, #cc3333);' :
-            'background: linear-gradient(135deg, #00d4ff, #5200ff);'
-        }
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    `;
-    
     document.body.appendChild(notification);
     
     setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease';
+        notification.style.animation = 'slideIn 0.3s reverse';
         setTimeout(() => {
             if (document.body.contains(notification)) {
-                document.body.removeChild(notification);
+                notification.remove();
             }
         }, 300);
     }, 3000);
 }
 
-function requestAdminData() {
-    if (socket && socket.connected) {
-        socket.emit('getAdminStats');
-        socket.emit('getRecentTrades');
+// Load statistics
+async function loadStats() {
+    try {
+        const response = await fetch('/api/admin/stats');
+        const data = await response.json();
+        
+        if (data.success) {
+            const stats = data.stats;
+            document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
+            document.getElementById('onlineUsers').textContent = stats.onlineUsers || 0;
+            document.getElementById('activeTrades').textContent = stats.activeTrades || 0;
+            document.getElementById('totalVolume').textContent = (stats.totalVolume || 0).toLocaleString();
+            document.getElementById('serverRevenue').textContent = (stats.serverRevenue || 0).toLocaleString();
+            document.getElementById('winRate').textContent = stats.winRate || 50;
+        }
+    } catch (error) {
+        console.error('Failed to load stats:', error);
+        showNotification('Failed to load statistics', 'error');
     }
 }
 
-function loadAdminData() {
-    // Load initial data
-    updateStats();
-    
-    // Generate some sample trades for demo
-    generateSampleTrades();
-}
+// Load users
+async function loadUsers() {
+    const container = document.getElementById('usersTable');
+    container.innerHTML = '<div class="loading">Loading users...</div>';
 
-function generateSampleTrades() {
-    const assets = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'BTC/USD', 'ETH/USD'];
-    const directions = ['up', 'down'];
-    const tableBody = document.getElementById('tradesTableBody');
-    
-    for (let i = 0; i < 10; i++) {
-        const trade = {
-            id: 'demo_' + Date.now() + '_' + i,
-            userId: 'user_' + Math.random().toString(36).substr(2, 8),
-            asset: assets[Math.floor(Math.random() * assets.length)],
-            direction: directions[Math.floor(Math.random() * directions.length)],
-            amount: Math.floor(Math.random() * 1000) + 100,
-            startTime: new Date(Date.now() - Math.random() * 3600000),
-            won: Math.random() > 0.5,
-            payout: 0
-        };
-        
-        trade.payout = trade.won ? Math.floor(trade.amount * 1.85) : trade.amount;
-        
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${trade.startTime.toLocaleTimeString()}</td>
-            <td>${trade.userId.substring(0, 8)}...</td>
-            <td>${trade.asset}</td>
-            <td class="${trade.direction}">${trade.direction.toUpperCase()}</td>
-            <td>₹${trade.amount}</td>
-            <td class="${trade.won ? 'won' : 'lost'}">${trade.won ? 'Won' : 'Lost'}</td>
-            <td>₹${trade.payout}</td>
-        `;
-        
-        tableBody.appendChild(row);
+    try {
+        const response = await fetch('/api/admin/users');
+        const data = await response.json();
+
+        if (data.success) {
+            const users = Object.values(data.users);
+
+            if (users.length === 0) {
+                container.innerHTML = '<div class="empty-state">No users found</div>';
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Demo Balance</th>
+                            <th>Real Balance</th>
+                            <th>Total Trades</th>
+                            <th>Win/Loss</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            // Display online users
+            const onlineUsersHtml = Object.values(data.onlineUsers || {}).map(onlineUser => {
+                return `<tr>
+                    <td>${onlineUser.username}</td>
+                    <td><span class="status online">Online</span></td>
+                    <td>${new Date(onlineUser.lastSeen).toLocaleString()}</td>
+                    <td>-</td>
+                </tr>`;
+            }).join('');
+            document.getElementById('onlineUsersTable').innerHTML = onlineUsersHtml;
+
+            // Populate deposit dropdown with all users showing IDs clearly
+            const depositSelect = document.getElementById('depositUserId');
+            let selectHtml = '<option value="">Select User (ID - Username - Status)</option>';
+
+            users.forEach(user => {
+                const status = user.status || 'active';
+                const username = user.username || 'N/A';
+                selectHtml += `<option value="${user.id}">${user.id} - ${username} - ${status.toUpperCase()}</option>`;
+            });
+            depositSelect.innerHTML = selectHtml;
+
+            users.forEach(user => {
+                const status = user.status || 'active';
+                const demoTrades = user.accounts.demo.totalTrades || 0;
+                const realTrades = user.accounts.real.totalTrades || 0;
+                const totalTrades = demoTrades + realTrades;
+                const wins = (user.accounts.demo.totalWins || 0) + (user.accounts.real.totalWins || 0);
+                const losses = (user.accounts.demo.totalLosses || 0) + (user.accounts.real.totalLosses || 0);
+
+                html += `
+                    <tr>
+                        <td title="${user.id}">${user.id.substring(0, 20)}...</td>
+                        <td>₹${user.accounts.demo.balance.toLocaleString()}</td>
+                        <td>₹${user.accounts.real.balance.toLocaleString()}</td>
+                        <td>${totalTrades}</td>
+                        <td>${wins}/${losses}</td>
+                        <td><span class="status-badge status-${status}">${status.toUpperCase()}</span></td>
+                        <td>
+                            ${status === 'active' ?
+                                `<button class="btn btn-danger" onclick="toggleUserStatus('${user.id}', 'deactivate')">Deactivate</button>` :
+                                `<button class="btn btn-success" onclick="toggleUserStatus('${user.id}', 'activate')">Activate</button>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+    } catch (error) {
+        console.error('Failed to load users:', error);
+        container.innerHTML = '<div class="empty-state">Failed to load users</div>';
+        showNotification('Failed to load users', 'error');
     }
 }
 
-function startStatsUpdate() {
-    // Update stats every 5 seconds
-    setInterval(() => {
-        // Simulate live stats
-        adminStats.onlineUsers = Math.floor(Math.random() * 50) + 10;
-        adminStats.activeTrades = Math.floor(Math.random() * 20) + 5;
-        adminStats.totalVolume += Math.floor(Math.random() * 10000);
-        adminStats.serverRevenue += Math.floor(Math.random() * 1000);
+// Toggle user status
+async function toggleUserStatus(userId, action) {
+    try {
+        const response = await fetch(`/api/admin/users/${userId}/${action}`, {
+            method: 'POST'
+        });
+        const data = await response.json();
         
-        updateAdminStats(adminStats);
-    }, 5000);
+        if (data.success) {
+            showNotification(data.message, 'success');
+            loadUsers();
+        } else {
+            showNotification(data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Failed to update user status:', error);
+        showNotification('Failed to update user status', 'error');
+    }
+}
+
+// Submit admin deposit
+async function submitAdminDeposit() {
+    const userId = document.getElementById('depositUserId').value.trim();
+    const amount = document.getElementById('depositAmount').value;
+    const accountType = document.getElementById('depositAccountType').value;
+
+    if (!userId || !amount) {
+        showNotification('Please fill all fields', 'error');
+        return;
+    }
+
+    if (parseFloat(amount) <= 0) {
+        showNotification('Amount must be greater than 0', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/admin/deposit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, amount: parseFloat(amount), accountType })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            showNotification(data.message, 'success');
+            document.getElementById('depositUserId').value = '';
+            document.getElementById('depositAmount').value = '';
+        } else {
+            showNotification(data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Failed to process deposit:', error);
+        showNotification('Failed to process deposit', 'error');
+    }
+}
+
+// Load withdrawals
+async function loadWithdrawals() {
+    const container = document.getElementById('withdrawalsList');
+    container.innerHTML = '<div class="loading">Loading withdrawals...</div>';
+    
+    try {
+        const response = await fetch('/api/admin/withdrawals');
+        const data = await response.json();
+        
+        if (data.success) {
+            const withdrawals = data.withdrawals;
+            
+            if (withdrawals.length === 0) {
+                container.innerHTML = '<div class="empty-state">No withdrawal requests found</div>';
+                return;
+            }
+            
+            let html = '';
+            withdrawals.forEach(withdrawal => {
+                html += `
+                    <div class="withdrawal-card">
+                        <div class="withdrawal-header">
+                            <div class="withdrawal-amount">₹${withdrawal.amount.toLocaleString()}</div>
+                            <span class="status-badge status-${withdrawal.status}">${withdrawal.status.toUpperCase()}</span>
+                        </div>
+                        <p><strong>User ID:</strong> ${withdrawal.userId}</p>
+                        <p><strong>Requested:</strong> ${new Date(withdrawal.timestamp).toLocaleString()}</p>
+                        ${withdrawal.bankDetails ? `
+                            <div style="margin-top: 10px; padding: 10px; background: #1e2329; border-radius: 8px;">
+                                <p><strong>Bank:</strong> ${withdrawal.bankDetails.bankName}</p>
+                                <p><strong>Account:</strong> ${withdrawal.bankDetails.accountNumber}</p>
+                                <p><strong>IFSC:</strong> ${withdrawal.bankDetails.ifscCode}</p>
+                                <p><strong>Holder:</strong> ${withdrawal.bankDetails.accountHolder}</p>
+                            </div>
+                        ` : ''}
+                        ${withdrawal.status === 'pending' ? `
+                            <div style="margin-top: 15px;">
+                                <button class="btn btn-success" onclick="approveWithdrawal('${withdrawal.id}')">✓ Approve</button>
+                                <button class="btn btn-danger" onclick="rejectWithdrawal('${withdrawal.id}')">✗ Reject</button>
+                            </div>
+                        ` : ''}
+                        ${withdrawal.status === 'approved' ? `
+                            <p style="margin-top: 10px; color: #02c076;"><strong>Approved at:</strong> ${new Date(withdrawal.approvedAt).toLocaleString()}</p>
+                        ` : ''}
+                        ${withdrawal.status === 'rejected' ? `
+                            <p style="margin-top: 10px; color: #f84960;"><strong>Rejected at:</strong> ${new Date(withdrawal.rejectedAt).toLocaleString()}</p>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+    } catch (error) {
+        console.error('Failed to load withdrawals:', error);
+        container.innerHTML = '<div class="empty-state">Failed to load withdrawals</div>';
+        showNotification('Failed to load withdrawals', 'error');
+    }
+}
+
+// Approve withdrawal
+async function approveWithdrawal(id) {
+    if (!confirm('Are you sure you want to approve this withdrawal?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/admin/withdrawals/${id}/approve`, {
+            method: 'POST'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            loadWithdrawals();
+        } else {
+            showNotification(data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Failed to approve withdrawal:', error);
+        showNotification('Failed to approve withdrawal', 'error');
+    }
+}
+
+// Reject withdrawal
+async function rejectWithdrawal(id) {
+    if (!confirm('Are you sure you want to reject this withdrawal? The amount will be refunded to the user.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/admin/withdrawals/${id}/reject`, {
+            method: 'POST'
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification(data.message, 'success');
+            loadWithdrawals();
+        } else {
+            showNotification(data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Failed to reject withdrawal:', error);
+        showNotification('Failed to reject withdrawal', 'error');
+    }
+}
+
+async function saveSettings() {
+    const maintenanceMode = document.getElementById('maintenanceMode').value;
+    const tradingStatus = document.getElementById('tradingStatus').value;
+    const maxTradeAmount = document.getElementById('maxTradeAmount').value;
+    const minTradeAmount = document.getElementById('minTradeAmount').value;
+
+    try {
+        // Save maintenance mode to backend
+        const response = await fetch('/api/admin/maintenance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ maintenanceMode })
+        });
+        const data = await response.json();
+        if (!data.success) {
+            showNotification('Failed to save maintenance mode', 'error');
+            return;
+        }
+    } catch (error) {
+        showNotification('Failed to save maintenance mode', 'error');
+        return;
+    }
+
+    // Save other settings locally or send to backend as needed
+    const settings = {
+        tradingStatus,
+        maxTradeAmount,
+        minTradeAmount
+    };
+    
+    localStorage.setItem('admin_settings', JSON.stringify(settings));
+    showNotification('Settings saved successfully', 'success');
+}
+
+// Load settings including maintenance mode from backend
+async function loadSettings() {
+    try {
+        const response = await fetch('/api/admin/maintenance');
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById('maintenanceMode').value = data.maintenanceMode;
+        }
+    } catch (error) {
+        showNotification('Failed to load maintenance mode', 'error');
+    }
+
+    const settings = JSON.parse(localStorage.getItem('admin_settings') || '{}');
+    
+    if (settings.tradingStatus) {
+        document.getElementById('tradingStatus').value = settings.tradingStatus;
+    }
+    if (settings.maxTradeAmount) {
+        document.getElementById('maxTradeAmount').value = settings.maxTradeAmount;
+    }
+    if (settings.minTradeAmount) {
+        document.getElementById('minTradeAmount').value = settings.minTradeAmount;
+    }
+}
+
+// Load settings
+function loadSettings() {
+    const settings = JSON.parse(localStorage.getItem('admin_settings') || '{}');
+    
+    if (settings.maintenanceMode) {
+        document.getElementById('maintenanceMode').value = settings.maintenanceMode;
+    }
+    if (settings.tradingStatus) {
+        document.getElementById('tradingStatus').value = settings.tradingStatus;
+    }
+    if (settings.maxTradeAmount) {
+        document.getElementById('maxTradeAmount').value = settings.maxTradeAmount;
+    }
+    if (settings.minTradeAmount) {
+        document.getElementById('minTradeAmount').value = settings.minTradeAmount;
+    }
 }
 
 // Logout function
-function adminLogout() {
-    localStorage.removeItem('admin_authenticated');
-    localStorage.removeItem('admin_username');
-    window.location.href = '/admin-login';
+function logout() {
+    if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('admin_authenticated');
+        localStorage.removeItem('admin_username');
+        window.location.href = '/admin-login';
+    }
 }
 
-// Add logout button functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const header = document.querySelector('.admin-header .admin-nav');
-    if (header) {
-        const logoutBtn = document.createElement('button');
-        logoutBtn.textContent = '🚪 Logout';
-        logoutBtn.onclick = adminLogout;
-        logoutBtn.style.cssText = `
-            background: #ff4444;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        `;
-        header.appendChild(logoutBtn);
-    }
-});
+// Toggle maintenance mode
+function toggleMaintenance() {
+    const currentMode = localStorage.getItem('maintenance_mode') || 'off';
+    const newMode = currentMode === 'off' ? 'on' : 'off';
+    
+    localStorage.setItem('maintenance_mode', newMode);
+    showNotification(`Maintenance mode ${newMode === 'on' ? 'enabled' : 'disabled'}`, 'success');
+}
+
+// Export functions for global access
+window.switchTab = switchTab;
+window.loadStats = loadStats;
+window.loadUsers = loadUsers;
+window.toggleUserStatus = toggleUserStatus;
+window.submitAdminDeposit = submitAdminDeposit;
+window.loadWithdrawals = loadWithdrawals;
+window.approveWithdrawal = approveWithdrawal;
+window.rejectWithdrawal = rejectWithdrawal;
+window.saveSettings = saveSettings;
+window.logout = logout;
+window.toggleMaintenance = toggleMaintenance;

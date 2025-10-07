@@ -11,12 +11,25 @@ const cryptoAddresses = {
 
 document.addEventListener('DOMContentLoaded', function() {
     loadUserBalance();
+    loadUserId();
 });
 
 function loadUserBalance() {
     // Get balance from localStorage or default
     const balance = localStorage.getItem('user_balance') || '0';
     document.getElementById('currentBalance').textContent = balance;
+}
+
+function loadUserId() {
+    const userId = localStorage.getItem('tradepro_user_id') || localStorage.getItem('tradepro_username');
+    if (!userId) {
+        console.error('User ID not found in localStorage');
+        return;
+    }
+    const userIdDisplay = document.getElementById('userIdDisplay');
+    if (userIdDisplay) {
+        userIdDisplay.textContent = userId;
+    }
 }
 
 function setAmount(amount) {

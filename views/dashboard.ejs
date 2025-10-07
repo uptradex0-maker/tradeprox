@@ -1,104 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>TradeXpro - Trading Dashboard</title>
-<link rel="stylesheet" href="/css/dashboard.css" />
-<link rel="stylesheet" href="/css/mobile.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>TrustX Trading</title>
+    <link rel="stylesheet" href="/css/mobile.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1421;
+            color: white;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        #tradingChart {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Mobile optimizations */
+        input, select, button {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            outline: none;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Prevent zoom on input focus */
+        input[type="number"] {
+            font-size: 16px;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                font-size: 14px;
+            }
+        }
+
+        /* Fast animations */
+        .fast-transition {
+            transition: all 0.1s ease-out;
+        }
+
+        /* Cool chart effects */
+        .chart-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #f0b90b, transparent);
+            animation: chartGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes chartGlow {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+    </style>
 </head>
 <body>
-<div id="app">
-  <aside class="sidebar">
-    <div class="logo">TradeXpro</div>
-    <nav class="nav-menu">
-      <ul>
-        <li class="active"><a href="#"><span class="icon">📈</span> Trading</a></li>
-        <li><a href="#"><span class="icon">💰</span> Finance</a></li>
-        <li><a href="#"><span class="icon">👤</span> Profile</a></li>
-        <li><a href="#"><span class="icon">🛒</span> Market</a></li>
-        <li><a href="#"><span class="icon">🏆</span> Achievements</a></li>
-        <li><a href="#"><span class="icon">🎯</span> Tournaments</a></li>
-        <li><a href="#"><span class="icon">💬</span> Chat</a></li>
-        <li><a href="#"><span class="icon">❓</span> Help</a></li>
-      </ul>
-    </nav>
-    <div class="promo">
-      <button class="promo-btn">PROMO</button>
-      <button class="friends-btn">POCKET FRIENDS</button>
+    <div style="position: fixed; top: 60px; left: 10px; z-index: 200; display: flex; gap: 10px; background: #1e2329; padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.5);">
+        <select id="assetSelector" class="fast-transition" style="padding: 8px; background: #2b2f36; border: none; border-radius: 6px; color: white; font-size: 14px;">
+            <option value="EUR/USD" selected>EUR/USD</option>
+            <option value="GBP/USD">GBP/USD</option>
+            <option value="BTC/USD">BTC/USD</option>
+        </select>
+        <select id="timeframeSelector" class="fast-transition" style="padding: 8px; background: #2b2f36; border: none; border-radius: 6px; color: white; font-size: 14px;">
+            <option value="60000" selected>1m</option>
+            <option value="300000">5m</option>
+            <option value="900000">15m</option>
+            <option value="3600000">1h</option>
+        </select>
     </div>
-  </aside>
 
-  <main class="main-content">
-    <header class="top-bar">
-      <div class="asset-selector">
-        <select id="assetSelect">
-          <option>AED/CNY OTC</option>
-          <option>EUR/USD</option>
-          <option>BTC/USD</option>
-        </select>
-        <button class="chart-type-btn">📊</button>
-        <button class="settings-btn">⚙️</button>
-        <button class="tools-btn">🖌️</button>
-        <button class="more-btn">...</button>
-        <button class="layout-btn">☰</button>
-      </div>
-      <div class="account-info">
-        <span>QT Real USD</span>
-        <select id="accountSelect">
-          <option>USD</option>
-          <option>EUR</option>
-        </select>
-        <button class="topup-btn">TOP UP</button>
-        <div class="user-avatar"></div>
-      </div>
-    </header>
+    <div id="tradingChart" class="chart-container"></div>
 
-    <section class="chart-section">
-      <div class="chart-header">
-        <div class="time-utc">16:06:31 UTC+5:30</div>
-        <div class="price-display">2.00152</div>
-      </div>
-      <div id="chartArea" class="chart-area">
-        <canvas id="candleChart"></canvas>
-      </div>
-    </section>
-
-    <aside class="trade-panel">
-      <div class="expiration-time">Expiration time 16:07:31</div>
-      <div class="trade-controls">
-        <label for="tradeTime">Time</label>
-        <input type="text" id="tradeTime" value="00:01:00" readonly />
-        <button class="time-picker-btn">⏰</button>
-
-        <label for="tradeAmount">Amount</label>
-        <input type="number" id="tradeAmount" value="1" min="1" />
-        <button class="currency-btn">$</button>
-
-        <div class="payout-info">
-          <div class="percent">+92%</div>
-          <div class="amount">+$1.92</div>
-        </div>
-
-        <button class="buy-btn">BUY</button>
-        <button class="sell-btn">SELL</button>
-      </div>
-    </aside>
-  </main>
-
-  <aside class="right-sidebar">
-    <ul class="right-menu">
-      <li><button>Trades</button></li>
-      <li><button>Signals</button></li>
-      <li><button>Social Trading</button></li>
-      <li><button>Express Trades</button></li>
-      <li><button>Pending Trades</button></li>
-      <li><button>Hotkeys</button></li>
-    </ul>
-  </aside>
-</div>
-
-<script src="/js/dashboard.js"></script>
-<script src="/js/mobile.js"></script>
+    <script src="/js/balance-manager.js"></script>
+    <script src="/js/trade-manager.js"></script>
+    <script type="module" src="/js/dashboard.js?v=20251005"></script>
 </body>
 </html>

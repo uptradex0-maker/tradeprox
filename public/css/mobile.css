@@ -1,323 +1,288 @@
-/* Mobile UI - Clean & Simple */
+/* Mobile CSS for Login/Register */
 @media (max-width: 768px) {
-    /* Hide desktop layout */
-    .dashboard-container {
-        display: none !important;
+    .login-container, .register-container {
+        margin: 20px;
+        padding: 30px 20px;
+        max-width: none;
     }
     
-    /* Mobile container */
-    .mobile-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: #0d1421;
-        z-index: 9999;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    /* Mobile header */
-    .mobile-header {
-        height: 60px;
-        background: #1e2329;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 15px;
-        border-bottom: 1px solid #2b2f36;
-    }
-    
-    .mobile-logo {
-        color: #f0b90b;
-        font-size: 20px;
-        font-weight: bold;
-    }
-    
-    .mobile-balance {
-        color: white;
-        font-size: 16px;
-        font-weight: 600;
-    }
-    
-    /* Mobile chart */
-    .mobile-chart {
-        height: 300px;
-        background: linear-gradient(135deg, #0a0e1a 0%, #1a1d29 100%);
-        position: relative;
-        margin: 10px;
-        border-radius: 10px;
-    }
-    
-    .mobile-chart-content {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #f0b90b;
-        font-size: 18px;
-        font-weight: 600;
-    }
-    
-    /* Mobile assets */
-    .mobile-assets {
-        height: 60px;
-        padding: 10px;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-    
-    .mobile-assets-list {
-        display: flex;
-        gap: 10px;
-    }
-    
-    .mobile-asset {
-        min-width: 80px;
-        padding: 8px 12px;
-        background: #2b2f36;
-        border: 1px solid #3c4043;
-        border-radius: 8px;
-        text-align: center;
-        cursor: pointer;
-        color: white;
-        font-size: 12px;
-        font-weight: 600;
-    }
-    
-    .mobile-asset.active {
-        background: #f0b90b;
-        color: #000;
-        border-color: #f0b90b;
-    }
-    
-    /* Mobile controls */
-    .mobile-controls {
-        flex: 1;
-        padding: 15px;
-        overflow-y: auto;
-    }
-    
-    .mobile-section {
-        margin-bottom: 20px;
-    }
-    
-    .mobile-section-title {
-        color: #848e9c;
-        font-size: 12px;
-        font-weight: 600;
-        margin-bottom: 10px;
-        text-transform: uppercase;
-    }
-    
-    /* Wallet buttons */
-    .mobile-wallet {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-    
-    .mobile-wallet-btn {
-        flex: 1;
-        padding: 12px;
-        border: none;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        color: white;
-    }
-    
-    .mobile-deposit {
-        background: linear-gradient(135deg, #02c076, #028a50);
-    }
-    
-    .mobile-withdraw {
-        background: linear-gradient(135deg, #f84960, #d63447);
-    }
-    
-    /* Amount input */
-    .mobile-amount-input {
-        width: 100%;
-        padding: 15px;
-        background: #2b2f36;
-        border: 2px solid #3c4043;
-        border-radius: 10px;
-        color: white;
-        font-size: 18px;
-        font-weight: 600;
-        text-align: center;
-        outline: none;
-        margin-bottom: 10px;
-    }
-    
-    .mobile-amount-buttons {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-        margin-bottom: 15px;
-    }
-    
-    .mobile-amount-btn {
-        padding: 10px;
-        background: #2b2f36;
-        color: #848e9c;
-        border: 1px solid #3c4043;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-    }
-    
-    .mobile-amount-btn.active {
-        background: #f0b90b;
-        color: #000;
-        border-color: #f0b90b;
-    }
-    
-    /* Duration buttons */
-    .mobile-duration {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        margin-bottom: 20px;
-    }
-    
-    .mobile-duration-btn {
-        padding: 12px;
-        background: #2b2f36;
-        color: #848e9c;
-        border: 1px solid #3c4043;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-    }
-    
-    .mobile-duration-btn.active {
-        background: #f0b90b;
-        color: #000;
-        border-color: #f0b90b;
-    }
-    
-    /* Trade buttons */
-    .mobile-trade-buttons {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 20px;
-    }
-    
-    .mobile-trade-btn {
-        flex: 1;
-        padding: 20px;
-        border: none;
-        border-radius: 12px;
-        font-size: 18px;
-        font-weight: 700;
-        cursor: pointer;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-    }
-    
-    .mobile-up-btn {
-        background: linear-gradient(135deg, #02c076, #028a50);
-    }
-    
-    .mobile-down-btn {
-        background: linear-gradient(135deg, #f84960, #d63447);
-    }
-    
-    /* Payout info */
-    .mobile-payout {
-        background: rgba(43, 47, 54, 0.5);
-        border: 1px solid #3c4043;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-    
-    .mobile-payout-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 8px;
-    }
-    
-    .mobile-payout-label {
-        color: #848e9c;
-        font-size: 12px;
-        font-weight: 600;
-    }
-    
-    .mobile-payout-value {
-        color: #02c076;
-        font-size: 12px;
-        font-weight: 600;
-    }
-}
-
-/* Mobile Login/Register Pages */
-@media (max-width: 768px) {
-    .auth-container {
-        padding: 20px !important;
-        margin: 0 !important;
-        min-height: 100vh !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    .auth-form {
-        width: 100% !important;
-        max-width: 350px !important;
-        padding: 30px 20px !important;
-        margin: 0 !important;
-    }
-    
-    .auth-form h1 {
-        font-size: 24px !important;
-        margin-bottom: 20px !important;
-        text-align: center !important;
-    }
-    
-    .form-group {
-        margin-bottom: 20px !important;
+    .logo h1 {
+        font-size: 28px;
     }
     
     .form-group input {
-        width: 100% !important;
-        padding: 15px !important;
-        font-size: 16px !important;
-        border-radius: 8px !important;
+        padding: 12px;
+        font-size: 16px;
     }
     
-    .auth-btn {
-        width: 100% !important;
-        padding: 15px !important;
-        font-size: 16px !important;
-        border-radius: 8px !important;
-        margin-top: 10px !important;
-    }
-    
-    .auth-links {
-        text-align: center !important;
-        margin-top: 20px !important;
-    }
-    
-    .auth-links a {
-        font-size: 14px !important;
-        display: block !important;
-        margin-top: 10px !important;
+    .login-btn, .register-btn {
+        padding: 12px;
+        font-size: 16px;
     }
 }
 
-/* Desktop - hide mobile */
-@media (min-width: 769px) {
-    .mobile-container {
-        display: none !important;
-    }
+/* Mobile Trading Interface */
+.mobile-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #0d1421;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Cool Chart Enhancements */
+#candlestickChart {
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    background: linear-gradient(135deg, #0d1421 0%, #1a1d29 100%);
+    position: relative;
+}
+
+#candlestickChart::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #f0b90b, #02c076, #f84960);
+    border-radius: 10px;
+    z-index: -1;
+    opacity: 0.3;
+    animation: chartBorderGlow 4s ease-in-out infinite;
+}
+
+@keyframes chartBorderGlow {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+}
+
+/* Fast Performance Optimizations */
+.fast-transition {
+    transition: all 0.1s ease-out;
+    will-change: transform, opacity;
+}
+
+.mobile-trade-btn:active {
+    transform: scale(0.95);
+    transition: transform 0.05s ease-out;
+}
+
+.mobile-amount-input:focus {
+    border-color: #f0b90b;
+    box-shadow: 0 0 0 2px rgba(240, 185, 11, 0.2);
+    transition: all 0.1s ease-out;
+}
+
+.mobile-header {
+    background: linear-gradient(135deg, #1e2329 0%, #181a20 100%);
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #2b2f36;
+}
+
+.mobile-logo {
+    color: #f0b90b;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.mobile-balance {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.mobile-chart {
+    height: 200px;
+    background: #0d1421;
+    position: relative;
+    border-bottom: 1px solid #2b2f36;
+}
+
+.mobile-assets {
+    background: #1e2329;
+    padding: 10px;
+    border-bottom: 1px solid #2b2f36;
+}
+
+.mobile-assets-list {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+}
+
+.mobile-asset {
+    padding: 8px 12px;
+    background: #2b2f36;
+    color: #848e9c;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mobile-asset.active {
+    background: #f0b90b;
+    color: #000;
+}
+
+.mobile-controls {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+.mobile-wallet {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.mobile-wallet-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mobile-deposit {
+    background: linear-gradient(135deg, #02c076, #028a50);
+    color: white;
+}
+
+.mobile-withdraw {
+    background: linear-gradient(135deg, #f84960, #d63447);
+    color: white;
+}
+
+.mobile-section {
+    margin-bottom: 20px;
+}
+
+.mobile-section-title {
+    color: #848e9c;
+    font-size: 12px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.mobile-amount-input {
+    width: 100%;
+    padding: 12px;
+    background: #2b2f36;
+    border: 2px solid #3c4043;
+    border-radius: 6px;
+    color: white;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+    margin-bottom: 10px;
+}
+
+.mobile-amount-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.mobile-amount-btn {
+    padding: 10px;
+    background: #2b2f36;
+    color: #848e9c;
+    border: 1px solid #3c4043;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mobile-amount-btn.active {
+    background: #f0b90b;
+    color: #000;
+    border-color: #f0b90b;
+}
+
+.mobile-duration {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.mobile-duration-btn {
+    padding: 10px;
+    background: #2b2f36;
+    color: #848e9c;
+    border: 1px solid #3c4043;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mobile-duration-btn.active {
+    background: #f0b90b;
+    color: #000;
+    border-color: #f0b90b;
+}
+
+.mobile-payout {
+    background: rgba(43, 47, 54, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.mobile-payout-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.mobile-payout-label {
+    color: #848e9c;
+    font-size: 12px;
+}
+
+.mobile-payout-value {
+    color: #02c076;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.mobile-trade-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.mobile-trade-btn {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mobile-up-btn {
+    background: linear-gradient(135deg, #02c076, #028a50);
+    color: white;
+}
+
+.mobile-down-btn {
+    background: linear-gradient(135deg, #f84960, #d63447);
+    color: white;
 }

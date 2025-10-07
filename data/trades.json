@@ -1,603 +1,306 @@
-{
-  "user_1759123207775_ux8afb8at": {
-    "demo": [],
-    "real": []
+[
+  {
+    "id": "3ec84274-8e07-406e-9260-592d58918aed",
+    "userId": "user_1759817236344",
+    "asset": "EUR/USD",
+    "direction": "up",
+    "amount": 100,
+    "duration": 60,
+    "startPrice": 1.0801872491690077,
+    "startTime": "2025-10-07T06:07:19.129Z",
+    "endTime": "2025-10-07T06:08:19.129Z",
+    "status": "completed",
+    "accountType": "demo",
+    "endPrice": 1.0802537623376796,
+    "result": "win",
+    "payout": 185
   },
-  "user_1759037606365_v8sw2ab7q": {
-    "demo": [
-      {
-        "id": 1759127622651,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.0854074083304954,
-        "startTime": "2025-09-29T06:33:42.651Z",
-        "endTime": "2025-09-29T06:33:47.651Z",
-        "status": "completed",
-        "accountType": "demo",
-        "result": "lost",
-        "endPrice": 1.0849617897237642,
-        "payout": 0
-      },
-      {
-        "id": 1759127623100,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.0854074083304954,
-        "startTime": "2025-09-29T06:33:43.100Z",
-        "endTime": "2025-09-29T06:33:48.100Z",
-        "status": "completed",
-        "accountType": "demo",
-        "result": "lost",
-        "endPrice": 1.0849617897237642,
-        "payout": 0
-      },
-      {
-        "id": 1759148716248,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.08484631707383,
-        "startTime": "2025-09-29T12:25:16.248Z",
-        "endTime": "2025-09-29T12:25:21.248Z",
-        "status": "completed",
-        "accountType": "demo",
-        "result": "lost",
-        "endPrice": 1.0847160149357558,
-        "payout": 0
-      },
-      {
-        "id": 1759148737420,
-        "asset": "EUR/USD",
-        "direction": "down",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.085383040955905,
-        "startTime": "2025-09-29T12:25:37.420Z",
-        "endTime": "2025-09-29T12:25:42.420Z",
-        "status": "completed",
-        "accountType": "demo",
-        "result": "won",
-        "endPrice": 1.084641892470016,
-        "payout": 185
-      }
-    ],
-    "real": []
+  {
+    "id": "88940a54-fc3e-4e59-af60-999e4fdb3dc4",
+    "userId": "user_1759817329012",
+    "asset": "EUR/USD",
+    "direction": "down",
+    "amount": 100,
+    "duration": 5,
+    "startPrice": 1.0835808811672556,
+    "startTime": "2025-10-07T06:09:03.362Z",
+    "endTime": "2025-10-07T06:09:08.362Z",
+    "status": "completed",
+    "accountType": "demo",
+    "endPrice": 1.0832407479283017,
+    "result": "win",
+    "payout": 185
   },
-  "user_1759123214605_9awa6grn1": {
-    "demo": [],
-    "real": []
+  {
+    "id": "9530fb29-5c29-4beb-955f-2acbd43809e4",
+    "userId": "user_1759817329012",
+    "asset": "EUR/USD",
+    "direction": "up",
+    "amount": 100,
+    "duration": 5,
+    "startPrice": 1.0836556041799845,
+    "startTime": "2025-10-07T06:09:13.093Z",
+    "endTime": "2025-10-07T06:09:18.093Z",
+    "status": "completed",
+    "accountType": "demo",
+    "endPrice": 1.082783403677061,
+    "result": "loss",
+    "payout": 0
   },
-  "user_1759123223010_qng2oywf6": {
-    "demo": [],
-    "real": []
+  {
+    "id": "3da4c836-1eba-4a09-aabb-79d6368bd171",
+    "userId": "user_1759817329012",
+    "asset": "EUR/USD",
+    "direction": "up",
+    "amount": 100,
+    "duration": 5,
+    "startPrice": 1.083691915592609,
+    "startTime": "2025-10-07T06:09:13.261Z",
+    "endTime": "2025-10-07T06:09:18.261Z",
+    "status": "completed",
+    "accountType": "demo",
+    "endPrice": 1.0830819737355237,
+    "result": "loss",
+    "payout": 0
   },
-  "user_1759123242691_exlz0jl1u": {
-    "demo": [],
-    "real": []
+  {
+    "id": "e45be037-48fd-4c29-84cc-e5c03150e3f0",
+    "userId": "user_1759817329012",
+    "asset": "EUR/USD",
+    "direction": "up",
+    "amount": 100,
+    "duration": 5,
+    "startPrice": 1.083691915592609,
+    "startTime": "2025-10-07T06:09:13.467Z",
+    "endTime": "2025-10-07T06:09:18.467Z",
+    "status": "completed",
+    "accountType": "demo",
+    "endPrice": 1.0831165362758195,
+    "result": "loss",
+    "payout": 0
   },
-  "user_1759123049476_re8y7xmv8": {
-    "demo": [
-      {
-        "id": 1759126882638,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.0842408809511772,
-        "startTime": "2025-09-29T06:21:22.638Z",
-        "endTime": "2025-09-29T06:21:27.638Z",
-        "status": "completed",
-        "accountType": "demo",
-        "result": "lost",
-        "endPrice": 1.083719585353046,
-        "payout": 0
-      }
-    ],
-    "real": []
+  {
+    "id": "a1df464a-5e40-4687-9fe6-c0758df01469",
+    "userId": "user_1759817329012",
+    "asset": "EUR/USD",
+    "direction": "up",
+    "amount": 100,
+    "duration": 5,
+    "startPrice": 1.083691915592609,
+    "startTime": "2025-10-07T06:09:13.670Z",
+    "endTime": "2025-10-07T06:09:18.670Z",
+    "status": "completed",
+    "accountType": "demo",
+    "endPrice": 1.0841611356904695,
+    "result": "win",
+    "payout": 185
   },
-  "user_1759123252400_o9vj7d9yb": {
-    "demo": [],
-    "real": []
+  {
+    "id": "24c13fea-d3d4-4346-9282-defba93f9fde",
+    "userId": "user_1759817329012",
+    "asset": "EUR/USD",
+    "direction": "up",
+    "amount": 100,
+    "duration": 5,
+    "startPrice": 1.083691915592609,
+    "startTime": "2025-10-07T06:09:13.876Z",
+    "endTime": "2025-10-07T06:09:18.876Z",
+    "status": "completed",
+    "accountType": "demo",
+    "endPrice": 1.084533032864765,
+    "result": "win",
+    "payout": 185
   },
-  "user_1759125022185_9z924ef2p": {
-    "demo": [],
-    "real": []
+  {
+    "id": "8326cdbb-c22c-46d0-a44f-5a900e7998cb",
+    "userId": "user_1759817329012",
+    "asset": "EUR/USD",
+    "direction": "up",
+    "amount": 100,
+    "duration": 5,
+    "startPrice": 1.083691915592609,
+    "startTime": "2025-10-07T06:09:14.024Z",
+    "endTime": "2025-10-07T06:09:19.024Z",
+    "status": "completed",
+    "accountType": "demo",
+    "endPrice": 1.0833831390784332,
+    "result": "loss",
+    "payout": 0
   },
-  "user_1759125199774_wduae2h0y": {
-    "demo": [],
-    "real": []
+  {
+    "id": "f52cf0c5-63a1-4513-8c62-169eb2aea5d1",
+    "userId": "user_1759817329012",
+    "asset": "EUR/USD",
+    "direction": "up",
+    "amount": 100,
+    "duration": 5,
+    "startPrice": 1.0837455727838352,
+    "startTime": "2025-10-07T06:09:14.200Z",
+    "endTime": "2025-10-07T06:09:19.200Z",
+    "status": "completed",
+    "accountType": "demo",
+    "endPrice": 1.0838980896466337,
+    "result": "win",
+    "payout": 185
   },
-  "user_1759125734649_uqe8igg7s": {
-    "demo": [],
-    "real": []
+  {
+    "id": "62e96863-c743-437d-b9c4-eb0c66dfc710",
+    "userId": "user_1759817329012",
+    "asset": "EUR/USD",
+    "direction": "up",
+    "amount": 100,
+    "duration": 5,
+    "startPrice": 1.0837455727838352,
+    "startTime": "2025-10-07T06:09:14.425Z",
+    "endTime": "2025-10-07T06:09:19.425Z",
+    "status": "completed",
+    "accountType": "demo",
+    "endPrice": 1.0844231436873693,
+    "result": "win",
+    "payout": 185
   },
-  "user_1759125891849_g1es0tr7k": {
-    "demo": [],
-    "real": []
+  {
+    "id": "7c021b1a-7b5d-4b44-8bbc-71e94d4b8dc8",
+    "userId": "user_1759817329012",
+    "asset": "EUR/USD",
+    "direction": "down",
+    "amount": 100,
+    "duration": 5,
+    "startPrice": 1.0838470464106371,
+    "startTime": "2025-10-07T06:09:21.687Z",
+    "endTime": "2025-10-07T06:09:26.687Z",
+    "status": "completed",
+    "accountType": "demo",
+    "endPrice": 1.0838785244558553,
+    "result": "loss",
+    "payout": 0
   },
-  "user_1759126576455_sx4afyca5": {
-    "demo": [],
-    "real": []
+  {
+    "id": "a08ab8d8-8399-4151-ba83-bdaebb4f3120",
+    "userId": "user_1759817329012",
+    "asset": "EUR/USD",
+    "direction": "down",
+    "amount": 100,
+    "duration": 5,
+    "startPrice": 1.0838470464106371,
+    "startTime": "2025-10-07T06:09:21.845Z",
+    "endTime": "2025-10-07T06:09:26.845Z",
+    "status": "completed",
+    "accountType": "demo",
+    "endPrice": 1.0845287603510447,
+    "result": "loss",
+    "payout": 0
   },
-  "user_1759126645914_7aczmx5mt": {
-    "demo": [],
-    "real": []
+  {
+    "id": "f836dadb-b201-46d9-947a-dcf7ed596e5b",
+    "userId": "user_1759817329012",
+    "asset": "EUR/USD",
+    "direction": "up",
+    "amount": 50000,
+    "duration": 5,
+    "startPrice": 1.0838146929688321,
+    "startTime": "2025-10-07T06:09:36.026Z",
+    "endTime": "2025-10-07T06:09:41.026Z",
+    "status": "completed",
+    "accountType": "demo",
+    "endPrice": 1.0838887410156224,
+    "result": "win",
+    "payout": 92500
   },
-  "user_1759126837764_q9ssgtfaq": {
-    "demo": [],
-    "real": []
+  {
+    "id": "e7b44e0a-9996-430e-ae3f-38f9cf0c5dcd",
+    "userId": "user_1759817236344",
+    "asset": "EUR/USD",
+    "direction": "up",
+    "amount": 3000,
+    "duration": 5,
+    "startPrice": 1.0776021631105976,
+    "startTime": "2025-10-07T06:15:34.644Z",
+    "endTime": "2025-10-07T06:15:39.644Z",
+    "status": "completed",
+    "accountType": "real",
+    "endPrice": 1.078184769714622,
+    "result": "win",
+    "payout": 5550
   },
-  "user_1759126899132_ggp02tq7c": {
-    "demo": [],
-    "real": []
+  {
+    "id": "bc9fd4b8-f824-4840-8883-dfae58887cec",
+    "userId": "user_1759817236344",
+    "asset": "EUR/USD",
+    "direction": "down",
+    "amount": 5550,
+    "duration": 60,
+    "startPrice": 1.085716735264869,
+    "startTime": "2025-10-07T06:20:09.760Z",
+    "endTime": "2025-10-07T06:21:09.760Z",
+    "status": "completed",
+    "accountType": "real",
+    "endPrice": 1.0857839743080848,
+    "result": "loss",
+    "payout": 0
   },
-  "user_1759127084769_cgqayf80a": {
-    "demo": [],
-    "real": []
+  {
+    "id": "3c9b39bc-77ff-4a54-a22e-0c07455650db",
+    "userId": "user_1759817236344",
+    "asset": "EUR/USD",
+    "direction": "down",
+    "amount": 100,
+    "duration": 60,
+    "startPrice": 1.0815508140698078,
+    "startTime": "2025-10-07T06:39:19.856Z",
+    "endTime": "2025-10-07T06:40:19.856Z",
+    "status": "completed",
+    "accountType": "real",
+    "endPrice": 1.0825016455903567,
+    "result": "loss",
+    "payout": 0
   },
-  "user_1759127088093_usbgfnkph": {
-    "demo": [],
-    "real": []
+  {
+    "id": "1cb54a2f-ca58-4654-9671-e6464ab60b8b",
+    "userId": "user_1759817236344",
+    "asset": "EUR/USD",
+    "direction": "up",
+    "amount": 2900,
+    "duration": 5,
+    "startPrice": 1.0811341633852494,
+    "startTime": "2025-10-07T06:39:42.624Z",
+    "endTime": "2025-10-07T06:39:47.624Z",
+    "status": "completed",
+    "accountType": "real",
+    "endPrice": 1.0813944786516825,
+    "result": "loss",
+    "payout": 0
   },
-  "user_1759127266125_dtoxdrab8": {
-    "demo": [],
-    "real": []
+  {
+    "id": "abdf398b-0414-464b-9874-6859b5663b6f",
+    "userId": "user_1759817236344",
+    "asset": "EUR/USD",
+    "direction": "up",
+    "amount": 3000,
+    "duration": 60,
+    "startPrice": 1.0844985118229886,
+    "startTime": "2025-10-07T06:45:17.153Z",
+    "endTime": "2025-10-07T06:46:17.153Z",
+    "status": "completed",
+    "accountType": "real",
+    "endPrice": 1.0837568035327096,
+    "result": "loss",
+    "payout": 0
   },
-  "user_1759127612095_yiukgcfnw": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759127692970_b3sqig6md": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759127977114_cjawkhs5w": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759128039693_0rvvvfxwc": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759128067523_b1af7hw11": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759137865766_ww22pnqd9": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759141757791_rymj0rv9z": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759141768329_o8tnkfgjo": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759141785912_n1qezparr": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759141846476_gtc05svvc": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759141847638_74bsnvirm": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759141855668_kx849cw57": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759142003885_u6c9juaha": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759149492239_yiibwnp32": {
-    "demo": [
-      {
-        "id": 1759149497863,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.0843528399762774,
-        "startTime": "2025-09-29T12:38:17.863Z",
-        "endTime": "2025-09-29T12:38:22.863Z",
-        "status": "completed",
-        "accountType": "demo",
-        "result": "won",
-        "endPrice": 1.0844981816309032,
-        "payout": 185
-      },
-      {
-        "id": 1759149498069,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.084128002158738,
-        "startTime": "2025-09-29T12:38:18.069Z",
-        "endTime": "2025-09-29T12:38:23.069Z",
-        "status": "completed",
-        "accountType": "demo",
-        "result": "won",
-        "endPrice": 1.084293290455863,
-        "payout": 185
-      }
-    ],
-    "real": []
-  },
-  "user_1759149499739_bpg5zwink": {
-    "demo": [
-      {
-        "id": 1759157317972,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 60,
-        "startPrice": 1.085100522458371,
-        "startTime": "2025-09-29T14:48:37.972Z",
-        "endTime": "2025-09-29T14:49:37.972Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759157318147,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 60,
-        "startPrice": 1.085100522458371,
-        "startTime": "2025-09-29T14:48:38.147Z",
-        "endTime": "2025-09-29T14:49:38.147Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759157318340,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 60,
-        "startPrice": 1.085100522458371,
-        "startTime": "2025-09-29T14:48:38.340Z",
-        "endTime": "2025-09-29T14:49:38.340Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759162355492,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.0850445938254858,
-        "startTime": "2025-09-29T16:12:35.493Z",
-        "endTime": "2025-09-29T16:12:40.493Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759162365997,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.085,
-        "startTime": "2025-09-29T16:12:45.997Z",
-        "endTime": "2025-09-29T16:12:50.997Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759162645015,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.084666443994853,
-        "startTime": "2025-09-29T16:17:25.015Z",
-        "endTime": "2025-09-29T16:17:30.015Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759162645058,
-        "asset": "EUR/USD",
-        "direction": "down",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.084666443994853,
-        "startTime": "2025-09-29T16:17:25.058Z",
-        "endTime": "2025-09-29T16:17:30.058Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759163348384,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.085472474481985,
-        "startTime": "2025-09-29T16:29:08.384Z",
-        "endTime": "2025-09-29T16:29:13.384Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759163592315,
-        "asset": "EUR/USD",
-        "direction": "down",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.0855880357550198,
-        "startTime": "2025-09-29T16:33:12.315Z",
-        "endTime": "2025-09-29T16:33:17.315Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759163595342,
-        "asset": "EUR/USD",
-        "direction": "down",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.0862034994510683,
-        "startTime": "2025-09-29T16:33:15.342Z",
-        "endTime": "2025-09-29T16:33:20.342Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759163597971,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.085,
-        "startTime": "2025-09-29T16:33:17.971Z",
-        "endTime": "2025-09-29T16:33:22.971Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759163598181,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.085,
-        "startTime": "2025-09-29T16:33:18.181Z",
-        "endTime": "2025-09-29T16:33:23.181Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759163598356,
-        "asset": "EUR/USD",
-        "direction": "down",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.085,
-        "startTime": "2025-09-29T16:33:18.356Z",
-        "endTime": "2025-09-29T16:33:23.356Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759163598493,
-        "asset": "EUR/USD",
-        "direction": "down",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.085,
-        "startTime": "2025-09-29T16:33:18.493Z",
-        "endTime": "2025-09-29T16:33:23.493Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759163599080,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.0847683136936432,
-        "startTime": "2025-09-29T16:33:19.080Z",
-        "endTime": "2025-09-29T16:33:24.080Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759163610968,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.0848993767249997,
-        "startTime": "2025-09-29T16:33:30.968Z",
-        "endTime": "2025-09-29T16:33:35.968Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759228013990,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.0857829418634495,
-        "startTime": "2025-09-30T10:26:53.990Z",
-        "endTime": "2025-09-30T10:26:58.990Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759228226640,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.0860546579140495,
-        "startTime": "2025-09-30T10:30:26.640Z",
-        "endTime": "2025-09-30T10:30:31.640Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759228245064,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.084897907830104,
-        "startTime": "2025-09-30T10:30:45.064Z",
-        "endTime": "2025-09-30T10:30:50.064Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759228246751,
-        "asset": "EUR/USD",
-        "direction": "up",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.0846162727987325,
-        "startTime": "2025-09-30T10:30:46.751Z",
-        "endTime": "2025-09-30T10:30:51.751Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759228269022,
-        "asset": "EUR/USD",
-        "direction": "down",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.086752784931537,
-        "startTime": "2025-09-30T10:31:09.022Z",
-        "endTime": "2025-09-30T10:31:14.022Z",
-        "status": "active",
-        "accountType": "demo"
-      },
-      {
-        "id": 1759228276647,
-        "asset": "EUR/USD",
-        "direction": "down",
-        "amount": 100,
-        "duration": 5,
-        "startPrice": 1.085,
-        "startTime": "2025-09-30T10:31:16.647Z",
-        "endTime": "2025-09-30T10:31:21.647Z",
-        "status": "active",
-        "accountType": "demo"
-      }
-    ],
-    "real": []
-  },
-  "user_1759157523908_rxfazu2rz": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759157527641_u2aftdstb": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759157528198_gx4mndciw": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759157528843_j3iuwpyfc": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759157529542_zr414fvy5": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759232886817_2lqxtby48": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759232889371_4vjwrch7z": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759233208650_5b8f5dtn9": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759233950681_wbs4px74p": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759234653787_ogdcijhla": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759234983002_cfu0aiuux": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759235011001_74dpak5ek": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759241830261_1gh0jr72b": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759242092571_9sa5w1r6g": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759243481834_s6ocjwvwy": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759243874555_mvbu65kjx": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759243876128_jtuzp12iz": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759243876622_n4cuxbnr2": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759243876843_l6dt4rhll": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759243877323_mpi71dde6": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759243878052_m8rl8hjj1": {
-    "demo": [],
-    "real": []
-  },
-  "user_1759244311622_cz47fv0bl": {
-    "demo": [],
-    "real": []
-  },
-  "web_user_1759245104507": {
-    "demo": [],
-    "real": []
-  },
-  "web_user_1759245371659": {
-    "demo": [],
-    "real": []
+  {
+    "id": "7c0c1aed-07e8-4617-bfc7-9bb8badacd83",
+    "userId": "aryan",
+    "asset": "EUR/USD",
+    "direction": "up",
+    "amount": 100,
+    "duration": 60,
+    "startPrice": 1.0895944518666671,
+    "startTime": "2025-10-07T06:53:47.319Z",
+    "endTime": "2025-10-07T06:54:47.319Z",
+    "status": "completed",
+    "accountType": "real",
+    "endPrice": 1.0905457123442315,
+    "result": "loss",
+    "payout": 0
   }
-}
+]
