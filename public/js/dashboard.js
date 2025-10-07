@@ -69,6 +69,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Build UI first so balance is visible, then load actual data
     initializeChart();
     applyAccountToUI();
+    
+    // Force chart initialization after DOM is ready
+    setTimeout(() => {
+        initializeCandlestickChart();
+    }, 500);
 
     // Load data with proper synchronization
     Promise.all([
@@ -476,16 +481,18 @@ function logout() {
 
 function initializeCandlestickChart() {
     const canvas = document.getElementById('candlestickChart');
-    if (!canvas) return;
+    if (!canvas) {
+        console.log('Canvas not found');
+        return;
+    }
     
-    // Force canvas size
-    const container = canvas.parentElement;
-    canvas.width = container.offsetWidth || window.innerWidth - 20;
-    canvas.height = container.offsetHeight || window.innerHeight - 200;
-    canvas.style.width = canvas.width + 'px';
-    canvas.style.height = canvas.height + 'px';
+    // Set fixed canvas size
+    canvas.width = window.innerWidth - 20;
+    canvas.height = window.innerHeight - 200;
+    canvas.style.display = 'block';
     
     const ctx = canvas.getContext('2d');
+    console.log('Canvas initialized:', canvas.width, 'x', canvas.height);
     
     // Generate initial candle data for all assets
     generateCandleData();
@@ -503,6 +510,8 @@ function initializeCandlestickChart() {
         candleStartTime[asset] = Date.now();
     });
     
+    // Draw chart immediately
+    console.log('Drawing initial chart');
     drawChart(ctx, canvas.width, canvas.height);
     
     // Add resize handler
