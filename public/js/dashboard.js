@@ -222,8 +222,8 @@ function initializeChart() {
             </div>
             
             <!-- Chart Area -->
-            <div style="margin-top: 60px; height: calc(100vh - 200px); padding: 10px;">
-                <canvas id="candlestickChart" style="width: 100%; height: 100%; background: #0d1421;"></canvas>
+            <div style="margin-top: 60px; height: calc(100vh - 200px); padding: 10px; position: relative;">
+                <canvas id="candlestickChart" style="width: 100%; height: 100%; background: #0d1421; display: block;"></canvas>
             </div>
             
             <!-- Mobile Trading Panel -->
@@ -478,10 +478,14 @@ function initializeCandlestickChart() {
     const canvas = document.getElementById('candlestickChart');
     if (!canvas) return;
     
+    // Force canvas size
+    const container = canvas.parentElement;
+    canvas.width = container.offsetWidth || window.innerWidth - 20;
+    canvas.height = container.offsetHeight || window.innerHeight - 200;
+    canvas.style.width = canvas.width + 'px';
+    canvas.style.height = canvas.height + 'px';
+    
     const ctx = canvas.getContext('2d');
-    canvas.width = canvas.offsetWidth * 2;
-    canvas.height = canvas.offsetHeight * 2;
-    ctx.scale(2, 2);
     
     // Generate initial candle data for all assets
     generateCandleData();
@@ -499,7 +503,23 @@ function initializeCandlestickChart() {
         candleStartTime[asset] = Date.now();
     });
     
-    drawChart(ctx, canvas.offsetWidth, canvas.offsetHeight);
+    drawChart(ctx, canvas.width, canvas.height);
+    
+    // Add resize handler
+    window.addEventListener('resize', () => {
+        setTimeout(() => {
+            const canvas = document.getElementById('candlestickChart');
+            if (canvas) {
+                const container = canvas.parentElement;
+                canvas.width = container.offsetWidth || window.innerWidth - 20;
+                canvas.height = container.offsetHeight || window.innerHeight - 200;
+                canvas.style.width = canvas.width + 'px';
+                canvas.style.height = canvas.height + 'px';
+                const ctx = canvas.getContext('2d');
+                drawChart(ctx, canvas.width, canvas.height);
+            }
+        }, 100);
+    });
 }
 
 function getInitialPrice(asset) {
@@ -694,7 +714,7 @@ if (canvas) {
             }
         }
         const ctx = canvas.getContext('2d');
-        drawChart(ctx, canvas.offsetWidth, canvas.offsetHeight);
+        drawChart(ctx, canvas.width, canvas.height);
     });
 }
 
@@ -734,7 +754,7 @@ function updateChart() {
     const canvas = document.getElementById('candlestickChart');
     if (canvas) {
         const ctx = canvas.getContext('2d');
-        drawChart(ctx, canvas.offsetWidth, canvas.offsetHeight);
+        drawChart(ctx, canvas.width, canvas.height);
     }
 }
 
