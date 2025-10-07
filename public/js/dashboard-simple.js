@@ -25,30 +25,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const storedAccount = localStorage.getItem('tradepro_current_account');
     currentAccount = storedAccount === 'real' ? 'real' : 'demo';
     
-    loadUserData();
+    // Initialize chart first to create UI
     initializeChart();
+    
+    // Then load data and start updates
+    loadUserData();
     startPriceUpdates();
     
-    const assetSelector = document.getElementById('assetSelector');
-    if (assetSelector) {
-        assetSelector.addEventListener('change', function(e) {
-            currentAsset = e.target.value;
-            updateChartDisplay();
-        });
-    }
-
-    const timeframeSelector = document.getElementById('timeframeSelector');
-    if (timeframeSelector) {
-        timeframeSelector.addEventListener('change', function(e) {
-            timeframe = parseInt(e.target.value);
-            assets.forEach(asset => {
-                chartData[asset] = [];
-                currentCandle[asset] = null;
-                candleStartTime[asset] = Date.now();
+    // Add event listeners after UI is created
+    setTimeout(() => {
+        const assetSelector = document.getElementById('assetSelector');
+        if (assetSelector) {
+            assetSelector.addEventListener('change', function(e) {
+                currentAsset = e.target.value;
+                updateChartDisplay();
             });
-            updateChartDisplay();
-        });
-    }
+        }
+
+        const timeframeSelector = document.getElementById('timeframeSelector');
+        if (timeframeSelector) {
+            timeframeSelector.addEventListener('change', function(e) {
+                timeframe = parseInt(e.target.value);
+                assets.forEach(asset => {
+                    chartData[asset] = [];
+                    currentCandle[asset] = null;
+                    candleStartTime[asset] = Date.now();
+                });
+                updateChartDisplay();
+            });
+        }
+    }, 100);
 });
 
 function loadUserData() {
@@ -87,7 +93,10 @@ function saveUserData() {
 
 function initializeChart() {
     const container = document.getElementById('tradingChart');
-    if (!container) return;
+    if (!container) {
+        console.error('Trading chart container not found');
+        return;
+    }
 
     container.innerHTML = `
         <div style="width: 100%; height: 100vh; background: #0d1421; position: relative; overflow: hidden;">
@@ -144,13 +153,17 @@ function initializeChart() {
         </div>
     `;
     
+    // Initialize chart data
     assets.forEach(asset => {
         chartData[asset] = [];
         currentCandle[asset] = null;
         candleStartTime[asset] = Date.now();
     });
     
-    initializeCandlestickChart();
+    // Wait for DOM to be ready then initialize canvas
+    setTimeout(() => {
+        initializeCandlestickChart();
+    }, 50);
 }
 
 function updateBalance() {
@@ -262,7 +275,10 @@ function logout() {
 
 function initializeCandlestickChart() {
     const canvas = document.getElementById('candlestickChart');
-    if (!canvas) return;
+    if (!canvas) {
+        console.error('Canvas element not found');
+        return;
+    }
     
     const ctx = canvas.getContext('2d');
     canvas.width = canvas.offsetWidth * 2;
@@ -382,6 +398,10 @@ function drawChart(ctx, width, height) {
 }
 
 function updateChart() {
+    if (!chartData || Object.keys(chartData).length === 0) {
+        return;
+    }
+    
     assets.forEach(asset => {
         if (!currentCandle[asset]) {
             const lastClose = chartData[asset].length > 0 ? chartData[asset][chartData[asset].length - 1].close : getInitialPrice(asset);
@@ -424,9 +444,13 @@ function updateChartDisplay() {
     }
     
     const canvas = document.getElementById('candlestickChart');
-    if (canvas) {
-        const ctx = canvas.getContext('2d');
-        drawChart(ctx, canvas.offsetWidth, canvas.offsetHeight);
+    if (canvas && canvas.getContext) {
+        try {
+            const ctx = canvas.getContext('2d');
+            drawChart(ctx, canvas.offsetWidth, canvas.offsetHeight);
+        } catch (error) {
+            console.error('Error updating chart display:', error);
+        }
     }
 }
 

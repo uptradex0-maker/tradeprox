@@ -92,6 +92,10 @@ app.get('/register', (req, res) => {
   res.render('register');
 });
 
+app.get('/deposit', (req, res) => {
+  res.render('deposit');
+});
+
 app.get('/admin', (req, res) => {
   res.render('admin');
 });

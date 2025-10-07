@@ -1,347 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Deposit - TrustX</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit - TradePro</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0d1421 0%, #1a1d29 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0d1421, #1e2329);
             color: white;
             min-height: 100vh;
-            margin: 0;
             padding: 20px;
         }
+        
         .container {
-            max-width: 400px;
+            max-width: 500px;
             margin: 0 auto;
-            background: #1e2329;
+            background: rgba(30, 35, 41, 0.9);
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 0 15px rgba(240, 185, 11, 0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        h1 {
-            color: #f0b90b;
+        
+        .header {
             text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #f0b90b;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .form-group {
             margin-bottom: 20px;
         }
+        
         label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 600;
-            color: #ccc;
+            color: #848e9c;
+            font-size: 14px;
         }
+        
         input {
             width: 100%;
             padding: 12px;
-            border-radius: 8px;
-            border: none;
-            font-size: 16px;
-            margin-bottom: 15px;
             background: #2b2f36;
+            border: 1px solid #3c4043;
+            border-radius: 6px;
             color: white;
+            font-size: 16px;
+            outline: none;
         }
-        button {
+        
+        input:focus {
+            border-color: #f0b90b;
+        }
+        
+        .btn {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #f0b90b, #e6a800);
+            padding: 12px;
+            background: linear-gradient(135deg, #f0b90b, #d4a017);
+            color: #0d1421;
             border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 700;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            color: #000;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
             margin-bottom: 10px;
         }
-        button:hover {
-            background: linear-gradient(135deg, #e6a800, #f0b90b);
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(240, 185, 11, 0.3);
         }
-        #userIdDisplay {
-            text-align: center;
-            margin-bottom: 20px;
-            font-weight: 600;
-            color: #f0b90b;
+        
+        .btn-secondary {
+            background: #39424e;
+            color: white;
         }
+        
         .qr-section {
             text-align: center;
             margin: 20px 0;
             padding: 20px;
-            background: #2b2f36;
-            border-radius: 10px;
+            background: rgba(43, 47, 54, 0.5);
+            border-radius: 8px;
         }
+        
         .qr-code {
             max-width: 200px;
-            width: 100%;
-            border-radius: 10px;
+            height: auto;
             margin: 10px 0;
         }
-        .step {
+        
+        .success {
+            background: #02c076;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
             display: none;
         }
-        .step.active {
-            display: block;
-        }
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        .step-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #3c4043;
-            margin: 0 5px;
-        }
-        .step-dot.active {
-            background: #f0b90b;
-        }
-        .amount-display {
-            font-size: 24px;
-            font-weight: bold;
-            color: #f0b90b;
-            text-align: center;
-            margin: 10px 0;
-        }
-        .instruction {
-            background: #2b2f36;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border-left: 4px solid #f0b90b;
-        }
-        .balance-display {
-            margin-top: 20px;
-            padding: 15px;
-            background: #2b2f36;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
+        
+        .error {
+            background: #f84960;
             color: white;
-            font-weight: bold;
-            z-index: 1001;
-            max-width: 300px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-        .notification.success {
-            background: linear-gradient(135deg, #00ff88, #00cc6a);
-        }
-        .notification.error {
-            background: linear-gradient(135deg, #ff4444, #cc3333);
-        }
-        .notification.info {
-            background: linear-gradient(135deg, #00d4ff, #5200ff);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>💰 Deposit Funds</h1>
-        <div id="userIdDisplay">Loading User ID...</div>
+        <div class="header">
+            <h1>Deposit Money</h1>
+            <p style="color: #848e9c;">Add funds to your trading account</p>
+        </div>
         
-        <div class="step-indicator">
-            <div class="step-dot active" id="dot1"></div>
-            <div class="step-dot" id="dot2"></div>
-            <div class="step-dot" id="dot3"></div>
-        </div>
-
-        <!-- Step 1: Enter Amount -->
-        <div class="step active" id="step1">
-            <label for="depositAmount">Deposit Amount (₹)</label>
-            <input type="number" id="depositAmount" min="100" placeholder="Minimum ₹100" />
-            <button id="proceedBtn">Proceed to Payment</button>
-        </div>
-
-        <!-- Step 2: QR Code Payment -->
-        <div class="step" id="step2">
-            <div class="amount-display">Amount: ₹<span id="displayAmount">0</span></div>
-            <div class="qr-section">
-                <h3>Scan QR Code to Pay</h3>
-                <img id="qrCode" class="qr-code" src="" alt="QR Code" style="display: none;" />
-                <div class="instruction">
-                    📱 Scan this QR code with any UPI app (PhonePe, Paytm, GPay, etc.) and make the payment
-                </div>
+        <div id="success" class="success"></div>
+        <div id="error" class="error"></div>
+        
+        <div class="qr-section">
+            <h3 style="color: #f0b90b; margin-bottom: 10px;">Scan QR Code to Pay</h3>
+            <div id="qrContainer">
+                <p style="color: #848e9c;">Loading QR code...</p>
             </div>
-            <button id="paymentDoneBtn">Payment Done</button>
         </div>
-
-        <!-- Step 3: UTR Verification -->
-        <div class="step" id="step3">
-            <div class="amount-display">Amount: ₹<span id="displayAmount2">0</span></div>
-            <div class="instruction">
-                ✅ Payment completed! Please enter your UTR/Transaction ID below:
+        
+        <form id="depositForm">
+            <div class="form-group">
+                <label for="amount">Amount (₹)</label>
+                <input type="number" id="amount" name="amount" required min="100" placeholder="Minimum ₹100">
             </div>
-            <label for="utrInput">UTR/Transaction ID</label>
-            <input type="text" id="utrInput" placeholder="Enter 12-digit UTR number" />
-            <button id="submitUtrBtn">Submit for Approval</button>
-            <button id="backToQrBtn" style="background: #666;">Back to QR Code</button>
-        </div>
-
-        <!-- Balance Display -->
-        <div class="balance-display">
-            <div style="margin-bottom: 10px;">Current Balance:</div>
-            <div style="font-size: 20px; font-weight: bold; color: #f0b90b;">
-                Real: ₹<span id="realBalance">0</span> | Demo: ₹<span id="demoBalance">50000</span>
+            
+            <div class="form-group">
+                <label for="utr">UTR/Transaction ID</label>
+                <input type="text" id="utr" name="utr" required placeholder="Enter UTR after payment">
             </div>
-            <button id="refreshBalanceBtn" style="margin-top: 10px; padding: 8px 16px; font-size: 14px;">Refresh Balance</button>
-        </div>
+            
+            <button type="submit" class="btn">Submit Deposit Request</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='/'">Back to Trading</button>
+        </form>
     </div>
 
     <script>
-        let currentStep = 1;
-        let depositAmount = 0;
-        let userId = '';
-        let balanceCheckInterval;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            userId = localStorage.getItem('tradepro_user_id') || localStorage.getItem('tradepro_username');
-            const userIdDisplay = document.getElementById('userIdDisplay');
-            if (!userId) {
-                userIdDisplay.textContent = 'User not logged in. Please login first.';
-                document.getElementById('proceedBtn').disabled = true;
-                return;
-            }
-            userIdDisplay.textContent = `User ID: ${userId}`;
-            loadQRCode();
-            loadUserBalance();
-            startBalanceMonitoring();
-        });
-
+        // Load QR code
         async function loadQRCode() {
             try {
                 const response = await fetch('/api/qr-code');
-                const data = await response.json();
+                const result = await response.json();
                 
-                if (data.success && data.qrCode) {
-                    const qrImg = document.getElementById('qrCode');
-                    qrImg.src = data.qrCode;
-                    qrImg.style.display = 'block';
+                const qrContainer = document.getElementById('qrContainer');
+                if (result.success && result.qrCode) {
+                    qrContainer.innerHTML = `<img src="${result.qrCode}" alt="Payment QR Code" class="qr-code">`;
                 } else {
-                    showQRError('QR Code not available. Please contact admin.');
+                    qrContainer.innerHTML = '<p style="color: #848e9c;">QR code not available. Contact admin.</p>';
                 }
             } catch (error) {
-                showQRError('Failed to load QR code. Please try again.');
+                console.error('Error loading QR code:', error);
+                document.getElementById('qrContainer').innerHTML = '<p style="color: #f84960;">Failed to load QR code</p>';
             }
         }
-
-        function showQRError(message) {
-            document.getElementById('qrCode').style.display = 'none';
-            document.querySelector('.qr-section h3').textContent = message;
-            document.querySelector('.qr-section h3').style.color = '#ff6b6b';
-        }
-
-        function showStep(step) {
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.step-dot').forEach(d => d.classList.remove('active'));
+        
+        // Handle deposit form
+        document.getElementById('depositForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            document.getElementById(`step${step}`).classList.add('active');
-            document.getElementById(`dot${step}`).classList.add('active');
-            currentStep = step;
-        }
-
-        document.getElementById('proceedBtn').addEventListener('click', () => {
-            const amount = parseInt(document.getElementById('depositAmount').value);
-            if (!amount || amount < 100) {
-                showNotification('Please enter a valid amount (minimum ₹100)', 'error');
+            const amount = document.getElementById('amount').value;
+            const utr = document.getElementById('utr').value;
+            const userId = localStorage.getItem('tradepro_username');
+            const errorDiv = document.getElementById('error');
+            const successDiv = document.getElementById('success');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            if (!userId) {
+                errorDiv.textContent = 'Please login first';
+                errorDiv.style.display = 'block';
                 return;
             }
-            depositAmount = amount;
-            document.getElementById('displayAmount').textContent = amount;
-            document.getElementById('displayAmount2').textContent = amount;
-            loadQRCode();
-            showStep(2);
-        });
-
-        document.getElementById('paymentDoneBtn').addEventListener('click', () => {
-            showStep(3);
-        });
-
-        document.getElementById('backToQrBtn').addEventListener('click', () => {
-            showStep(2);
-        });
-
-        document.getElementById('submitUtrBtn').addEventListener('click', async () => {
-            const utr = document.getElementById('utrInput').value.trim();
-            if (!utr) {
-                showNotification('Please enter UTR/Transaction ID', 'error');
-                return;
-            }
-
+            
             try {
                 const response = await fetch('/api/deposit-request', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId: userId,
-                        amount: depositAmount,
-                        utr: utr
-                    })
+                    body: JSON.stringify({ userId, amount, utr })
                 });
-                const data = await response.json();
                 
-                if (data.success) {
-                    showNotification('Deposit request submitted! Waiting for admin approval...', 'success');
-                    document.getElementById('depositAmount').value = '';
-                    document.getElementById('utrInput').value = '';
-                    showStep(1);
-                    startBalanceMonitoring();
+                const result = await response.json();
+                
+                if (result.success) {
+                    successDiv.textContent = result.message;
+                    successDiv.style.display = 'block';
+                    document.getElementById('depositForm').reset();
                 } else {
-                    showNotification(data.message || 'Failed to submit deposit request', 'error');
+                    errorDiv.textContent = result.message;
+                    errorDiv.style.display = 'block';
                 }
             } catch (error) {
-                showNotification('Error submitting deposit request. Please try again.', 'error');
+                errorDiv.textContent = 'Deposit request failed. Please try again.';
+                errorDiv.style.display = 'block';
             }
         });
-
-        async function loadUserBalance() {
-            try {
-                const response = await fetch(`/api/balance/${userId}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    const oldBalance = parseInt(document.getElementById('realBalance').textContent.replace(/,/g, '')) || 0;
-                    const newBalance = data.realBalance || 0;
-                    
-                    document.getElementById('realBalance').textContent = newBalance.toLocaleString();
-                    document.getElementById('demoBalance').textContent = (data.demoBalance || 50000).toLocaleString();
-                    
-                    if (newBalance > oldBalance && oldBalance >= 0) {
-                        const addedAmount = newBalance - oldBalance;
-                        if (addedAmount > 0) {
-                            showNotification(`🎉 Deposit Approved! ₹${addedAmount.toLocaleString()} added to your balance!`, 'success');
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to load balance:', error);
-            }
-        }
-
-        function startBalanceMonitoring() {
-            if (balanceCheckInterval) clearInterval(balanceCheckInterval);
-            balanceCheckInterval = setInterval(loadUserBalance, 2000);
-        }
-
-        document.getElementById('refreshBalanceBtn').addEventListener('click', loadUserBalance);
-
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 5000);
-        }
+        
+        // Load QR code on page load
+        loadQRCode();
     </script>
 </body>
 </html>
