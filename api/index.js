@@ -2,7 +2,6 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
-const fs = require('fs').promises;
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 
@@ -22,7 +21,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../views'));
 
-// Memory storage for Vercel (since file system is read-only)
+// In-memory storage
 let users = {};
 let trades = [];
 let depositRequests = [];
@@ -30,53 +29,25 @@ let qrCode = null;
 let maintenanceMode = 'off';
 let alwaysLoss = 'off';
 
-// Multer for file uploads (in-memory for Vercel)
+// Price generation
+let currentPrice = 85000;
+const generatePrice = () => Math.random() * (85000 - 82000) + 82000;
+
+// Multer for file uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Helper functions
-const generatePrice = () => Math.random() * (85000 - 82000) + 82000;
-const generateCandle = (lastPrice) => {
-  const change = (Math.random() - 0.5) * 1000;
-  const open = lastPrice || generatePrice();
-  const close = open + change;
-  const high = Math.max(open, close) + Math.random() * 200;
-  const low = Math.min(open, close) - Math.random() * 200;
-  return { open, high, low, close, time: Date.now() };
-};
-
 // Socket.io for real-time data
-let currentPrice = generatePrice();
-let candleData = [];
-
 const sendPriceUpdate = () => {
-  const candle = generateCandle(currentPrice);
-  currentPrice = candle.close;
-  candleData.push(candle);
-  if (candleData.length > 100) candleData.shift();
-  
-  io.emit('priceUpdate', {
-    price: currentPrice,
-    candle: candle,
-    candleData: candleData
-  });
+  const change = (Math.random() - 0.5) * 1000;
+  currentPrice += change;
+  io.emit('priceUpdate', { price: currentPrice });
 };
 
-// Start price updates
 setInterval(sendPriceUpdate, 1000);
 
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
-  
-  // Send initial data
-  socket.emit('priceUpdate', {
-    price: currentPrice,
-    candleData: candleData
-  });
-  
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
+  socket.emit('priceUpdate', { price: currentPrice });
 });
 
 // Routes
@@ -108,16 +79,12 @@ app.get('/admin-login', (req, res) => {
 app.post('/api/register', (req, res) => {
   const { username, password } = req.body;
   
-  // Check if username already exists
-  const existingUser = Object.values(users).find(u => u.username === username);
-  if (existingUser) {
+  if (users[username]) {
     return res.status(400).json({ success: false, message: 'Username already exists' });
   }
   
-  const userId = username; // Use username as userId for simplicity
-  
-  users[userId] = {
-    id: userId,
+  users[username] = {
+    id: username,
     username,
     password,
     demoBalance: 50000,
@@ -125,12 +92,12 @@ app.post('/api/register', (req, res) => {
     currentAccount: 'demo'
   };
   
-  res.json({ success: true, userId, message: 'Registration successful' });
+  res.json({ success: true, userId: username, message: 'Registration successful' });
 });
 
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
-  const user = users[username] || Object.values(users).find(u => u.username === username && u.password === password);
+  const user = users[username];
   
   if (user && user.password === password) {
     res.json({ success: true, userId: username, message: 'Login successful' });
@@ -141,91 +108,88 @@ app.post('/api/login', (req, res) => {
 
 app.get('/api/balance/:userId', (req, res) => {
   const { userId } = req.params;
-  const user = users[userId];
   
-  if (user) {
-    res.json({
-      success: true,
-      demoBalance: user.demoBalance,
-      realBalance: user.realBalance,
-      currentAccount: user.currentAccount
-    });
-  } else {
-    res.status(404).json({ success: false, message: 'User not found' });
+  if (!users[userId]) {
+    users[userId] = {
+      id: userId,
+      username: userId,
+      demoBalance: 50000,
+      realBalance: 0,
+      currentAccount: 'demo'
+    };
   }
+  
+  const user = users[userId];
+  res.json({
+    success: true,
+    demoBalance: user.demoBalance,
+    realBalance: user.realBalance,
+    currentAccount: user.currentAccount
+  });
 });
 
 app.post('/api/trade', (req, res) => {
-  try {
-    const { userId, amount, direction, accountType = 'demo' } = req.body;
-    
-    // Create user if doesn't exist
-    if (!users[userId]) {
-      users[userId] = {
-        id: userId,
-        username: userId,
-        demoBalance: 50000,
-        realBalance: 0,
-        currentAccount: 'demo'
-      };
-    }
-    
-    const user = users[userId];
-    const tradeAmount = parseFloat(amount);
-    const currentBalance = accountType === 'demo' ? user.demoBalance : user.realBalance;
-    
-    if (tradeAmount > currentBalance) {
-      return res.status(400).json({ success: false, message: 'Insufficient balance' });
-    }
-
-    // Deduct amount
-    if (accountType === 'demo') {
-      user.demoBalance -= tradeAmount;
-    } else {
-      user.realBalance -= tradeAmount;
-    }
-
-    const trade = {
-      id: uuidv4(),
-      userId,
-      amount: tradeAmount,
-      direction,
-      accountType,
-      entryPrice: currentPrice,
-      timestamp: new Date().toISOString(),
-      status: 'active'
+  const { userId, amount, direction, accountType = 'demo' } = req.body;
+  
+  if (!users[userId]) {
+    users[userId] = {
+      id: userId,
+      username: userId,
+      demoBalance: 50000,
+      realBalance: 0,
+      currentAccount: 'demo'
     };
-
-    trades.push(trade);
-
-    // Auto-resolve trade after 30 seconds
-    setTimeout(() => {
-      const finalPrice = currentPrice;
-      const priceChange = finalPrice - trade.entryPrice;
-      const isWin = (direction === 'up' && priceChange > 0) || (direction === 'down' && priceChange < 0);
-      
-      // Apply always loss mode
-      const actualWin = alwaysLoss === 'on' ? false : isWin;
-      
-      trade.status = actualWin ? 'won' : 'lost';
-      trade.exitPrice = finalPrice;
-      trade.payout = actualWin ? tradeAmount * 1.8 : 0;
-      
-      if (actualWin) {
-        if (accountType === 'demo') {
-          user.demoBalance += trade.payout;
-        } else {
-          user.realBalance += trade.payout;
-        }
-      }
-      
-      io.emit('tradeResult', trade);
-    }, 30000);
-
-    res.json({ success: true, trade, message: 'Trade placed successfully' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
   }
+  
+  const user = users[userId];
+  const tradeAmount = parseFloat(amount);
+  const currentBalance = accountType === 'demo' ? user.demoBalance : user.realBalance;
+  
+  if (tradeAmount > currentBalance) {
+    return res.status(400).json({ success: false, message: 'Insufficient balance' });
+  }
+
+  if (accountType === 'demo') {
+    user.demoBalance -= tradeAmount;
+  } else {
+    user.realBalance -= tradeAmount;
+  }
+
+  const trade = {
+    id: uuidv4(),
+    userId,
+    amount: tradeAmount,
+    direction,
+    accountType,
+    entryPrice: currentPrice,
+    timestamp: new Date().toISOString(),
+    status: 'active'
+  };
+
+  trades.push(trade);
+
+  setTimeout(() => {
+    const finalPrice = currentPrice;
+    const priceChange = finalPrice - trade.entryPrice;
+    const isWin = (direction === 'up' && priceChange > 0) || (direction === 'down' && priceChange < 0);
+    const actualWin = alwaysLoss === 'on' ? false : isWin;
+    
+    trade.status = actualWin ? 'won' : 'lost';
+    trade.exitPrice = finalPrice;
+    trade.payout = actualWin ? tradeAmount * 1.8 : 0;
+    
+    if (actualWin) {
+      if (accountType === 'demo') {
+        user.demoBalance += trade.payout;
+      } else {
+        user.realBalance += trade.payout;
+      }
+    }
+    
+    io.emit('tradeResult', trade);
+  }, 30000);
+
+  res.json({ success: true, trade, message: 'Trade placed successfully' });
 });
 
 app.post('/api/admin/login', (req, res) => {
@@ -238,54 +202,57 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 app.post('/api/admin/deposit', (req, res) => {
-  try {
-    const { userId, amount, accountType = 'real' } = req.body;
-    const user = users[userId];
-    
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    
-    const depositAmount = parseFloat(amount);
-    if (accountType === 'demo') {
-      user.demoBalance += depositAmount;
-    } else {
-      user.realBalance += depositAmount;
-    }
-    
-    res.json({ success: true, message: `Deposited ₹${depositAmount} to ${accountType} account` });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+  const { userId, amount, accountType = 'real' } = req.body;
+  
+  if (!users[userId]) {
+    users[userId] = {
+      id: userId,
+      username: userId,
+      demoBalance: 50000,
+      realBalance: 0,
+      currentAccount: 'demo'
+    };
   }
+  
+  const user = users[userId];
+  const depositAmount = parseFloat(amount);
+  
+  if (accountType === 'demo') {
+    user.demoBalance += depositAmount;
+  } else {
+    user.realBalance += depositAmount;
+  }
+  
+  res.json({ success: true, message: `Deposited ₹${depositAmount} to ${accountType} account` });
 });
 
 app.post('/api/balance/:userId/update', (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { currentAccount } = req.body;
-    const user = users[userId];
-    
-    if (user && currentAccount) {
-      user.currentAccount = currentAccount;
-    }
-    
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+  const { userId } = req.params;
+  const { currentAccount } = req.body;
+  
+  if (!users[userId]) {
+    users[userId] = {
+      id: userId,
+      username: userId,
+      demoBalance: 50000,
+      realBalance: 0,
+      currentAccount: 'demo'
+    };
   }
+  
+  if (currentAccount) {
+    users[userId].currentAccount = currentAccount;
+  }
+  
+  res.json({ success: true });
 });
 
 app.get('/api/trades/:userId', (req, res) => {
-  try {
-    const { userId } = req.params;
-    const userTrades = trades.filter(t => t.userId === userId);
-    res.json({ success: true, trades: userTrades });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+  const { userId } = req.params;
+  const userTrades = trades.filter(t => t.userId === userId);
+  res.json({ success: true, trades: userTrades });
 });
 
-// QR Code APIs
 app.get('/api/qr-code', (req, res) => {
   res.json({ success: true, qrCode });
 });
@@ -295,151 +262,124 @@ app.get('/api/admin/qr-code', (req, res) => {
 });
 
 app.post('/api/admin/upload-qr', upload.single('qrCode'), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No file uploaded' });
-    }
-
-    // Convert buffer to base64 for storage
-    const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-    qrCode = base64Image;
-    
-    res.json({ success: true, message: 'QR code uploaded successfully', qrCode });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: 'No file uploaded' });
   }
+
+  const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+  qrCode = base64Image;
+  
+  res.json({ success: true, message: 'QR code uploaded successfully', qrCode });
 });
 
-// Deposit Request APIs
 app.post('/api/deposit-request', (req, res) => {
-  try {
-    const { userId, amount, utr } = req.body;
-    
-    if (!userId || !amount || !utr) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
-    }
-
-    const depositAmount = parseFloat(amount);
-    if (isNaN(depositAmount) || depositAmount <= 0) {
-      return res.status(400).json({ success: false, message: 'Invalid amount' });
-    }
-
-    const depositRequest = {
-      id: uuidv4(),
-      userId: String(userId),
-      amount: depositAmount,
-      utr: utr.trim(),
-      status: 'pending',
-      timestamp: new Date().toISOString()
-    };
-
-    depositRequests.push(depositRequest);
-    
-    res.json({ 
-      success: true, 
-      message: `Deposit request for ₹${depositAmount} submitted successfully. UTR: ${utr}` 
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+  const { userId, amount, utr } = req.body;
+  
+  if (!userId || !amount || !utr) {
+    return res.status(400).json({ success: false, message: 'Missing required fields' });
   }
+
+  const depositAmount = parseFloat(amount);
+  if (isNaN(depositAmount) || depositAmount <= 0) {
+    return res.status(400).json({ success: false, message: 'Invalid amount' });
+  }
+
+  const depositRequest = {
+    id: uuidv4(),
+    userId: String(userId),
+    amount: depositAmount,
+    utr: utr.trim(),
+    status: 'pending',
+    timestamp: new Date().toISOString()
+  };
+
+  depositRequests.push(depositRequest);
+  
+  res.json({ 
+    success: true, 
+    message: `Deposit request for ₹${depositAmount} submitted successfully. UTR: ${utr}` 
+  });
 });
 
 app.get('/api/admin/deposit-requests', (req, res) => {
-  try {
-    const sortedRequests = [...depositRequests].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    res.json({ success: true, requests: sortedRequests });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+  const sortedRequests = [...depositRequests].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  res.json({ success: true, requests: sortedRequests });
 });
 
 app.post('/api/admin/deposit-requests/:id/approve', (req, res) => {
-  try {
-    const { id } = req.params;
-    const request = depositRequests.find(r => r.id === id);
-    
-    if (!request) {
-      return res.status(404).json({ success: false, message: 'Deposit request not found' });
-    }
-    
-    if (request.status !== 'pending') {
-      return res.status(400).json({ success: false, message: 'Request already processed' });
-    }
-    
-    const user = users[request.userId];
-    if (user) {
-      user.realBalance += request.amount;
-    }
-    
-    request.status = 'approved';
-    request.approvedAt = new Date().toISOString();
-    
-    res.json({ 
-      success: true, 
-      message: `Deposit approved! ₹${request.amount} added to ${request.userId}'s account` 
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+  const { id } = req.params;
+  const request = depositRequests.find(r => r.id === id);
+  
+  if (!request) {
+    return res.status(404).json({ success: false, message: 'Deposit request not found' });
   }
+  
+  if (request.status !== 'pending') {
+    return res.status(400).json({ success: false, message: 'Request already processed' });
+  }
+  
+  if (!users[request.userId]) {
+    users[request.userId] = {
+      id: request.userId,
+      username: request.userId,
+      demoBalance: 50000,
+      realBalance: 0,
+      currentAccount: 'demo'
+    };
+  }
+  
+  users[request.userId].realBalance += request.amount;
+  request.status = 'approved';
+  request.approvedAt = new Date().toISOString();
+  
+  res.json({ 
+    success: true, 
+    message: `Deposit approved! ₹${request.amount} added to ${request.userId}'s account` 
+  });
 });
 
 app.post('/api/admin/deposit-requests/:id/reject', (req, res) => {
-  try {
-    const { id } = req.params;
-    const request = depositRequests.find(r => r.id === id);
-    
-    if (!request) {
-      return res.status(404).json({ success: false, message: 'Deposit request not found' });
-    }
-    
-    request.status = 'rejected';
-    request.rejectedAt = new Date().toISOString();
-    
-    res.json({ success: true, message: 'Deposit request rejected' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+  const { id } = req.params;
+  const request = depositRequests.find(r => r.id === id);
+  
+  if (!request) {
+    return res.status(404).json({ success: false, message: 'Deposit request not found' });
   }
+  
+  request.status = 'rejected';
+  request.rejectedAt = new Date().toISOString();
+  
+  res.json({ success: true, message: 'Deposit request rejected' });
 });
 
-// Maintenance mode APIs
 app.get('/api/admin/maintenance', (req, res) => {
   res.json({ success: true, maintenanceMode });
 });
 
 app.post('/api/admin/maintenance', (req, res) => {
-  try {
-    const { maintenanceMode: mode } = req.body;
-    if (!['on', 'off'].includes(mode)) {
-      return res.status(400).json({ success: false, message: 'Invalid maintenance mode value' });
-    }
-    
-    maintenanceMode = mode;
-    res.json({ success: true, message: `Maintenance mode set to ${mode}` });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+  const { maintenanceMode: mode } = req.body;
+  if (!['on', 'off'].includes(mode)) {
+    return res.status(400).json({ success: false, message: 'Invalid maintenance mode value' });
   }
+  
+  maintenanceMode = mode;
+  res.json({ success: true, message: `Maintenance mode set to ${mode}` });
 });
 
-// Always Loss Mode APIs
 app.get('/api/admin/always-loss', (req, res) => {
   res.json({ success: true, alwaysLoss });
 });
 
 app.post('/api/admin/always-loss', (req, res) => {
-  try {
-    const { alwaysLoss: mode } = req.body;
-    if (!['on', 'off'].includes(mode)) {
-      return res.status(400).json({ success: false, message: 'Invalid always loss mode value' });
-    }
-    
-    alwaysLoss = mode;
-    res.json({ success: true, message: `Always loss mode set to ${mode}` });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+  const { alwaysLoss: mode } = req.body;
+  if (!['on', 'off'].includes(mode)) {
+    return res.status(400).json({ success: false, message: 'Invalid always loss mode value' });
   }
+  
+  alwaysLoss = mode;
+  res.json({ success: true, message: `Always loss mode set to ${mode}` });
 });
 
-// Admin stats
 app.get('/api/admin/stats', (req, res) => {
   res.json({
     success: true,
@@ -458,5 +398,4 @@ app.get('/api/admin/users', (req, res) => {
   res.json({ success: true, users: Object.values(users), onlineUsers: {} });
 });
 
-// For Vercel
 module.exports = app;
