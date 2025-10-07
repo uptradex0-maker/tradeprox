@@ -168,6 +168,19 @@
         </form>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Socket.IO connection for real-time updates
+        const socket = io();
+        
+        socket.on('balanceUpdate', function(data) {
+            const userId = localStorage.getItem('tradepro_username');
+            if (data.userId === userId) {
+                document.getElementById('demoBalance').textContent = `₹${data.demoBalance.toLocaleString()}`;
+                document.getElementById('realBalance').textContent = `₹${data.realBalance.toLocaleString()}`;
+            }
+        });
+    </script>
     <script>
         // Load QR code
         async function loadQRCode() {
@@ -219,6 +232,8 @@
                     successDiv.textContent = result.message;
                     successDiv.style.display = 'block';
                     document.getElementById('depositForm').reset();
+                    // Refresh balance after successful deposit request
+                    setTimeout(loadUserBalance, 1000);
                 } else {
                     errorDiv.textContent = result.message;
                     errorDiv.style.display = 'block';
@@ -232,6 +247,19 @@
         // Load balance and QR code on page load
         loadUserBalance();
         loadQRCode();
+        
+        // Auto-refresh balance every 5 seconds
+        setInterval(loadUserBalance, 5000);
+        
+        // Add refresh button
+        const balanceDiv = document.querySelector('.header div[style*="background: #2b2f36"]');
+        if (balanceDiv) {
+            const refreshBtn = document.createElement('button');
+            refreshBtn.textContent = '🔄 Refresh Balance';
+            refreshBtn.style.cssText = 'margin-top: 10px; padding: 8px 16px; background: #f0b90b; color: #0d1421; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;';
+            refreshBtn.onclick = loadUserBalance;
+            balanceDiv.appendChild(refreshBtn);
+        }
         
         // Load user balance
         async function loadUserBalance() {

@@ -338,6 +338,13 @@ app.post('/api/admin/deposit-requests/:id/approve', (req, res) => {
     request.status = 'approved';
     request.approvedAt = new Date().toISOString();
     
+    // Emit balance update via Socket.IO
+    io.emit('balanceUpdate', {
+      userId: request.userId,
+      demoBalance: users[request.userId].demoBalance,
+      realBalance: users[request.userId].realBalance
+    });
+    
     res.json({ 
       success: true, 
       message: `Deposit approved! ₹${request.amount} added to ${request.userId}'s real account` 

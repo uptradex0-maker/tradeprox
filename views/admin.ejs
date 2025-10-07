@@ -556,10 +556,10 @@
                         const status = user.status || 'active';
                         html += `
                             <tr>
-                                <td>${user.id.substring(0, 20)}...</td>
-                                <td>₹${user.accounts.demo.balance.toLocaleString()}</td>
-                                <td>₹${user.accounts.real.balance.toLocaleString()}</td>
-                                <td>${(user.accounts.demo.totalTrades || 0) + (user.accounts.real.totalTrades || 0)}</td>
+                                <td>${user.id}</td>
+                                <td>₹${user.demoBalance.toLocaleString()}</td>
+                                <td>₹${user.realBalance.toLocaleString()}</td>
+                                <td>0</td>
                                 <td><span class="status-badge status-${status}">${status.toUpperCase()}</span></td>
                                 <td>
                                     ${status === 'active' ? 
@@ -857,26 +857,39 @@
                         return;
                     }
                     
-                    let html = '';
+                    let html = `<table>
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Amount</th>
+                                <th>UTR</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                    
                     requests.forEach(request => {
                         html += `
-                            <div class="withdrawal-card">
-                                <div class="withdrawal-header">
-                                    <div class="withdrawal-amount">₹${request.amount.toLocaleString()}</div>
-                                    <span class="status-badge status-${request.status}">${request.status.toUpperCase()}</span>
-                                </div>
-                                <p><strong>User ID:</strong> ${request.userId}</p>
-                                <p><strong>UTR:</strong> ${request.utr}</p>
-                                <p><strong>Requested:</strong> ${new Date(request.timestamp).toLocaleString()}</p>
-                                ${request.status === 'pending' ? `
-                                    <div style="margin-top: 15px;">
-                                        <button class="btn btn-success" onclick="approveDeposit('${request.id}')">✓ Approve</button>
-                                        <button class="btn btn-danger" onclick="rejectDeposit('${request.id}')">✗ Reject</button>
-                                    </div>
-                                ` : ''}
-                            </div>
+                            <tr>
+                                <td>${request.userId}</td>
+                                <td>₹${request.amount.toLocaleString()}</td>
+                                <td>${request.utr}</td>
+                                <td>${new Date(request.timestamp).toLocaleDateString()}</td>
+                                <td><span class="status-badge status-${request.status}">${request.status.toUpperCase()}</span></td>
+                                <td>
+                                    ${request.status === 'pending' ? 
+                                        `<button class="btn btn-success" onclick="approveDeposit('${request.id}')">✓ Approve</button>
+                                         <button class="btn btn-danger" onclick="rejectDeposit('${request.id}')">✗ Reject</button>` :
+                                        `<span style="color: #848e9c;">Processed</span>`
+                                    }
+                                </td>
+                            </tr>
                         `;
                     });
+                    
+                    html += '</tbody></table>';
                     
                     container.innerHTML = html;
                 }
