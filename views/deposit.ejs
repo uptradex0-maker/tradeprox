@@ -127,6 +127,19 @@
         <div class="header">
             <h1>Deposit Money</h1>
             <p style="color: #848e9c;">Add funds to your trading account</p>
+            <div style="background: #2b2f36; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                <h3 style="color: #f0b90b; margin-bottom: 10px;">Current Balance</h3>
+                <div style="display: flex; justify-content: space-around;">
+                    <div>
+                        <p style="color: #848e9c; font-size: 12px;">Demo Account</p>
+                        <p style="color: #02c076; font-size: 18px; font-weight: bold;" id="demoBalance">₹50,000</p>
+                    </div>
+                    <div>
+                        <p style="color: #848e9c; font-size: 12px;">Real Account</p>
+                        <p style="color: #f0b90b; font-size: 18px; font-weight: bold;" id="realBalance">₹0</p>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div id="success" class="success"></div>
@@ -216,8 +229,27 @@
             }
         });
         
-        // Load QR code on page load
+        // Load balance and QR code on page load
+        loadUserBalance();
         loadQRCode();
+        
+        // Load user balance
+        async function loadUserBalance() {
+            try {
+                const userId = localStorage.getItem('tradepro_username');
+                if (!userId) return;
+                
+                const response = await fetch(`/api/balance/${userId}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('demoBalance').textContent = `₹${result.demoBalance.toLocaleString()}`;
+                    document.getElementById('realBalance').textContent = `₹${result.realBalance.toLocaleString()}`;
+                }
+            } catch (error) {
+                console.error('Error loading balance:', error);
+            }
+        }
     </script>
 </body>
 </html>

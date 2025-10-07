@@ -307,35 +307,44 @@ app.get('/api/admin/deposit-requests', (req, res) => {
 });
 
 app.post('/api/admin/deposit-requests/:id/approve', (req, res) => {
-  const { id } = req.params;
-  const request = depositRequests.find(r => r.id === id);
-  
-  if (!request) {
-    return res.status(404).json({ success: false, message: 'Deposit request not found' });
+  try {
+    const { id } = req.params;
+    const requestIndex = depositRequests.findIndex(r => r.id === id);
+    
+    if (requestIndex === -1) {
+      return res.status(404).json({ success: false, message: 'Deposit request not found' });
+    }
+    
+    const request = depositRequests[requestIndex];
+    if (request.status !== 'pending') {
+      return res.status(400).json({ success: false, message: 'Request already processed' });
+    }
+    
+    // Create user if doesn't exist
+    if (!users[request.userId]) {
+      users[request.userId] = {
+        id: request.userId,
+        username: request.userId,
+        demoBalance: 50000,
+        realBalance: 0,
+        currentAccount: 'demo'
+      };
+    }
+    
+    // Add money to real balance
+    users[request.userId].realBalance += request.amount;
+    
+    // Update request status
+    request.status = 'approved';
+    request.approvedAt = new Date().toISOString();
+    
+    res.json({ 
+      success: true, 
+      message: `Deposit approved! ₹${request.amount} added to ${request.userId}'s real account` 
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
-  
-  if (request.status !== 'pending') {
-    return res.status(400).json({ success: false, message: 'Request already processed' });
-  }
-  
-  if (!users[request.userId]) {
-    users[request.userId] = {
-      id: request.userId,
-      username: request.userId,
-      demoBalance: 50000,
-      realBalance: 0,
-      currentAccount: 'demo'
-    };
-  }
-  
-  users[request.userId].realBalance += request.amount;
-  request.status = 'approved';
-  request.approvedAt = new Date().toISOString();
-  
-  res.json({ 
-    success: true, 
-    message: `Deposit approved! ₹${request.amount} added to ${request.userId}'s account` 
-  });
 });
 
 app.post('/api/admin/deposit-requests/:id/reject', (req, res) => {
