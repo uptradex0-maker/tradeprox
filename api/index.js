@@ -100,16 +100,27 @@ app.get('/admin', (req, res) => {
   res.render('admin');
 });
 
+app.get('/admin-login', (req, res) => {
+  res.render('admin-login');
+});
+
 // API Routes
 app.post('/api/register', (req, res) => {
   const { username, password } = req.body;
-  const userId = uuidv4();
+  
+  // Check if username already exists
+  const existingUser = Object.values(users).find(u => u.username === username);
+  if (existingUser) {
+    return res.status(400).json({ success: false, message: 'Username already exists' });
+  }
+  
+  const userId = username; // Use username as userId for simplicity
   
   users[userId] = {
     id: userId,
     username,
     password,
-    demoBalance: 10000,
+    demoBalance: 50000,
     realBalance: 0,
     currentAccount: 'demo'
   };
@@ -119,10 +130,10 @@ app.post('/api/register', (req, res) => {
 
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
-  const user = Object.values(users).find(u => u.username === username && u.password === password);
+  const user = users[username] || Object.values(users).find(u => u.username === username && u.password === password);
   
-  if (user) {
-    res.json({ success: true, userId: user.id, message: 'Login successful' });
+  if (user && user.password === password) {
+    res.json({ success: true, userId: username, message: 'Login successful' });
   } else {
     res.status(401).json({ success: false, message: 'Invalid credentials' });
   }
